@@ -1,0 +1,51 @@
+# Backend
+backend/node_modules/
+backend/.env
+backend/.env.local
+backend/logs/
+backend/*.log
+backend/database.sqlite
+backend/database.sqlite-journal
+backend/npm-debug.log*
+backend/yarn-debug.log*
+backend/yarn-error.log*
+
+# Frontend
+frontend/node_modules/
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/build/
+frontend/.eslintcache
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+nohup.out
+backend.log
+frontend.log
+frontend2.log
+
+# Testing
+coverage/
+.nyc_output
+
+# Temporary files
+tmp/
+temp/
