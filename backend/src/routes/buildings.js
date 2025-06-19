@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { body, query } = require('express-validator');
-const buildingController = require('../controllers/buildingController');
+const buildingController = require('../presentation/controllers/buildings.controller');
 const { authenticate, authorize } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 

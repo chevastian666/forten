@@ -5,6 +5,7 @@ const app = require('./app');
 const config = require('./config/config');
 const { sequelize } = require('./models');
 const { connectRedis } = require('./config/redis');
+const { initializeInfrastructure, cleanup } = require('./infrastructure/initialization');
 
 const server = createServer(app);
 const io = new Server(server, {
@@ -14,31 +15,7 @@ const io = new Server(server, {
   }
 });
 
-// Socket.IO middleware for authentication
-io.use((socket, next) => {
-  // TODO: Implement JWT validation for WebSocket connections
-  next();
-});
-
-// Socket.IO event handlers
-io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
-  
-  socket.on('subscribe', (buildingId) => {
-    socket.join(`building:${buildingId}`);
-    console.log(`Socket ${socket.id} subscribed to building ${buildingId}`);
-  });
-  
-  socket.on('unsubscribe', (buildingId) => {
-    socket.leave(`building:${buildingId}`);
-  });
-  
-  socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
-  });
-});
-
-// Make io accessible to routes
+// Make io accessible to routes before initialization
 app.set('io', io);
 
 // Database and server initialization
@@ -54,6 +31,9 @@ const startServer = async () => {
     
     // Connect to Redis
     await connectRedis();
+    
+    // Initialize clean architecture infrastructure with Socket.io
+    await initializeInfrastructure(io);
     
     // Start server
     server.listen(config.app.port, () => {
@@ -73,6 +53,7 @@ process.on('SIGTERM', async () => {
     console.log('HTTP server closed');
     await sequelize.close();
     console.log('Database connection closed');
+    await cleanup();
     process.exit(0);
   });
 });
