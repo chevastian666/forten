@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 const config = require('./config/config');
 const routes = require('./routes');
 const errorHandler = require('./middleware/errorHandler');
+const { getContainer } = require('./infrastructure/initialization');
 
 const app = express();
 
@@ -30,6 +31,12 @@ if (config.app.env === 'development') {
 // Body parsing
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Make container available to routes
+app.use((req, res, next) => {
+  req.container = getContainer();
+  next();
+});
 
 // API routes
 app.use('/api', routes);
