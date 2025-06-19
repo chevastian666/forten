@@ -1,6 +1,14 @@
 # FORTEN CRM - Sistema de Portería Digital
 
-Sistema integral de portería digital y monitoreo 24h para edificios residenciales.
+<div align="center">
+  <h3>Sistema integral de portería digital y monitoreo 24h para edificios residenciales</h3>
+  <p>
+    <img src="https://img.shields.io/badge/React-18.0-blue?logo=react" alt="React">
+    <img src="https://img.shields.io/badge/Node.js-16.0+-green?logo=node.js" alt="Node.js">
+    <img src="https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript" alt="TypeScript">
+    <img src="https://img.shields.io/badge/Material--UI-5.0-blue?logo=material-ui" alt="Material-UI">
+  </p>
+</div>
 
 ## 🚀 Inicio Rápido
 
