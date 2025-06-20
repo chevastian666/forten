@@ -29,6 +29,11 @@ const startServer = async () => {
     await sequelize.sync({ alter: true });
     console.log('Database models synchronized');
     
+    // Create admin user if it doesn't exist
+    const createAdminUser = require('./seeders/createAdminUser');
+    const User = require('./models/User');
+    await createAdminUser(User);
+    
     // Connect to Redis
     await connectRedis();
     

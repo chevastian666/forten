@@ -1,5 +1,5 @@
 // JavaScript wrapper for LoginUseCase
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 class LoginUseCase {
   constructor(userRepository, authService) {
