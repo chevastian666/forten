@@ -157,12 +157,19 @@ const DailyStatistics = sequelize.define('DailyStatistics', {
     type: DataTypes.INTEGER,
     defaultValue: 1,
     comment: 'Schema version for this record'
+  },
+  deleted_at: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    comment: 'Soft delete timestamp'
   }
 }, {
   tableName: 'daily_statistics',
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',
+  deletedAt: 'deleted_at',
+  paranoid: true,
   indexes: [
     {
       unique: true,
@@ -176,6 +183,9 @@ const DailyStatistics = sequelize.define('DailyStatistics', {
     },
     {
       fields: ['created_at']
+    },
+    {
+      fields: ['deleted_at']
     }
   ]
 });
@@ -199,6 +209,49 @@ DailyStatistics.getLatest = async function(buildingId, days = 30) {
   startDate.setDate(startDate.getDate() - days);
   
   return this.getDateRange(buildingId, startDate, endDate);
+};
+
+// Soft delete methods
+DailyStatistics.prototype.softDelete = async function() {
+  return await this.destroy();
+};
+
+DailyStatistics.prototype.restore = async function() {
+  return await this.restore();
+};
+
+DailyStatistics.prototype.isDeleted = function() {
+  return this.deleted_at !== null;
+};
+
+// Scopes
+DailyStatistics.addScope('withDeleted', {
+  paranoid: false
+});
+
+DailyStatistics.addScope('onlyDeleted', {
+  where: {
+    deleted_at: {
+      [require('sequelize').Op.ne]: null
+    }
+  },
+  paranoid: false
+});
+
+DailyStatistics.findWithDeleted = function(options = {}) {
+  return this.scope('withDeleted').findAll(options);
+};
+
+DailyStatistics.findOnlyDeleted = function(options = {}) {
+  return this.scope('onlyDeleted').findAll(options);
+};
+
+DailyStatistics.restoreById = async function(id) {
+  const stat = await this.findByPk(id, { paranoid: false });
+  if (stat && stat.deleted_at) {
+    return await stat.restore();
+  }
+  throw new Error('Daily statistic not found or not deleted');
 };
 
 module.exports = DailyStatistics;

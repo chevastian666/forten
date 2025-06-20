@@ -33,6 +33,7 @@ const eventRoutes = require('./routes/event.routes');
 const accessRoutes = require('./routes/access.routes');
 const webhookRoutes = require('./routes/webhook.routes');
 const statisticsRoutes = require('./routes/statistics.routes');
+const softDeleteRoutes = require('./routes/softDelete.routes');
 
 // Import models to initialize database
 const models = require('./models');
@@ -111,6 +112,7 @@ app.use('/api/events', eventRoutes);
 app.use('/api/access', accessRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/statistics', statisticsRoutes);
+app.use('/api/soft-deletes', softDeleteRoutes);
 
 // Example protected routes to demonstrate audit functionality
 app.use('/api/demo', (req, res, next) => {
@@ -327,6 +329,17 @@ const startServer = async () => {
       });
     }
     
+    // Initialize soft delete service
+    try {
+      const SoftDeleteService = require('./services/softDelete.service');
+      SoftDeleteService.initialize(models);
+      logger.info('Soft delete service initialized');
+    } catch (error) {
+      logger.error('Failed to initialize soft delete service:', {
+        error: error.message
+      });
+    }
+    
     // Start server
     server.listen(PORT, () => {
       logger.info(`FORTEN Backend Server running on port ${PORT}`, {
@@ -341,7 +354,8 @@ const startServer = async () => {
           notifications: 'ENABLED',
           logging: 'Winston ENABLED',
           webhooks: 'ENABLED (with HMAC-SHA256 signatures)',
-          aggregation: 'ENABLED (with cron jobs)'
+          aggregation: 'ENABLED (with cron jobs)',
+          softDeletes: 'ENABLED (paranoid mode)'
         }
       });
       
@@ -434,6 +448,15 @@ const startServer = async () => {
         console.log('  POST   /api/statistics/aggregate           - Manual aggregation');
         console.log('  GET    /api/statistics/jobs/status         - Job status');
         console.log('  GET    /api/statistics/export/:buildingId  - Export statistics');
+        console.log('\n🗑️  Soft Delete endpoints:');
+        console.log('  GET    /api/soft-deletes                   - Get deleted records');
+        console.log('  POST   /api/soft-deletes/:model/:id/restore - Restore record');
+        console.log('  DELETE /api/soft-deletes/:model/:id/permanent - Permanently delete');
+        console.log('  POST   /api/soft-deletes/:model/bulk-restore - Bulk restore');
+        console.log('  GET    /api/soft-deletes/statistics        - Delete statistics');
+        console.log('  POST   /api/soft-deletes/cleanup           - Cleanup old records');
+        console.log('  GET    /api/soft-deletes/search            - Search deleted records');
+        console.log('  GET    /api/soft-deletes/models            - Supported models');
       }
     });
   } catch (error) {

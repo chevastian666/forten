@@ -127,12 +127,19 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(50),
       allowNull: true,
       comment: 'User who created the PIN'
+    },
+    deleted_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      comment: 'Soft delete timestamp'
     }
   }, {
     tableName: 'pins',
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
+    paranoid: true,
     indexes: [
       {
         fields: ['building_id', 'is_active']
@@ -148,6 +155,9 @@ module.exports = (sequelize, DataTypes) => {
       },
       {
         fields: ['created_at']
+      },
+      {
+        fields: ['deleted_at']
       }
     ],
     hooks: {
@@ -204,6 +214,18 @@ module.exports = (sequelize, DataTypes) => {
     return this.save();
   };
 
+  Pin.prototype.softDelete = async function() {
+    return await this.destroy();
+  };
+
+  Pin.prototype.restore = async function() {
+    return await this.restore();
+  };
+
+  Pin.prototype.isDeleted = function() {
+    return this.deleted_at !== null;
+  };
+
   // Class methods
   Pin.cleanExpired = async function() {
     return Pin.update(
@@ -225,6 +247,34 @@ module.exports = (sequelize, DataTypes) => {
         expires_at: { [sequelize.Op.gt]: new Date() }
       }
     });
+  };
+
+  // Soft delete related methods
+  Pin.addScope('withDeleted', {
+    paranoid: false
+  });
+
+  Pin.addScope('onlyDeleted', {
+    where: {
+      deleted_at: { [sequelize.Op.ne]: null }
+    },
+    paranoid: false
+  });
+
+  Pin.findWithDeleted = function(options = {}) {
+    return this.scope('withDeleted').findAll(options);
+  };
+
+  Pin.findOnlyDeleted = function(options = {}) {
+    return this.scope('onlyDeleted').findAll(options);
+  };
+
+  Pin.restoreById = async function(id) {
+    const pin = await this.findByPk(id, { paranoid: false });
+    if (pin && pin.deleted_at) {
+      return await pin.restore();
+    }
+    throw new Error('PIN not found or not deleted');
   };
 
   return Pin;

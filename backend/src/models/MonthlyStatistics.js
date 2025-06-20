@@ -216,12 +216,19 @@ const MonthlyStatistics = sequelize.define('MonthlyStatistics', {
   version: {
     type: DataTypes.INTEGER,
     defaultValue: 1
+  },
+  deleted_at: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    comment: 'Soft delete timestamp'
   }
 }, {
   tableName: 'monthly_statistics',
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',
+  deletedAt: 'deleted_at',
+  paranoid: true,
   indexes: [
     {
       unique: true,
@@ -235,6 +242,9 @@ const MonthlyStatistics = sequelize.define('MonthlyStatistics', {
     },
     {
       fields: ['created_at']
+    },
+    {
+      fields: ['deleted_at']
     }
   ]
 });
@@ -260,6 +270,49 @@ MonthlyStatistics.getLatest = async function(buildingId, months = 12) {
     order: [['year', 'DESC'], ['month', 'DESC']],
     limit: months
   });
+};
+
+// Soft delete methods
+MonthlyStatistics.prototype.softDelete = async function() {
+  return await this.destroy();
+};
+
+MonthlyStatistics.prototype.restore = async function() {
+  return await this.restore();
+};
+
+MonthlyStatistics.prototype.isDeleted = function() {
+  return this.deleted_at !== null;
+};
+
+// Scopes
+MonthlyStatistics.addScope('withDeleted', {
+  paranoid: false
+});
+
+MonthlyStatistics.addScope('onlyDeleted', {
+  where: {
+    deleted_at: {
+      [require('sequelize').Op.ne]: null
+    }
+  },
+  paranoid: false
+});
+
+MonthlyStatistics.findWithDeleted = function(options = {}) {
+  return this.scope('withDeleted').findAll(options);
+};
+
+MonthlyStatistics.findOnlyDeleted = function(options = {}) {
+  return this.scope('onlyDeleted').findAll(options);
+};
+
+MonthlyStatistics.restoreById = async function(id) {
+  const stat = await this.findByPk(id, { paranoid: false });
+  if (stat && stat.deleted_at) {
+    return await stat.restore();
+  }
+  throw new Error('Monthly statistic not found or not deleted');
 };
 
 module.exports = MonthlyStatistics;

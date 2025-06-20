@@ -159,12 +159,19 @@ const Webhook = sequelize.define('Webhook', {
     type: DataTypes.STRING(50),
     allowNull: true,
     comment: 'Building scope (null for all buildings)'
+  },
+  deleted_at: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    comment: 'Soft delete timestamp'
   }
 }, {
   tableName: 'webhooks',
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',
+  deletedAt: 'deleted_at',
+  paranoid: true,
   indexes: [
     {
       fields: ['is_active']
@@ -178,6 +185,9 @@ const Webhook = sequelize.define('Webhook', {
     {
       fields: ['events'],
       using: 'GIN'
+    },
+    {
+      fields: ['deleted_at']
     }
   ]
 });
@@ -204,6 +214,18 @@ Webhook.prototype.incrementDeliveryStats = function(success) {
 Webhook.prototype.shouldDisable = function() {
   // Disable after 10 consecutive failures
   return this.consecutive_failures >= 10;
+};
+
+Webhook.prototype.softDelete = async function() {
+  return await this.destroy();
+};
+
+Webhook.prototype.restore = async function() {
+  return await this.restore();
+};
+
+Webhook.prototype.isDeleted = function() {
+  return this.deleted_at !== null;
 };
 
 Webhook.prototype.matchesEvent = function(eventType, eventData = {}) {
@@ -263,6 +285,36 @@ Webhook.getActiveWebhooksForEvent = async function(eventType, eventData = {}) {
   
   // Filter by additional criteria
   return webhooks.filter(webhook => webhook.matchesEvent(eventType, eventData));
+};
+
+// Soft delete scopes and methods
+Webhook.addScope('withDeleted', {
+  paranoid: false
+});
+
+Webhook.addScope('onlyDeleted', {
+  where: {
+    deleted_at: {
+      [sequelize.Op.ne]: null
+    }
+  },
+  paranoid: false
+});
+
+Webhook.findWithDeleted = function(options = {}) {
+  return this.scope('withDeleted').findAll(options);
+};
+
+Webhook.findOnlyDeleted = function(options = {}) {
+  return this.scope('onlyDeleted').findAll(options);
+};
+
+Webhook.restoreById = async function(id) {
+  const webhook = await this.findByPk(id, { paranoid: false });
+  if (webhook && webhook.deleted_at) {
+    return await webhook.restore();
+  }
+  throw new Error('Webhook not found or not deleted');
 };
 
 module.exports = Webhook;

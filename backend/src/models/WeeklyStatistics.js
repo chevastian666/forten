@@ -175,12 +175,19 @@ const WeeklyStatistics = sequelize.define('WeeklyStatistics', {
   version: {
     type: DataTypes.INTEGER,
     defaultValue: 1
+  },
+  deleted_at: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    comment: 'Soft delete timestamp'
   }
 }, {
   tableName: 'weekly_statistics',
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',
+  deletedAt: 'deleted_at',
+  paranoid: true,
   indexes: [
     {
       unique: true,
@@ -194,6 +201,9 @@ const WeeklyStatistics = sequelize.define('WeeklyStatistics', {
     },
     {
       fields: ['created_at']
+    },
+    {
+      fields: ['deleted_at']
     }
   ]
 });
@@ -212,6 +222,49 @@ WeeklyStatistics.getLatest = async function(buildingId, weeks = 12) {
     order: [['week_start', 'DESC']],
     limit: weeks
   });
+};
+
+// Soft delete methods
+WeeklyStatistics.prototype.softDelete = async function() {
+  return await this.destroy();
+};
+
+WeeklyStatistics.prototype.restore = async function() {
+  return await this.restore();
+};
+
+WeeklyStatistics.prototype.isDeleted = function() {
+  return this.deleted_at !== null;
+};
+
+// Scopes
+WeeklyStatistics.addScope('withDeleted', {
+  paranoid: false
+});
+
+WeeklyStatistics.addScope('onlyDeleted', {
+  where: {
+    deleted_at: {
+      [require('sequelize').Op.ne]: null
+    }
+  },
+  paranoid: false
+});
+
+WeeklyStatistics.findWithDeleted = function(options = {}) {
+  return this.scope('withDeleted').findAll(options);
+};
+
+WeeklyStatistics.findOnlyDeleted = function(options = {}) {
+  return this.scope('onlyDeleted').findAll(options);
+};
+
+WeeklyStatistics.restoreById = async function(id) {
+  const stat = await this.findByPk(id, { paranoid: false });
+  if (stat && stat.deleted_at) {
+    return await stat.restore();
+  }
+  throw new Error('Weekly statistic not found or not deleted');
 };
 
 module.exports = WeeklyStatistics;
