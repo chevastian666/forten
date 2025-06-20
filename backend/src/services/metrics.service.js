@@ -7,6 +7,7 @@
 const { sequelize } = require('../models');
 const CacheService = require('./cache.service');
 const { QueryTypes } = require('sequelize');
+const { logPerformance, info: logger } = require('../config/logger');
 
 // Metrics update interval (30 seconds)
 const METRICS_UPDATE_INTERVAL = 30 * 1000;
@@ -34,15 +35,17 @@ class MetricsService {
    */
   startAutoUpdate() {
     if (this.updateTimer) {
-      console.log('⚠️  Metrics auto-update already running');
+      logger('Metrics auto-update already running');
       return;
     }
 
-    console.log('🚀 Starting metrics auto-update service...');
+    logger('Starting metrics auto-update service...');
     
     // Initial update
     this.updateAllMetrics().catch(error => {
-      console.error('Initial metrics update failed:', error);
+      logger('Initial metrics update failed', {
+        error: error.message
+      });
     });
 
     // Schedule periodic updates
@@ -50,11 +53,15 @@ class MetricsService {
       try {
         await this.updateAllMetrics();
       } catch (error) {
-        console.error('Scheduled metrics update failed:', error);
+        logger('Scheduled metrics update failed', {
+          error: error.message
+        });
       }
     }, METRICS_UPDATE_INTERVAL);
 
-    console.log(`✅ Metrics auto-update started (interval: ${METRICS_UPDATE_INTERVAL}ms)`);
+    logger('Metrics auto-update started', {
+      interval: `${METRICS_UPDATE_INTERVAL}ms`
+    });
   }
 
   /**
@@ -64,7 +71,7 @@ class MetricsService {
     if (this.updateTimer) {
       clearInterval(this.updateTimer);
       this.updateTimer = null;
-      console.log('🛑 Metrics auto-update stopped');
+      logger('Metrics auto-update stopped');
     }
   }
 
@@ -73,7 +80,7 @@ class MetricsService {
    */
   async updateAllMetrics() {
     if (this.isUpdating) {
-      console.log('⏳ Metrics update already in progress, skipping...');
+      logger('Metrics update already in progress, skipping...');
       return;
     }
 
@@ -81,7 +88,7 @@ class MetricsService {
     const startTime = Date.now();
 
     try {
-      console.log('🔄 Updating dashboard metrics...');
+      logger('Updating dashboard metrics...');
 
       // Parallelize all metrics calculations
       const [
@@ -127,10 +134,15 @@ class MetricsService {
       this.lastUpdate = new Date();
       const duration = Date.now() - startTime;
       
-      console.log(`✅ Metrics updated successfully in ${duration}ms`);
+      logPerformance('Metrics update', duration, {
+        type: 'all metrics'
+      });
 
     } catch (error) {
-      console.error('❌ Failed to update metrics:', error);
+      logger('Failed to update metrics', {
+        error: error.message,
+        stack: error.stack
+      });
       throw error;
     } finally {
       this.isUpdating = false;
@@ -555,7 +567,10 @@ class MetricsService {
           return await CacheService.get(METRICS_CACHE_KEYS.REAL_TIME);
       }
     } catch (error) {
-      console.error(`Error getting cached metrics for ${type}:`, error);
+      logger('Error getting cached metrics', {
+        type,
+        error: error.message
+      });
       return null;
     }
   }
@@ -564,7 +579,7 @@ class MetricsService {
    * Force metrics update
    */
   async forceUpdate() {
-    console.log('🔄 Forcing metrics update...');
+    logger('Forcing metrics update...');
     return await this.updateAllMetrics();
   }
 

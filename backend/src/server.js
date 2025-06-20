@@ -9,7 +9,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const { createServer } = require('http');
-const { Server } = require('socket.io');
+const { WebSocketManager } = require('./websocket');
+const { logger, api: apiLogger } = require('./config/logger');
 
 // Import Redis configuration
 const { initializeRedis } = require('./config/redis');
@@ -24,6 +25,13 @@ const auditRoutes = require('./routes/audit.routes');
 const cacheRoutes = require('./routes/cache.routes');
 const metricsRoutes = require('./routes/metrics.routes');
 const rateLimitRoutes = require('./routes/rateLimit.routes');
+const notificationRoutes = require('./routes/notification.routes');
+const websocketRoutes = require('./routes/websocket.routes');
+const exportRoutes = require('./routes/export.routes');
+const pinRoutes = require('./routes/pin.routes');
+const eventRoutes = require('./routes/event.routes');
+const accessRoutes = require('./routes/access.routes');
+const webhookRoutes = require('./routes/webhook.routes');
 
 // Import models to initialize database
 const models = require('./models');
@@ -33,16 +41,8 @@ const app = express();
 const server = createServer(app);
 const PORT = process.env.PORT || 3001;
 
-// Initialize Socket.io
-const io = new Server(server, {
-  cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    credentials: true
-  }
-});
-
-// Make io accessible to routes
-app.set('io', io);
+// Initialize WebSocket Manager
+let webSocketManager = null;
 
 // Security middleware
 app.use(helmet());
@@ -51,8 +51,8 @@ app.use(cors({
   credentials: true
 }));
 
-// Request logging
-app.use(morgan('combined'));
+// Request logging with Winston
+app.use(morgan('combined', { stream: logger.stream }));
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -102,6 +102,13 @@ app.use('/api', auditRoutes);
 app.use('/api/cache', cacheRoutes);
 app.use('/api/metrics', metricsRoutes);
 app.use('/api/rate-limit', rateLimitRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/websocket', websocketRoutes);
+app.use('/api/export', exportRoutes);
+app.use('/api/pins', pinRoutes);
+app.use('/api/events', eventRoutes);
+app.use('/api/access', accessRoutes);
+app.use('/api/webhooks', webhookRoutes);
 
 // Example protected routes to demonstrate audit functionality
 app.use('/api/demo', (req, res, next) => {
@@ -175,7 +182,13 @@ app.delete('/api/demo/users/:id', (req, res) => {
 
 // Error handling middleware
 app.use((error, req, res, next) => {
-  console.error('Server error:', error);
+  apiLogger.error('Server error:', {
+    error: error.message,
+    stack: error.stack,
+    path: req.path,
+    method: req.method,
+    ip: req.ip
+  });
   
   // Store error message for audit logging
   res.locals.errorMessage = error.message;
@@ -202,43 +215,115 @@ const startServer = async () => {
     await initializeRedis();
     
     // Test database connection
-    await models.sequelize.authenticate();
-    console.log('✅ Database connection established successfully.');
-    
-    // Sync database models (in development)
-    if (process.env.NODE_ENV === 'development') {
-      await models.sequelize.sync({ alter: true });
-      console.log('📊 Database models synchronized successfully.');
+    try {
+      await models.sequelize.authenticate();
+      logger.info('Database connection established successfully.');
+      
+      // Sync database models (in development)
+      if (process.env.NODE_ENV === 'development') {
+        await models.sequelize.sync({ alter: true });
+        logger.info('Database models synchronized successfully.');
+      }
+    } catch (error) {
+      logger.warn('Database not available, continuing without database...', {
+        error: error.message
+      });
     }
     
     // Initialize existing infrastructure if available
     try {
       const { initializeInfrastructure } = require('./infrastructure/initialization');
       await initializeInfrastructure(io);
-      console.log('🏗️ Clean architecture infrastructure initialized.');
+      logger.info('Clean architecture infrastructure initialized.');
     } catch (error) {
-      console.log('ℹ️ Clean architecture infrastructure not found, skipping...');
+      logger.debug('Clean architecture infrastructure not found, skipping...');
     }
     
     // Start metrics service
     try {
       const metricsService = require('./services/metrics.service');
       metricsService.startAutoUpdate();
-      console.log('📊 Metrics service started');
+      logger.info('Metrics service started');
     } catch (error) {
-      console.error('❌ Failed to start metrics service:', error.message);
+      logger.error('Failed to start metrics service:', {
+        error: error.message
+      });
+    }
+    
+    // Initialize WebSocket Manager
+    try {
+      webSocketManager = new WebSocketManager(server);
+      logger.info('WebSocket manager initialized with building rooms');
+      
+      // Make io accessible to routes
+      app.set('io', webSocketManager.getIO());
+      app.set('buildingRoomsManager', webSocketManager.getBuildingRoomsManager());
+      
+      // Generate test tokens in development
+      if (process.env.NODE_ENV === 'development') {
+        const testTokens = webSocketManager.generateTestTokens();
+        if (testTokens) {
+          app.set('testTokens', testTokens);
+        }
+      }
+      
+    } catch (error) {
+      logger.error('Failed to initialize WebSocket manager:', {
+        error: error.message
+      });
+    }
+    
+    // Initialize notification service
+    try {
+      const { notificationService } = require('./services/notification.service');
+      const io = webSocketManager ? webSocketManager.getIO() : null;
+      await notificationService.initialize(io);
+      logger.info('Notification service initialized');
+    } catch (error) {
+      logger.error('Failed to initialize notification service:', {
+        error: error.message
+      });
+    }
+    
+    // Initialize webhook service with Redis
+    try {
+      const webhookService = require('./services/webhook.service');
+      const redis = require('./config/redis');
+      const redisClient = redis.getClient();
+      
+      // Get models from the already initialized models
+      const { Webhook, WebhookDelivery } = models;
+      
+      if (Webhook && WebhookDelivery && redisClient) {
+        await webhookService.initialize(Webhook, WebhookDelivery, redisClient);
+        logger.info('Webhook service initialized with Redis queue');
+      } else {
+        // Initialize without Redis if not available
+        await webhookService.initialize(Webhook, WebhookDelivery);
+        logger.info('Webhook service initialized (without Redis queue)');
+      }
+    } catch (error) {
+      logger.error('Failed to initialize webhook service:', {
+        error: error.message
+      });
     }
     
     // Start server
     server.listen(PORT, () => {
-      console.log(`🚀 FORTEN Backend Server running on port ${PORT}`);
-      console.log(`📱 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🔍 Audit system: ENABLED`);
-      console.log(`🔐 Database: PostgreSQL`);
-      console.log(`📊 Metrics service: ENABLED`);
-      console.log(`💾 Redis cache: ENABLED`);
-      console.log(`🛡️  Rate limiting: ENABLED`);
-      console.log(`🌐 WebSocket: ENABLED`);
+      logger.info(`FORTEN Backend Server running on port ${PORT}`, {
+        environment: process.env.NODE_ENV || 'development',
+        features: {
+          audit: 'ENABLED',
+          database: 'PostgreSQL',
+          metrics: 'ENABLED',
+          cache: 'Redis ENABLED',
+          rateLimiting: 'ENABLED',
+          websocket: 'ENABLED (with building rooms & auth)',
+          notifications: 'ENABLED',
+          logging: 'Winston ENABLED',
+          webhooks: 'ENABLED (with HMAC-SHA256 signatures)'
+        }
+      });
       
       if (process.env.NODE_ENV === 'development') {
         console.log('\n📋 Demo endpoints available:');
@@ -262,21 +347,103 @@ const startServer = async () => {
         console.log('  GET    /api/rate-limit/usage  - Current usage');
         console.log('  GET    /api/rate-limit/config - Configuration');
         console.log('  GET    /api/rate-limit/health - Health check');
+        console.log('\n📢 Notification endpoints:');
+        console.log('  GET    /api/notifications/health     - Health check');
+        console.log('  GET    /api/notifications/stats      - Queue statistics');
+        console.log('  GET    /api/notifications/dashboard  - Dashboard data');
+        console.log('  POST   /api/notifications/send       - Send custom notification');
+        console.log('  POST   /api/notifications/security-alert - Send security alert');
+        console.log('  POST   /api/notifications/test       - Test notification system');
+        console.log('\n🌐 WebSocket endpoints:');
+        console.log('  Connect with JWT token in auth header or query parameter');
+        console.log('  Building rooms: building_<buildingId>');
+        console.log('  Role rooms: role_<role>, administrators, operators, security_team');
+        console.log('  Heartbeat: Every 30 seconds');
+        console.log('\n🌐 WebSocket testing endpoints:');
+        console.log('  GET    /api/websocket/test-tokens   - Get JWT test tokens');
+        console.log('  GET    /api/websocket/stats         - Connection statistics');
+        console.log('  GET    /api/websocket/health        - System health check');
+        console.log('  GET    /api/websocket/client-example - Connection examples');
+        console.log('  POST   /api/websocket/test-notification - Send test notification');
+        console.log('\n📊 Export endpoints:');
+        console.log('  GET    /api/export/options          - Get export options');
+        console.log('  GET    /api/export/:dataType/:format - Export data');
+        console.log('  POST   /api/export/preview          - Preview export data');
+        console.log('  GET    /api/export/history          - Export history');
+        console.log('\n🔐 PIN endpoints:');
+        console.log('  POST   /api/pins/generate           - Generate secure PIN');
+        console.log('  POST   /api/pins/validate           - Validate PIN');
+        console.log('  POST   /api/pins/bulk-generate      - Generate multiple PINs');
+        console.log('  POST   /api/pins/:pinId/revoke      - Revoke a PIN');
+        console.log('  GET    /api/pins/stats/:buildingId  - Get PIN statistics');
+        console.log('  POST   /api/pins/temporary-access   - Generate visitor PIN');
+        console.log('  POST   /api/pins/delivery           - Generate delivery PIN');
+        console.log('  POST   /api/pins/emergency          - Generate emergency PIN');
+        console.log('  DELETE /api/pins/cleanup            - Clean expired PINs');
+        console.log('\n📊 Events endpoints (Cursor Pagination):');
+        console.log('  GET    /api/events                  - Get paginated events');
+        console.log('  GET    /api/events/building/:id     - Events by building');
+        console.log('  GET    /api/events/critical         - Critical events');
+        console.log('  GET    /api/events/stats            - Event statistics');
+        console.log('  GET    /api/events/export           - Stream export');
+        console.log('\n🚪 Access endpoints (Cursor Pagination):');
+        console.log('  GET    /api/access                  - Get paginated access logs');
+        console.log('  GET    /api/access/person/:doc      - Access by person');
+        console.log('  GET    /api/access/failed/:building - Failed attempts');
+        console.log('  GET    /api/access/frequency/:id    - Access frequency');
+        console.log('  GET    /api/access/visitors/:id     - Top visitors');
+        console.log('  GET    /api/access/stats            - Access statistics');
+        console.log('  GET    /api/access/export           - Stream export');
+        console.log('\n🔗 Webhook endpoints:');
+        console.log('  POST   /api/webhooks                - Create webhook');
+        console.log('  GET    /api/webhooks                - List webhooks');
+        console.log('  GET    /api/webhooks/:id            - Get webhook details');
+        console.log('  PUT    /api/webhooks/:id            - Update webhook');
+        console.log('  DELETE /api/webhooks/:id            - Delete webhook');
+        console.log('  POST   /api/webhooks/:id/test       - Test webhook');
+        console.log('  GET    /api/webhooks/:id/stats      - Webhook statistics');
+        console.log('  GET    /api/webhooks/:id/deliveries - Delivery history');
+        console.log('  POST   /api/webhooks/trigger        - Trigger event');
+        console.log('  GET    /api/webhooks/events         - Available events');
       }
     });
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
+    logger.error('Failed to start server:', {
+      error: error.message,
+      stack: error.stack
+    });
     process.exit(1);
   }
 };
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
-  console.log('📴 SIGTERM received, shutting down gracefully...');
+  logger.info('SIGTERM received, shutting down gracefully...');
   server.close(async () => {
-    console.log('🔌 HTTP server closed');
+    logger.info('HTTP server closed');
     await models.sequelize.close();
-    console.log('🗄️ Database connection closed');
+    logger.info('Database connection closed');
+    
+    // Shutdown WebSocket manager
+    try {
+      if (webSocketManager) {
+        await webSocketManager.shutdown();
+      }
+    } catch (error) {
+      logger.error('Error shutting down WebSocket manager:', {
+        error: error.message
+      });
+    }
+    
+    // Shutdown notification service
+    try {
+      const { notificationService } = require('./services/notification.service');
+      await notificationService.shutdown();
+    } catch (error) {
+      logger.error('Error shutting down notification service:', {
+        error: error.message
+      });
+    }
     
     // Cleanup existing infrastructure if available
     try {
@@ -291,11 +458,33 @@ process.on('SIGTERM', async () => {
 });
 
 process.on('SIGINT', async () => {
-  console.log('📴 SIGINT received, shutting down gracefully...');
+  logger.info('SIGINT received, shutting down gracefully...');
   server.close(async () => {
-    console.log('🔌 HTTP server closed');
+    logger.info('HTTP server closed');
     await models.sequelize.close();
-    console.log('🗄️ Database connection closed');
+    logger.info('Database connection closed');
+    
+    // Shutdown WebSocket manager
+    try {
+      if (webSocketManager) {
+        await webSocketManager.shutdown();
+      }
+    } catch (error) {
+      logger.error('Error shutting down WebSocket manager:', {
+        error: error.message
+      });
+    }
+    
+    // Shutdown notification service
+    try {
+      const { notificationService } = require('./services/notification.service');
+      await notificationService.shutdown();
+    } catch (error) {
+      logger.error('Error shutting down notification service:', {
+        error: error.message
+      });
+    }
+    
     process.exit(0);
   });
 });

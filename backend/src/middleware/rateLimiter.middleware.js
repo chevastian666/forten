@@ -6,6 +6,7 @@
 const rateLimit = require('express-rate-limit');
 const RedisStore = require('rate-limit-redis').default;
 const { getRedisClient } = require('../config/redis');
+const { logSecurity } = require('../config/logger');
 
 // Rate limits by user role (requests per hour)
 const RATE_LIMITS = {
@@ -124,7 +125,9 @@ function createRedisStore() {
   const redisClient = getRedisClient();
   
   if (!redisClient) {
-    console.warn('⚠️  Redis not available, using memory store for rate limiting');
+    logSecurity('Redis not available for rate limiting', {
+      fallback: 'memory store'
+    });
     return undefined; // Will use default memory store
   }
   
@@ -142,7 +145,13 @@ function createRateLimitHandler(req, res, next, options) {
   const userId = req.user?.id || 'anonymous';
   
   // Log rate limit violation
-  console.warn(`🚫 Rate limit exceeded: IP=${ip}, Role=${role}, User=${userId}, Endpoint=${req.path}`);
+  logSecurity('Rate limit exceeded', {
+    ip,
+    role,
+    userId,
+    endpoint: req.path,
+    method: req.method
+  });
   
   // Custom error response
   const error = {
@@ -181,7 +190,10 @@ function createRateLimiter(isStrict = false) {
       
       // Check if IP is whitelisted
       if (isWhitelistedIP(ip)) {
-        console.log(`✅ IP ${ip} is whitelisted, bypassing rate limit`);
+        logSecurity('Whitelisted IP bypassing rate limit', {
+          ip,
+          userId: req.user?.id
+        });
         return next();
       }
       
@@ -208,7 +220,12 @@ function createRateLimiter(isStrict = false) {
           });
         },
         onLimitReached: (req, res, options) => {
-          console.warn(`⚠️  Rate limit reached for ${role} role: ${req.path}`);
+          logSecurity('Rate limit warning', {
+            role,
+            path: req.path,
+            remaining: req.rateLimit?.remaining || 0,
+            userId: req.user?.id
+          });
         }
       });
       
@@ -216,7 +233,11 @@ function createRateLimiter(isStrict = false) {
       return limiter(req, res, next);
       
     } catch (error) {
-      console.error('❌ Rate limiter error:', error);
+      logSecurity('Rate limiter error', {
+        error: error.message,
+        path: req.path,
+        userId: req.user?.id
+      });
       // Continue without rate limiting on error
       return next();
     }

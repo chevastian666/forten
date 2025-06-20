@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORTEN Export Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .export-section {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #495057;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .format-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .format-button {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .format-button:hover {
+            background-color: #dee2e6;
+        }
+        .format-button.selected {
+            background-color: #007bff;
+            color: white;
+        }
+        .preview-section {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        tr:hover {
+            background-color: #f1f3f5;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 FORTEN Data Export System</h1>
+        <p>Sistema de exportación de datos con soporte para CSV, Excel y PDF</p>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalRecords">0</div>
+                <div class="stat-label">Total Records</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="selectedFormat">-</div>
+                <div class="stat-label">Format</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="exportCount">0</div>
+                <div class="stat-label">Exports Today</div>
+            </div>
+        </div>
+
+        <div class="export-section">
+            <h2>Export Configuration</h2>
+            
+            <div class="form-group">
+                <label for="dataType">Data Type:</label>
+                <select id="dataType" onchange="updatePreview()">
+                    <option value="">Select data type...</option>
+                    <option value="events">System Events</option>
+                    <option value="access_logs">Access Logs</option>
+                    <option value="alerts">Security Alerts</option>
+                    <option value="devices">Device Status</option>
+                    <option value="users">User List</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="startDate">Start Date:</label>
+                <input type="date" id="startDate" onchange="updatePreview()">
+            </div>
+
+            <div class="form-group">
+                <label for="endDate">End Date:</label>
+                <input type="date" id="endDate" onchange="updatePreview()">
+            </div>
+
+            <div class="form-group">
+                <label for="buildingId">Building:</label>
+                <select id="buildingId" onchange="updatePreview()">
+                    <option value="all">All Buildings</option>
+                    <option value="building-1">Building A</option>
+                    <option value="building-2">Building B</option>
+                    <option value="building-3">Building C</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="eventTypeGroup" style="display: none;">
+                <label for="eventType">Event Type:</label>
+                <select id="eventType" onchange="updatePreview()">
+                    <option value="all">All Event Types</option>
+                    <option value="system_start">System Start</option>
+                    <option value="system_stop">System Stop</option>
+                    <option value="config_change">Configuration Change</option>
+                    <option value="user_login">User Login</option>
+                    <option value="user_logout">User Logout</option>
+                </select>
+            </div>
+
+            <h3>Export Format:</h3>
+            <div class="format-buttons">
+                <div class="format-button" onclick="selectFormat('csv')" data-format="csv">
+                    <strong>CSV</strong><br>
+                    <small>Comma-separated values</small>
+                </div>
+                <div class="format-button selected" onclick="selectFormat('xlsx')" data-format="xlsx">
+                    <strong>Excel</strong><br>
+                    <small>Microsoft Excel format</small>
+                </div>
+                <div class="format-button" onclick="selectFormat('pdf')" data-format="pdf">
+                    <strong>PDF</strong><br>
+                    <small>Portable document format</small>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button onclick="previewData()">Preview Data</button>
+                <button onclick="exportData()" id="exportButton">Export Data</button>
+                <button onclick="getExportOptions()">Get Options</button>
+                <button onclick="getExportHistory()">View History</button>
+            </div>
+        </div>
+
+        <div id="status"></div>
+
+        <div id="previewSection" class="preview-section" style="display: none;">
+            <h3>Data Preview</h3>
+            <div id="previewContent"></div>
+        </div>
+
+        <div id="historySection" class="export-section" style="display: none;">
+            <h3>Export History</h3>
+            <div id="historyContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFormat = 'xlsx';
+        let previewData = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set default dates
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 30);
+            
+            document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+            document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
+            
+            updateSelectedFormat();
+        });
+
+        function selectFormat(format) {
+            selectedFormat = format;
+            document.querySelectorAll('.format-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelector(`[data-format="${format}"]`).classList.add('selected');
+            updateSelectedFormat();
+        }
+
+        function updateSelectedFormat() {
+            document.getElementById('selectedFormat').textContent = selectedFormat.toUpperCase();
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = message;
+            statusDiv.style.display = 'block';
+            
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function updatePreview() {
+            const dataType = document.getElementById('dataType').value;
+            
+            // Show/hide event type filter based on data type
+            const eventTypeGroup = document.getElementById('eventTypeGroup');
+            if (dataType === 'events' || dataType === 'alerts') {
+                eventTypeGroup.style.display = 'block';
+            } else {
+                eventTypeGroup.style.display = 'none';
+            }
+        }
+
+        async function getExportOptions() {
+            try {
+                showStatus('Loading export options... <span class="loading"></span>', 'info');
+                
+                const response = await fetch('/api/export/options');
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('Export options loaded successfully!', 'success');
+                    console.log('Export options:', result.data);
+                    alert(JSON.stringify(result.data, null, 2));
+                } else {
+                    showStatus(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function previewData() {
+            const dataType = document.getElementById('dataType').value;
+            
+            if (!dataType) {
+                showStatus('Please select a data type', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('Loading preview... <span class="loading"></span>', 'info');
+                
+                const filters = getFilters();
+                
+                const response = await fetch('/api/export/preview', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        dataType,
+                        filters
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus(`Preview loaded: ${result.data.totalCount} total records`, 'success');
+                    displayPreview(result.data);
+                    document.getElementById('totalRecords').textContent = result.data.totalCount.toLocaleString();
+                } else {
+                    showStatus(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        function displayPreview(data) {
+            const previewSection = document.getElementById('previewSection');
+            const previewContent = document.getElementById('previewContent');
+            
+            if (!data.records || data.records.length === 0) {
+                previewContent.innerHTML = '<p>No data available</p>';
+                previewSection.style.display = 'block';
+                return;
+            }
+            
+            // Create table
+            let html = '<table>';
+            
+            // Headers
+            html += '<thead><tr>';
+            data.headers.forEach(header => {
+                html += `<th>${header.label}</th>`;
+            });
+            html += '</tr></thead>';
+            
+            // Data rows
+            html += '<tbody>';
+            data.records.forEach(record => {
+                html += '<tr>';
+                data.headers.forEach(header => {
+                    const value = record[header.key] || '';
+                    html += `<td>${formatValue(value, header.type)}</td>`;
+                });
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            
+            html += `<p style="margin-top: 10px;"><small>Showing ${data.previewCount} of ${data.totalCount} records</small></p>`;
+            
+            previewContent.innerHTML = html;
+            previewSection.style.display = 'block';
+        }
+
+        function formatValue(value, type) {
+            if (!value) return '';
+            
+            if (type === 'datetime' || type === 'date') {
+                return new Date(value).toLocaleString('es-UY');
+            }
+            
+            return value;
+        }
+
+        function getFilters() {
+            const filters = {};
+            
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const buildingId = document.getElementById('buildingId').value;
+            const eventType = document.getElementById('eventType').value;
+            
+            if (startDate) filters.startDate = startDate;
+            if (endDate) filters.endDate = endDate;
+            if (buildingId && buildingId !== 'all') filters.buildingId = buildingId;
+            if (eventType && eventType !== 'all') filters.eventType = eventType;
+            
+            return filters;
+        }
+
+        async function exportData() {
+            const dataType = document.getElementById('dataType').value;
+            
+            if (!dataType) {
+                showStatus('Please select a data type', 'error');
+                return;
+            }
+            
+            try {
+                const exportButton = document.getElementById('exportButton');
+                exportButton.disabled = true;
+                showStatus('Generating export... <span class="loading"></span>', 'info');
+                
+                const filters = getFilters();
+                const queryParams = new URLSearchParams(filters).toString();
+                const url = `/api/export/${dataType}/${selectedFormat}?${queryParams}`;
+                
+                // Create a link and trigger download
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `forten_${dataType}_export.${selectedFormat}`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showStatus(`Export started for ${dataType} in ${selectedFormat.toUpperCase()} format`, 'success');
+                
+                // Update export count
+                const countEl = document.getElementById('exportCount');
+                countEl.textContent = parseInt(countEl.textContent) + 1;
+                
+            } catch (error) {
+                showStatus(`Export failed: ${error.message}`, 'error');
+            } finally {
+                document.getElementById('exportButton').disabled = false;
+            }
+        }
+
+        async function getExportHistory() {
+            try {
+                showStatus('Loading export history... <span class="loading"></span>', 'info');
+                
+                const response = await fetch('/api/export/history');
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('Export history loaded', 'success');
+                    displayHistory(result.data);
+                } else {
+                    showStatus(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        function displayHistory(history) {
+            const historySection = document.getElementById('historySection');
+            const historyContent = document.getElementById('historyContent');
+            
+            if (!history || history.length === 0) {
+                historyContent.innerHTML = '<p>No export history available</p>';
+                historySection.style.display = 'block';
+                return;
+            }
+            
+            let html = '<table>';
+            html += '<thead><tr>';
+            html += '<th>Date</th><th>Data Type</th><th>Format</th><th>Records</th><th>Size</th><th>Filters</th>';
+            html += '</tr></thead><tbody>';
+            
+            history.forEach(item => {
+                html += '<tr>';
+                html += `<td>${new Date(item.createdAt).toLocaleString('es-UY')}</td>`;
+                html += `<td>${item.dataType}</td>`;
+                html += `<td>${item.format.toUpperCase()}</td>`;
+                html += `<td>${item.recordCount.toLocaleString()}</td>`;
+                html += `<td>${item.fileSize}</td>`;
+                html += `<td>${JSON.stringify(item.filters)}</td>`;
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            
+            historyContent.innerHTML = html;
+            historySection.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
