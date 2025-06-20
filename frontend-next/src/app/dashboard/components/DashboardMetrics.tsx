@@ -1,4 +1,6 @@
 import { api } from '@/lib/api';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface Metric {
   label: string;
@@ -85,36 +87,36 @@ export async function DashboardMetrics() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {metrics.map((metric, index) => (
-        <div
-          key={index}
-          className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
-        >
-          <div className="flex items-center justify-between mb-4">
+        <Card key={index} className="p-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <span className="text-3xl">{metric.icon}</span>
             {metric.change !== undefined && (
-              <span className={`text-sm font-medium ${
-                metric.change > 0 ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <Badge 
+                variant={metric.change > 0 ? "default" : "destructive"}
+                className="text-xs"
+              >
                 {metric.change > 0 ? '+' : ''}{metric.change}%
-              </span>
+              </Badge>
             )}
-          </div>
+          </CardHeader>
           
-          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-            {metric.label}
-          </h3>
-          
-          <div className="flex items-baseline gap-2">
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {metric.value}
-            </p>
-            {metric.unit && (
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                {metric.unit}
-              </span>
-            )}
-          </div>
-        </div>
+          <CardContent className="p-0">
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">
+              {metric.label}
+            </h3>
+            
+            <div className="flex items-baseline gap-2">
+              <p className="text-2xl font-bold">
+                {metric.value}
+              </p>
+              {metric.unit && (
+                <span className="text-sm text-muted-foreground">
+                  {metric.unit}
+                </span>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );

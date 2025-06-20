@@ -2,134 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
-import styled from '@emotion/styled';
-import { theme } from '@/styles/theme';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CheckCircle, AlertTriangle, XCircle, Wrench } from 'lucide-react';
 
-const Container = styled.div`
-  background: ${theme.colors.white};
-  border-radius: ${theme.borderRadius.lg};
-  box-shadow: ${theme.shadows.sm};
-  border: 1px solid ${theme.colors.gray[200]};
-  padding: ${theme.spacing.lg};
-
-  .dark & {
-    background: ${theme.colors.gray[800]};
-    border-color: ${theme.colors.gray[700]};
-  }
-`;
-
-const SystemItem = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: ${theme.spacing.md} 0;
-  border-bottom: 1px solid ${theme.colors.gray[200]};
-  
-  &:last-child {
-    border-bottom: none;
-  }
-  
-  .dark & {
-    border-color: ${theme.colors.gray[700]};
-  }
-`;
-
-const SystemInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${theme.spacing.sm};
-`;
-
-const SystemName = styled.div`
-  font-weight: ${theme.typography.fontWeight.medium};
-  color: ${theme.colors.gray[900]};
-  
-  .dark & {
-    color: ${theme.colors.white};
-  }
-`;
-
-const SystemDetails = styled.div`
-  font-size: ${theme.typography.fontSize.sm};
-  color: ${theme.colors.gray[600]};
-  
-  .dark & {
-    color: ${theme.colors.gray[400]};
-  }
-`;
-
-const StatusIndicator = styled.div<{ status: 'online' | 'warning' | 'offline' }>`
-  display: flex;
-  align-items: center;
-  gap: ${theme.spacing.xs};
-  
-  .status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    
-    ${props => {
-      switch (props.status) {
-        case 'online':
-          return `background: ${theme.colors.green[500]};`;
-        case 'warning':
-          return `background: ${theme.colors.yellow[500]};`;
-        case 'offline':
-          return `background: ${theme.colors.red[500]};`;
-      }
-    }}
-  }
-  
-  .status-text {
-    font-size: ${theme.typography.fontSize.sm};
-    font-weight: ${theme.typography.fontWeight.medium};
-    
-    ${props => {
-      switch (props.status) {
-        case 'online':
-          return `color: ${theme.colors.green[700]};`;
-        case 'warning':
-          return `color: ${theme.colors.yellow[700]};`;
-        case 'offline':
-          return `color: ${theme.colors.red[700]};`;
-      }
-    }}
-  }
-`;
-
-const MaintenanceAlert = styled.div`
-  background: ${theme.colors.blue[50]};
-  border: 1px solid ${theme.colors.blue[200]};
-  border-radius: ${theme.borderRadius.md};
-  padding: ${theme.spacing.md};
-  margin-top: ${theme.spacing.md};
-  
-  .dark & {
-    background: ${theme.colors.blue[900]};
-    border-color: ${theme.colors.blue[700]};
-  }
-`;
-
-const MaintenanceTitle = styled.h4`
-  font-size: ${theme.typography.fontSize.sm};
-  font-weight: ${theme.typography.fontWeight.medium};
-  color: ${theme.colors.blue[800]};
-  margin-bottom: ${theme.spacing.xs};
-  
-  .dark & {
-    color: ${theme.colors.blue[200]};
-  }
-`;
-
-const MaintenanceText = styled.p`
-  font-size: ${theme.typography.fontSize.sm};
-  color: ${theme.colors.blue[700]};
-  margin: 0;
-  
-  .dark & {
-    color: ${theme.colors.blue[300]};
-  }
-`;
 
 interface SystemStatus {
   id: string;
@@ -249,6 +126,22 @@ export function BuildingStatus() {
     }
   };
 
+  const getStatusVariant = (status: SystemStatus['status']) => {
+    switch (status) {
+      case 'online': return 'default';
+      case 'warning': return 'secondary';
+      case 'offline': return 'destructive';
+    }
+  };
+
+  const getStatusIcon = (status: SystemStatus['status']) => {
+    switch (status) {
+      case 'online': return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'warning': return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
+      case 'offline': return <XCircle className="h-4 w-4 text-red-600" />;
+    }
+  };
+
   const getStatusText = (status: SystemStatus['status']) => {
     switch (status) {
       case 'online': return 'En línea';
@@ -268,62 +161,65 @@ export function BuildingStatus() {
 
   if (loading) {
     return (
-      <Container>
+      <Card className="p-6">
         <div className="animate-pulse space-y-4">
           {[1, 2, 3, 4, 5].map(i => (
             <div key={i} className="flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded" />
+                <div className="w-8 h-8 bg-muted rounded" />
                 <div>
-                  <div className="w-24 h-4 bg-gray-200 dark:bg-gray-700 rounded mb-1" />
-                  <div className="w-32 h-3 bg-gray-200 dark:bg-gray-700 rounded" />
+                  <div className="w-24 h-4 bg-muted rounded mb-1" />
+                  <div className="w-32 h-3 bg-muted rounded" />
                 </div>
               </div>
-              <div className="w-16 h-4 bg-gray-200 dark:bg-gray-700 rounded" />
+              <div className="w-16 h-4 bg-muted rounded" />
             </div>
           ))}
         </div>
-      </Container>
+      </Card>
     );
   }
 
   return (
-    <Container>
-      <div className="space-y-0">
+    <Card className="p-6">
+      <div className="space-y-4">
         {systems.map(system => (
-          <SystemItem key={system.id}>
-            <SystemInfo>
+          <div key={system.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
+            <div className="flex items-center gap-3">
               <span className="text-2xl">{system.icon}</span>
               <div>
-                <SystemName>{system.name}</SystemName>
-                <SystemDetails>{system.details}</SystemDetails>
+                <div className="font-medium">{system.name}</div>
+                <div className="text-sm text-muted-foreground">{system.details}</div>
               </div>
-            </SystemInfo>
+            </div>
             
-            <StatusIndicator status={system.status}>
-              <div className="status-dot" />
-              <span className="status-text">
+            <div className="flex items-center gap-2">
+              {getStatusIcon(system.status)}
+              <Badge variant={getStatusVariant(system.status)}>
                 {getStatusText(system.status)}
-              </span>
-            </StatusIndicator>
-          </SystemItem>
+              </Badge>
+            </div>
+          </div>
         ))}
       </div>
 
       {maintenance.length > 0 && (
-        <MaintenanceAlert>
-          <MaintenanceTitle>
-            🔧 Mantenimiento Programado
-          </MaintenanceTitle>
-          {maintenance.map(item => (
-            <MaintenanceText key={item.id}>
-              <strong>{item.system}</strong> - {item.type}
-              <br />
-              {formatDateTime(item.scheduledDate)} ({item.duration})
-            </MaintenanceText>
-          ))}
-        </MaintenanceAlert>
+        <Alert className="mt-4">
+          <Wrench className="h-4 w-4" />
+          <AlertDescription>
+            <div className="font-medium mb-2">
+              Mantenimiento Programado
+            </div>
+            {maintenance.map(item => (
+              <div key={item.id} className="text-sm">
+                <strong>{item.system}</strong> - {item.type}
+                <br />
+                {formatDateTime(item.scheduledDate)} ({item.duration})
+              </div>
+            ))}
+          </AlertDescription>
+        </Alert>
       )}
-    </Container>
+    </Card>
   );
 }

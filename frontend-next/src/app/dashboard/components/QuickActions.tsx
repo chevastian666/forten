@@ -1,211 +1,27 @@
 "use client";
 
 import { useState } from 'react';
-import styled from '@emotion/styled';
-import { theme } from '@/styles/theme';
 import { api } from '@/lib/api';
 import { useNotifications } from '@/contexts/NotificationContext';
-
-const Container = styled.div`
-  background: ${theme.colors.white};
-  border-radius: ${theme.borderRadius.lg};
-  box-shadow: ${theme.shadows.sm};
-  border: 1px solid ${theme.colors.gray[200]};
-  padding: ${theme.spacing.lg};
-
-  .dark & {
-    background: ${theme.colors.gray[800]};
-    border-color: ${theme.colors.gray[700]};
-  }
-`;
-
-const ActionsGrid = styled.div`
-  display: grid;
-  gap: ${theme.spacing.md};
-`;
-
-const ActionButton = styled.button<{ variant?: 'primary' | 'secondary' | 'danger' }>`
-  display: flex;
-  align-items: center;
-  gap: ${theme.spacing.sm};
-  width: 100%;
-  padding: ${theme.spacing.md};
-  border-radius: ${theme.borderRadius.md};
-  font-size: ${theme.typography.fontSize.sm};
-  font-weight: ${theme.typography.fontWeight.medium};
-  transition: all 0.2s;
-  border: none;
-  cursor: pointer;
-  
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  
-  ${props => {
-    switch (props.variant) {
-      case 'primary':
-        return `
-          background: ${theme.colors.blue[500]};
-          color: ${theme.colors.white};
-          
-          &:hover:not(:disabled) {
-            background: ${theme.colors.blue[600]};
-          }
-        `;
-      case 'danger':
-        return `
-          background: ${theme.colors.red[500]};
-          color: ${theme.colors.white};
-          
-          &:hover:not(:disabled) {
-            background: ${theme.colors.red[600]};
-          }
-        `;
-      default:
-        return `
-          background: ${theme.colors.gray[100]};
-          color: ${theme.colors.gray[700]};
-          
-          &:hover:not(:disabled) {
-            background: ${theme.colors.gray[200]};
-          }
-          
-          .dark & {
-            background: ${theme.colors.gray[700]};
-            color: ${theme.colors.gray[200]};
-            
-            &:hover:not(:disabled) {
-              background: ${theme.colors.gray[600]};
-            }
-          }
-        `;
-    }
-  }}
-`;
-
-const Modal = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.5);
-`;
-
-const ModalContent = styled.div`
-  background: ${theme.colors.white};
-  border-radius: ${theme.borderRadius.lg};
-  padding: ${theme.spacing.xl};
-  max-width: 400px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  
-  .dark & {
-    background: ${theme.colors.gray[800]};
-  }
-`;
-
-const ModalTitle = styled.h3`
-  font-size: ${theme.typography.fontSize.lg};
-  font-weight: ${theme.typography.fontWeight.semibold};
-  color: ${theme.colors.gray[900]};
-  margin-bottom: ${theme.spacing.md};
-  
-  .dark & {
-    color: ${theme.colors.white};
-  }
-`;
-
-const FormGroup = styled.div`
-  margin-bottom: ${theme.spacing.md};
-`;
-
-const Label = styled.label`
-  display: block;
-  font-size: ${theme.typography.fontSize.sm};
-  font-weight: ${theme.typography.fontWeight.medium};
-  color: ${theme.colors.gray[700]};
-  margin-bottom: ${theme.spacing.xs};
-  
-  .dark & {
-    color: ${theme.colors.gray[300]};
-  }
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: ${theme.spacing.sm};
-  border: 1px solid ${theme.colors.gray[300]};
-  border-radius: ${theme.borderRadius.md};
-  font-size: ${theme.typography.fontSize.sm};
-  
-  &:focus {
-    outline: none;
-    border-color: ${theme.colors.blue[500]};
-    box-shadow: 0 0 0 3px ${theme.colors.blue[100]};
-  }
-  
-  .dark & {
-    background: ${theme.colors.gray[700]};
-    border-color: ${theme.colors.gray[600]};
-    color: ${theme.colors.white};
-    
-    &:focus {
-      border-color: ${theme.colors.blue[400]};
-      box-shadow: 0 0 0 3px ${theme.colors.blue[900]};
-    }
-  }
-`;
-
-const Select = styled.select`
-  width: 100%;
-  padding: ${theme.spacing.sm};
-  border: 1px solid ${theme.colors.gray[300]};
-  border-radius: ${theme.borderRadius.md};
-  font-size: ${theme.typography.fontSize.sm};
-  background: ${theme.colors.white};
-  
-  &:focus {
-    outline: none;
-    border-color: ${theme.colors.blue[500]};
-    box-shadow: 0 0 0 3px ${theme.colors.blue[100]};
-  }
-  
-  .dark & {
-    background: ${theme.colors.gray[700]};
-    border-color: ${theme.colors.gray[600]};
-    color: ${theme.colors.white};
-    
-    &:focus {
-      border-color: ${theme.colors.blue[400]};
-      box-shadow: 0 0 0 3px ${theme.colors.blue[900]};
-    }
-  }
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  gap: ${theme.spacing.sm};
-  margin-top: ${theme.spacing.lg};
-`;
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Hash, Megaphone, Lock, Camera, RefreshCw, Save } from 'lucide-react';
 
 interface QuickAction {
   id: string;
   label: string;
-  icon: string;
-  variant?: 'primary' | 'secondary' | 'danger';
+  icon: React.ReactNode;
+  variant?: 'default' | 'destructive' | 'outline';
   action: () => void;
 }
 
 export function QuickActions() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalType, setModalType] = useState<'pin' | 'alert' | null>(null);
+  const [pinDialogOpen, setPinDialogOpen] = useState(false);
+  const [alertDialogOpen, setAlertDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { addNotification } = useNotifications();
 
@@ -237,7 +53,7 @@ export function QuickActions() {
         message: `PIN ${response.data.pin} creado para ${pinForm.visitorName}`
       });
 
-      setIsModalOpen(false);
+      setPinDialogOpen(false);
       setPinForm({ visitorName: '', apartment: '', duration: '4' });
     } catch {
       addNotification({
@@ -266,7 +82,7 @@ export function QuickActions() {
         message: 'Notificación enviada a todos los residentes'
       });
 
-      setIsModalOpen(false);
+      setAlertDialogOpen(false);
       setAlertForm({ type: 'security', title: '', message: '' });
     } catch {
       addNotification({
@@ -304,34 +120,28 @@ export function QuickActions() {
     {
       id: 'generate-pin',
       label: 'Generar PIN Temporal',
-      icon: '🔢',
-      variant: 'primary',
-      action: () => {
-        setModalType('pin');
-        setIsModalOpen(true);
-      }
+      icon: <Hash className="h-4 w-4" />,
+      variant: 'default',
+      action: () => setPinDialogOpen(true)
     },
     {
       id: 'emergency-alert',
       label: 'Enviar Alerta General',
-      icon: '📢',
-      variant: 'secondary',
-      action: () => {
-        setModalType('alert');
-        setIsModalOpen(true);
-      }
+      icon: <Megaphone className="h-4 w-4" />,
+      variant: 'outline',
+      action: () => setAlertDialogOpen(true)
     },
     {
       id: 'lockdown',
       label: 'Modo Seguridad',
-      icon: '🔒',
-      variant: 'danger',
+      icon: <Lock className="h-4 w-4" />,
+      variant: 'destructive',
       action: handleLockdownToggle
     },
     {
       id: 'camera-check',
       label: 'Verificar Cámaras',
-      icon: '📹',
+      icon: <Camera className="h-4 w-4" />,
       action: async () => {
         setLoading(true);
         try {
@@ -355,7 +165,7 @@ export function QuickActions() {
     {
       id: 'sync-data',
       label: 'Sincronizar Datos',
-      icon: '🔄',
+      icon: <RefreshCw className="h-4 w-4" />,
       action: async () => {
         setLoading(true);
         try {
@@ -379,7 +189,7 @@ export function QuickActions() {
     {
       id: 'backup',
       label: 'Respaldar Sistema',
-      icon: '💾',
+      icon: <Save className="h-4 w-4" />,
       action: async () => {
         setLoading(true);
         try {
@@ -404,124 +214,147 @@ export function QuickActions() {
 
   return (
     <>
-      <Container>
-        <ActionsGrid>
+      <Card className="p-6">
+        <div className="grid gap-3">
           {actions.map(action => (
-            <ActionButton
+            <Button
               key={action.id}
-              variant={action.variant}
+              variant={action.variant || 'outline'}
               onClick={action.action}
               disabled={loading}
+              className="justify-start gap-2 h-auto py-3"
             >
-              <span className="text-lg">{action.icon}</span>
+              {action.icon}
               {action.label}
-            </ActionButton>
+            </Button>
           ))}
-        </ActionsGrid>
-      </Container>
+        </div>
+      </Card>
 
-      {isModalOpen && (
-        <Modal onClick={() => setIsModalOpen(false)}>
-          <ModalContent onClick={(e) => e.stopPropagation()}>
-            {modalType === 'pin' && (
-              <>
-                <ModalTitle>Generar PIN Temporal</ModalTitle>
-                <FormGroup>
-                  <Label>Nombre del Visitante</Label>
-                  <Input
-                    type="text"
-                    value={pinForm.visitorName}
-                    onChange={(e) => setPinForm({ ...pinForm, visitorName: e.target.value })}
-                    placeholder="Ej: Juan Pérez"
-                  />
-                </FormGroup>
-                <FormGroup>
-                  <Label>Apartamento</Label>
-                  <Input
-                    type="text"
-                    value={pinForm.apartment}
-                    onChange={(e) => setPinForm({ ...pinForm, apartment: e.target.value })}
-                    placeholder="Ej: Apto 501"
-                  />
-                </FormGroup>
-                <FormGroup>
-                  <Label>Duración (horas)</Label>
-                  <Select
-                    value={pinForm.duration}
-                    onChange={(e) => setPinForm({ ...pinForm, duration: e.target.value })}
-                  >
-                    <option value="1">1 hora</option>
-                    <option value="2">2 horas</option>
-                    <option value="4">4 horas</option>
-                    <option value="8">8 horas</option>
-                    <option value="24">24 horas</option>
-                  </Select>
-                </FormGroup>
-                <ButtonGroup>
-                  <ActionButton
-                    variant="primary"
-                    onClick={handleGeneratePin}
-                    disabled={loading || !pinForm.visitorName || !pinForm.apartment}
-                  >
-                    Generar PIN
-                  </ActionButton>
-                  <ActionButton onClick={() => setIsModalOpen(false)}>
-                    Cancelar
-                  </ActionButton>
-                </ButtonGroup>
-              </>
-            )}
+      {/* PIN Generation Dialog */}
+      <Dialog open={pinDialogOpen} onOpenChange={setPinDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Generar PIN Temporal</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="visitorName">Nombre del Visitante</Label>
+              <Input
+                id="visitorName"
+                value={pinForm.visitorName}
+                onChange={(e) => setPinForm({ ...pinForm, visitorName: e.target.value })}
+                placeholder="Ej: Juan Pérez"
+              />
+            </div>
+            <div>
+              <Label htmlFor="apartment">Apartamento</Label>
+              <Input
+                id="apartment"
+                value={pinForm.apartment}
+                onChange={(e) => setPinForm({ ...pinForm, apartment: e.target.value })}
+                placeholder="Ej: Apto 501"
+              />
+            </div>
+            <div>
+              <Label htmlFor="duration">Duración</Label>
+              <Select 
+                value={pinForm.duration} 
+                onValueChange={(value) => setPinForm({ ...pinForm, duration: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 hora</SelectItem>
+                  <SelectItem value="2">2 horas</SelectItem>
+                  <SelectItem value="4">4 horas</SelectItem>
+                  <SelectItem value="8">8 horas</SelectItem>
+                  <SelectItem value="24">24 horas</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button
+                onClick={handleGeneratePin}
+                disabled={loading || !pinForm.visitorName || !pinForm.apartment}
+                className="flex-1"
+              >
+                Generar PIN
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setPinDialogOpen(false)}
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-            {modalType === 'alert' && (
-              <>
-                <ModalTitle>Enviar Alerta General</ModalTitle>
-                <FormGroup>
-                  <Label>Tipo de Alerta</Label>
-                  <Select
-                    value={alertForm.type}
-                    onChange={(e) => setAlertForm({ ...alertForm, type: e.target.value })}
-                  >
-                    <option value="security">Seguridad</option>
-                    <option value="maintenance">Mantenimiento</option>
-                    <option value="emergency">Emergencia</option>
-                    <option value="general">General</option>
-                  </Select>
-                </FormGroup>
-                <FormGroup>
-                  <Label>Título</Label>
-                  <Input
-                    type="text"
-                    value={alertForm.title}
-                    onChange={(e) => setAlertForm({ ...alertForm, title: e.target.value })}
-                    placeholder="Ej: Corte de agua programado"
-                  />
-                </FormGroup>
-                <FormGroup>
-                  <Label>Mensaje</Label>
-                  <Input
-                    type="text"
-                    value={alertForm.message}
-                    onChange={(e) => setAlertForm({ ...alertForm, message: e.target.value })}
-                    placeholder="Detalle de la alerta..."
-                  />
-                </FormGroup>
-                <ButtonGroup>
-                  <ActionButton
-                    variant="primary"
-                    onClick={handleSendAlert}
-                    disabled={loading || !alertForm.title || !alertForm.message}
-                  >
-                    Enviar Alerta
-                  </ActionButton>
-                  <ActionButton onClick={() => setIsModalOpen(false)}>
-                    Cancelar
-                  </ActionButton>
-                </ButtonGroup>
-              </>
-            )}
-          </ModalContent>
-        </Modal>
-      )}
+      {/* Alert Dialog */}
+      <Dialog open={alertDialogOpen} onOpenChange={setAlertDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enviar Alerta General</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="alertType">Tipo de Alerta</Label>
+              <Select 
+                value={alertForm.type} 
+                onValueChange={(value) => setAlertForm({ ...alertForm, type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="security">Seguridad</SelectItem>
+                  <SelectItem value="maintenance">Mantenimiento</SelectItem>
+                  <SelectItem value="emergency">Emergencia</SelectItem>
+                  <SelectItem value="general">General</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="alertTitle">Título</Label>
+              <Input
+                id="alertTitle"
+                value={alertForm.title}
+                onChange={(e) => setAlertForm({ ...alertForm, title: e.target.value })}
+                placeholder="Ej: Corte de agua programado"
+              />
+            </div>
+            <div>
+              <Label htmlFor="alertMessage">Mensaje</Label>
+              <Input
+                id="alertMessage"
+                value={alertForm.message}
+                onChange={(e) => setAlertForm({ ...alertForm, message: e.target.value })}
+                placeholder="Detalle de la alerta..."
+              />
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button
+                onClick={handleSendAlert}
+                disabled={loading || !alertForm.title || !alertForm.message}
+                className="flex-1"
+              >
+                Enviar Alerta
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setAlertDialogOpen(false)}
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

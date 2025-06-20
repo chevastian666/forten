@@ -2,135 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
-import styled from '@emotion/styled';
-import { theme } from '@/styles/theme';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
-const Container = styled.div`
-  background: ${theme.colors.white};
-  border-radius: ${theme.borderRadius.lg};
-  box-shadow: ${theme.shadows.sm};
-  border: 1px solid ${theme.colors.gray[200]};
-  overflow: hidden;
-
-  .dark & {
-    background: ${theme.colors.gray[800]};
-    border-color: ${theme.colors.gray[700]};
-  }
-`;
-
-const Table = styled.table`
-  width: 100%;
-  
-  thead {
-    background: ${theme.colors.gray[50]};
-    
-    .dark & {
-      background: ${theme.colors.gray[700]};
-    }
-  }
-  
-  th {
-    padding: ${theme.spacing.sm} ${theme.spacing.md};
-    text-align: left;
-    font-size: ${theme.typography.fontSize.xs};
-    font-weight: ${theme.typography.fontWeight.medium};
-    color: ${theme.colors.gray[700]};
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    
-    .dark & {
-      color: ${theme.colors.gray[300]};
-    }
-  }
-  
-  td {
-    padding: ${theme.spacing.md};
-    border-top: 1px solid ${theme.colors.gray[200]};
-    
-    .dark & {
-      border-color: ${theme.colors.gray[700]};
-    }
-  }
-  
-  tbody tr:hover {
-    background: ${theme.colors.gray[50]};
-    
-    .dark & {
-      background: ${theme.colors.gray[700]};
-    }
-  }
-`;
-
-const StatusBadge = styled.span<{ type: 'success' | 'warning' | 'error' }>`
-  display: inline-flex;
-  align-items: center;
-  padding: ${theme.spacing.xs} ${theme.spacing.sm};
-  border-radius: ${theme.borderRadius.full};
-  font-size: ${theme.typography.fontSize.xs};
-  font-weight: ${theme.typography.fontWeight.medium};
-  
-  ${props => {
-    switch (props.type) {
-      case 'success':
-        return `
-          background: ${theme.colors.green[100]};
-          color: ${theme.colors.green[800]};
-          
-          .dark & {
-            background: ${theme.colors.green[900]};
-            color: ${theme.colors.green[100]};
-          }
-        `;
-      case 'warning':
-        return `
-          background: ${theme.colors.yellow[100]};
-          color: ${theme.colors.yellow[800]};
-          
-          .dark & {
-            background: ${theme.colors.yellow[900]};
-            color: ${theme.colors.yellow[100]};
-          }
-        `;
-      case 'error':
-        return `
-          background: ${theme.colors.red[100]};
-          color: ${theme.colors.red[800]};
-          
-          .dark & {
-            background: ${theme.colors.red[900]};
-            color: ${theme.colors.red[100]};
-          }
-        `;
-    }
-  }}
-`;
-
-const TimeAgo = styled.span`
-  color: ${theme.colors.gray[500]};
-  font-size: ${theme.typography.fontSize.sm};
-  
-  .dark & {
-    color: ${theme.colors.gray[400]};
-  }
-`;
-
-const Name = styled.div`
-  font-weight: ${theme.typography.fontWeight.medium};
-  color: ${theme.colors.gray[900]};
-  
-  .dark & {
-    color: ${theme.colors.white};
-  }
-`;
-
-const Details = styled.div`
-  font-size: ${theme.typography.fontSize.sm};
-  color: ${theme.colors.gray[600]};
-  
-  .dark & {
-    color: ${theme.colors.gray[400]};
-  }
-`;
 
 interface AccessEntry {
   id: string;
@@ -237,11 +112,11 @@ export function AccessActivity() {
     }
   };
 
-  const getStatusType = (status: AccessEntry['status']): 'success' | 'warning' | 'error' => {
+  const getStatusVariant = (status: AccessEntry['status']) => {
     switch (status) {
-      case 'granted': return 'success';
-      case 'expired': return 'warning';
-      case 'denied': return 'error';
+      case 'granted': return 'default';
+      case 'expired': return 'secondary';
+      case 'denied': return 'destructive';
     }
   };
 
@@ -268,69 +143,71 @@ export function AccessActivity() {
 
   if (loading) {
     return (
-      <Container>
+      <Card className="overflow-hidden">
         <div className="animate-pulse">
-          <div className="h-12 bg-gray-200 dark:bg-gray-700" />
+          <div className="h-12 bg-muted" />
           {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} className="h-16 bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700" />
+            <div key={i} className="h-16 bg-muted/50 border-t" />
           ))}
         </div>
-      </Container>
+      </Card>
     );
   }
 
   return (
-    <Container>
+    <Card className="overflow-hidden">
       <Table>
-        <thead>
-          <tr>
-            <th>Persona</th>
-            <th>Método</th>
-            <th>Ubicación</th>
-            <th>Estado</th>
-            <th>Tiempo</th>
-          </tr>
-        </thead>
-        <tbody>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Persona</TableHead>
+            <TableHead>Método</TableHead>
+            <TableHead>Ubicación</TableHead>
+            <TableHead>Estado</TableHead>
+            <TableHead>Tiempo</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {entries.map(entry => (
-            <tr key={entry.id}>
-              <td>
+            <TableRow key={entry.id}>
+              <TableCell>
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{getTypeIcon(entry.type)}</span>
                   <div>
-                    <Name>{entry.name}</Name>
-                    <Details>
+                    <div className="font-medium">{entry.name}</div>
+                    <div className="text-sm text-muted-foreground">
                       {entry.apartment && `${entry.apartment} • `}
                       {entry.authorizedBy && `Autorizado por ${entry.authorizedBy}`}
-                    </Details>
+                    </div>
                   </div>
                 </div>
-              </td>
-              <td>
+              </TableCell>
+              <TableCell>
                 <div className="flex items-center gap-2">
                   <span>{getMethodIcon(entry.method)}</span>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                  <span className="text-sm text-muted-foreground">
                     {entry.method.toUpperCase()}
                   </span>
                 </div>
-              </td>
-              <td>
-                <span className="text-sm text-gray-900 dark:text-gray-100">
+              </TableCell>
+              <TableCell>
+                <span className="text-sm">
                   {entry.location}
                 </span>
-              </td>
-              <td>
-                <StatusBadge type={getStatusType(entry.status)}>
+              </TableCell>
+              <TableCell>
+                <Badge variant={getStatusVariant(entry.status)}>
                   {getStatusText(entry.status)}
-                </StatusBadge>
-              </td>
-              <td>
-                <TimeAgo>{formatTimeAgo(entry.timestamp)}</TimeAgo>
-              </td>
-            </tr>
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <span className="text-sm text-muted-foreground">
+                  {formatTimeAgo(entry.timestamp)}
+                </span>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
+        </TableBody>
       </Table>
-    </Container>
+    </Card>
   );
 }

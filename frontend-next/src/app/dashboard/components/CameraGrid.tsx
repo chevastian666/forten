@@ -3,6 +3,11 @@
 import { useState, useEffect } from 'react';
 import { VideoPlayer } from '@/components/design-system';
 import { api } from '@/lib/api';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { X } from 'lucide-react';
 
 interface Camera {
   id: string;
@@ -75,7 +80,9 @@ export function CameraGrid() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {[1, 2, 3, 4].map(i => (
-          <div key={i} className="aspect-video bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+          <Card key={i} className="aspect-video">
+            <div className="w-full h-full bg-muted animate-pulse rounded-lg" />
+          </Card>
         ))}
       </div>
     );
@@ -85,9 +92,9 @@ export function CameraGrid() {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {cameras.map(camera => (
-          <div
+          <Card
             key={camera.id}
-            className="relative bg-black rounded-lg overflow-hidden cursor-pointer group"
+            className="relative bg-black rounded-lg overflow-hidden cursor-pointer group hover:shadow-lg transition-shadow"
             onClick={() => camera.status === 'online' && setSelectedCamera(camera)}
           >
             <div className="aspect-video">
@@ -103,10 +110,10 @@ export function CameraGrid() {
                   location={camera.location}
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gray-900">
+                <div className="w-full h-full flex items-center justify-center bg-muted">
                   <div className="text-center">
-                    <span className="text-gray-400 text-lg">📹</span>
-                    <p className="text-gray-400 mt-2">Cámara fuera de línea</p>
+                    <span className="text-muted-foreground text-4xl">📹</span>
+                    <p className="text-muted-foreground mt-2">Cámara fuera de línea</p>
                   </div>
                 </div>
               )}
@@ -123,52 +130,47 @@ export function CameraGrid() {
 
             {/* Status Badge */}
             <div className="absolute top-4 right-4">
-              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                camera.status === 'online'
-                  ? 'bg-green-500 text-white'
-                  : 'bg-red-500 text-white'
-              }`}>
+              <Badge 
+                variant={camera.status === 'online' ? 'default' : 'destructive'}
+                className="text-xs"
+              >
                 {camera.status === 'online' ? 'En Vivo' : 'Offline'}
-              </span>
+              </Badge>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
 
       {/* Full Screen Modal */}
-      {selectedCamera && (
-        <div 
-          className="fixed inset-0 z-50 bg-black flex items-center justify-center"
-          onClick={() => setSelectedCamera(null)}
-        >
-          <div className="relative w-full h-full max-w-6xl max-h-[90vh] m-4">
-            <VideoPlayer
-              url={selectedCamera.streamUrl!}
-              type="live"
-              isLive
-              autoPlay
-              muted={false}
-              controls
-              deviceName={selectedCamera.name}
-              location={selectedCamera.location}
-              onSnapshot={() => handleSnapshot(selectedCamera.id)}
-            />
-            
-            {/* Close Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedCamera(null);
-              }}
-              className="absolute top-4 right-4 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
+      <Dialog open={!!selectedCamera} onOpenChange={() => setSelectedCamera(null)}>
+        <DialogContent className="max-w-6xl max-h-[90vh] p-0 bg-black">
+          {selectedCamera && (
+            <>
+              <VideoPlayer
+                url={selectedCamera.streamUrl!}
+                type="live"
+                isLive
+                autoPlay
+                muted={false}
+                controls
+                deviceName={selectedCamera.name}
+                location={selectedCamera.location}
+                onSnapshot={() => handleSnapshot(selectedCamera.id)}
+              />
+              
+              {/* Close Button */}
+              <Button
+                onClick={() => setSelectedCamera(null)}
+                variant="outline"
+                size="icon"
+                className="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/70 border-white/20"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
