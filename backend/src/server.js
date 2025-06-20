@@ -17,11 +17,13 @@ const { initializeRedis } = require('./config/redis');
 // Import middleware
 const { auditMiddleware } = require('./middleware/audit.middleware');
 const { cacheInvalidationMiddleware } = require('./middleware/cache.middleware');
+const { adaptiveRateLimit, globalRateLimit, authRateLimit, apiRateLimit, addRateLimitHeaders } = require('./middleware/rateLimiter.middleware');
 
 // Import routes
 const auditRoutes = require('./routes/audit.routes');
 const cacheRoutes = require('./routes/cache.routes');
 const metricsRoutes = require('./routes/metrics.routes');
+const rateLimitRoutes = require('./routes/rateLimit.routes');
 
 // Import models to initialize database
 const models = require('./models');
@@ -63,6 +65,12 @@ app.use((req, res, next) => {
   next();
 });
 
+// Global rate limiting (very permissive)
+app.use(globalRateLimit);
+
+// Add rate limit headers
+app.use(addRateLimitHeaders);
+
 // Cache invalidation middleware - automatically invalidates cache on data changes
 app.use(cacheInvalidationMiddleware());
 
@@ -85,10 +93,15 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API Routes
+// API Routes with rate limiting
+app.use('/api/auth', authRateLimit); // Strict rate limiting for auth endpoints
+app.use('/api', apiRateLimit); // General API rate limiting
+app.use('/api', adaptiveRateLimit); // Adaptive rate limiting based on endpoint
+
 app.use('/api', auditRoutes);
 app.use('/api/cache', cacheRoutes);
 app.use('/api/metrics', metricsRoutes);
+app.use('/api/rate-limit', rateLimitRoutes);
 
 // Example protected routes to demonstrate audit functionality
 app.use('/api/demo', (req, res, next) => {
@@ -224,6 +237,7 @@ const startServer = async () => {
       console.log(`🔐 Database: PostgreSQL`);
       console.log(`📊 Metrics service: ENABLED`);
       console.log(`💾 Redis cache: ENABLED`);
+      console.log(`🛡️  Rate limiting: ENABLED`);
       console.log(`🌐 WebSocket: ENABLED`);
       
       if (process.env.NODE_ENV === 'development') {
@@ -243,6 +257,11 @@ const startServer = async () => {
         console.log('  GET    /api/cache/stats       - Cache statistics');
         console.log('  GET    /api/cache/health      - Cache health check');
         console.log('  DELETE /api/cache/all         - Clear all cache');
+        console.log('\n🛡️  Rate limit endpoints:');
+        console.log('  GET    /api/rate-limit/status - Rate limit status');
+        console.log('  GET    /api/rate-limit/usage  - Current usage');
+        console.log('  GET    /api/rate-limit/config - Configuration');
+        console.log('  GET    /api/rate-limit/health - Health check');
       }
     });
   } catch (error) {
