@@ -17,7 +17,10 @@ import {
   LogOut,
   Menu,
   X,
-  ChevronDown
+  ChevronDown,
+  BarChart3,
+  FileText,
+  MessageSquare
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -32,6 +35,9 @@ const navigation = [
   { name: 'Accesos', href: '/access', icon: Key },
   { name: 'Cámaras', href: '/cameras', icon: Camera },
   { name: 'Eventos', href: '/events', icon: Bell },
+  { name: 'WhatsApp', href: '/whatsapp', icon: MessageSquare },
+  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'Reportes', href: '/reports', icon: FileText },
   { name: 'Configuración', href: '/settings', icon: Settings },
 ];
 

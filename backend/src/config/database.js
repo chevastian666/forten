@@ -1,30 +1,37 @@
+/**
+ * Sequelize Database Connection
+ * Initializes Sequelize with PostgreSQL
+ */
+
 const { Sequelize } = require('sequelize');
-require('dotenv').config();
+const config = require('./database.config');
 
-// Use SQLite for development if PostgreSQL is not available
-const isDevelopment = process.env.NODE_ENV === 'development';
-const usePostgreSQL = process.env.DB_HOST && process.env.DB_USER && process.env.DB_PASSWORD;
+const env = process.env.NODE_ENV || 'development';
+const dbConfig = config[env];
 
-const sequelize = usePostgreSQL ? 
-  new Sequelize({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    database: process.env.DB_NAME,
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    dialect: 'postgres',
-    logging: isDevelopment ? console.log : false,
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    }
-  }) :
-  new Sequelize({
-    dialect: 'sqlite',
-    storage: './database.sqlite',
-    logging: isDevelopment ? console.log : false
+// Create Sequelize instance with PostgreSQL
+const sequelize = new Sequelize(
+  dbConfig.database,
+  dbConfig.username,
+  dbConfig.password,
+  {
+    host: dbConfig.host,
+    port: dbConfig.port,
+    dialect: dbConfig.dialect,
+    logging: dbConfig.logging,
+    pool: dbConfig.pool,
+    define: dbConfig.define,
+    dialectOptions: dbConfig.dialectOptions || {}
+  }
+);
+
+// Test the connection
+sequelize.authenticate()
+  .then(() => {
+    console.log('✅ Database connection established successfully.');
+  })
+  .catch(err => {
+    console.error('❌ Unable to connect to the database:', err);
   });
 
 module.exports = sequelize;

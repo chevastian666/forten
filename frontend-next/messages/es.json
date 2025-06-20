@@ -129,6 +129,103 @@
       "system": "Sistema"
     }
   },
+  "Analytics": {
+    "title": "Analytics y Reportes",
+    "subtitle": "Análisis de datos y métricas del sistema",
+    "connected": "Conectado",
+    "disconnected": "Desconectado",
+    "autoRefreshOn": "Auto-actualizar",
+    "autoRefreshOff": "Manual",
+    "timeRange": {
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "week": "Última semana",
+      "month": "Último mes",
+      "quarter": "Último trimestre",
+      "year": "Último año"
+    },
+    "dashboards": {
+      "operations": "Operaciones",
+      "financial": "Financiero",
+      "maintenance": "Mantenimiento",
+      "alerts": "Alertas"
+    },
+    "error": {
+      "title": "Error",
+      "loadingData": "Error al cargar los datos de analytics"
+    }
+  },
+  "WhatsApp": {
+    "title": "WhatsApp Business",
+    "connected": "Conectado",
+    "disconnected": "Desconectado",
+    "stats": {
+      "totalConversations": "Conversaciones Totales",
+      "unreadMessages": "Mensajes Sin Leer",
+      "activeChats": "Chats Activos",
+      "sentToday": "Enviados Hoy"
+    },
+    "tabs": {
+      "conversations": "Conversaciones",
+      "notifications": "Notificaciones"
+    },
+    "notifications": {
+      "stats": {
+        "sent": "Enviadas",
+        "delivered": "Entregadas",
+        "scheduled": "Programadas",
+        "last30Days": "Últimos 30 días",
+        "deliveryRate": "Tasa de entrega",
+        "pendingNotifications": "Notificaciones pendientes"
+      },
+      "tabs": {
+        "templates": "Plantillas",
+        "recent": "Recientes",
+        "scheduled": "Programadas"
+      },
+      "sendNotification": "Enviar Notificación",
+      "broadcast": "Difundir",
+      "templates": {
+        "accessNotification": "Notificación de Acceso",
+        "accessNotificationDesc": "Notifica a residentes sobre accesos registrados",
+        "visitorArrival": "Llegada de Visitante",
+        "visitorArrivalDesc": "Alerta cuando un visitante llega a la entrada",
+        "deliveryNotification": "Notificación de Entrega",
+        "deliveryNotificationDesc": "Avisa sobre entregas y paquetes",
+        "emergencyAlert": "Alerta de Emergencia",
+        "emergencyAlertDesc": "Notificación urgente de seguridad",
+        "maintenanceNotice": "Aviso de Mantenimiento",
+        "maintenanceNoticeDesc": "Informa sobre trabajos de mantenimiento",
+        "securityAlert": "Alerta de Seguridad",
+        "securityAlertDesc": "Notificación de eventos de seguridad",
+        "pinNotification": "Notificación de PIN",
+        "pinNotificationDesc": "Envía PIN de acceso temporal",
+        "paymentReminder": "Recordatorio de Pago",
+        "paymentReminderDesc": "Recuerda pagos pendientes",
+        "welcomeMessage": "Mensaje de Bienvenida",
+        "welcomeMessageDesc": "Saluda a nuevos residentes",
+        "generalAnnouncement": "Anuncio General",
+        "generalAnnouncementDesc": "Comunicados generales del edificio"
+      },
+      "templateSelected": "Plantilla seleccionada",
+      "configureAndSend": "Configura los detalles y envía la notificación",
+      "recentNotifications": "Notificaciones Recientes",
+      "sentTo": "Enviado a {{count}} destinatarios",
+      "completed": "Completado",
+      "failed": "Fallido",
+      "scheduledNotifications": "Notificaciones Programadas",
+      "noScheduled": "No hay notificaciones programadas",
+      "broadcastMessage": "Difundir Mensaje",
+      "broadcastDescription": "Envía un mensaje a múltiples residentes",
+      "selectResidents": "Seleccionar Residentes",
+      "selectBuilding": "Seleccionar Edificio",
+      "allResidents": "Todos los Residentes",
+      "message": "Mensaje",
+      "messagePlaceholder": "Escribe tu mensaje aquí...",
+      "cancel": "Cancelar",
+      "sendBroadcast": "Enviar Difusión"
+    }
+  },
   "common": {
     "loading": "Cargando...",
     "save": "Guardar",
