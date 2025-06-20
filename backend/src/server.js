@@ -28,6 +28,7 @@ const rateLimitRoutes = require('./routes/rateLimit.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const websocketRoutes = require('./routes/websocket.routes');
 const exportRoutes = require('./routes/export.routes');
+const pinRoutes = require('./routes/pin.routes');
 
 // Import models to initialize database
 const models = require('./models');
@@ -101,6 +102,7 @@ app.use('/api/rate-limit', rateLimitRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/websocket', websocketRoutes);
 app.use('/api/export', exportRoutes);
+app.use('/api/pins', pinRoutes);
 
 // Example protected routes to demonstrate audit functionality
 app.use('/api/demo', (req, res, next) => {
@@ -338,6 +340,16 @@ const startServer = async () => {
         console.log('  GET    /api/export/:dataType/:format - Export data');
         console.log('  POST   /api/export/preview          - Preview export data');
         console.log('  GET    /api/export/history          - Export history');
+        console.log('\n🔐 PIN endpoints:');
+        console.log('  POST   /api/pins/generate           - Generate secure PIN');
+        console.log('  POST   /api/pins/validate           - Validate PIN');
+        console.log('  POST   /api/pins/bulk-generate      - Generate multiple PINs');
+        console.log('  POST   /api/pins/:pinId/revoke      - Revoke a PIN');
+        console.log('  GET    /api/pins/stats/:buildingId  - Get PIN statistics');
+        console.log('  POST   /api/pins/temporary-access   - Generate visitor PIN');
+        console.log('  POST   /api/pins/delivery           - Generate delivery PIN');
+        console.log('  POST   /api/pins/emergency          - Generate emergency PIN');
+        console.log('  DELETE /api/pins/cleanup            - Clean expired PINs');
       }
     });
   } catch (error) {

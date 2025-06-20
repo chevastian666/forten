@@ -4,8 +4,12 @@
  */
 
 const sequelize = require('../config/database');
+const { Sequelize } = require('sequelize');
 const User = require('./User');
 const AuditLog = require('./AuditLog');
+
+// Import PIN model
+const Pin = require('./pin.model')(sequelize, Sequelize.DataTypes);
 
 // Import other models if they exist
 let Building, Event, Access;
@@ -21,7 +25,8 @@ try {
 // Initialize models object
 const models = {
   User,
-  AuditLog
+  AuditLog,
+  Pin
 };
 
 // Add other models if they exist
@@ -40,6 +45,21 @@ AuditLog.belongsTo(User, {
   foreignKey: 'user_id',
   as: 'user'
 });
+
+// PIN associations
+User.hasMany(Pin, {
+  foreignKey: 'user_id',
+  as: 'pins'
+});
+
+Pin.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
+});
+
+// Initialize PIN service with model
+const PinService = require('../services/pin.service');
+PinService.initialize(Pin);
 
 // Existing associations (if models exist)
 if (Building && Event) {
