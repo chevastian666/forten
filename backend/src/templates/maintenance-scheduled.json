@@ -1,0 +1,17 @@
+{
+  "name": "Scheduled Maintenance",
+  "category": "maintenance",
+  "description": "Notification for scheduled maintenance",
+  "subject": "Scheduled Maintenance Notification",
+  "variables": [
+    "timestamp",
+    "maintenanceType",
+    "duration",
+    "affectedSystems"
+  ],
+  "priority": "medium",
+  "channels": [
+    "email",
+    "websocket"
+  ]
+}
