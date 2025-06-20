@@ -22,6 +22,27 @@ class AuditLog extends Model {
   }
 
   /**
+   * Soft delete the audit log
+   */
+  async softDelete() {
+    return await this.destroy();
+  }
+
+  /**
+   * Restore soft deleted audit log
+   */
+  async restore() {
+    return await this.restore();
+  }
+
+  /**
+   * Check if audit log is soft deleted
+   */
+  get isDeleted() {
+    return this.deleted_at !== null;
+  }
+
+  /**
    * Get audit logs with filters
    * @param {Object} filters - Filter options
    * @returns {Promise<Array>} Audit logs
@@ -240,12 +261,19 @@ AuditLog.init({
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: DataTypes.NOW
+  },
+  deleted_at: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    comment: 'Soft delete timestamp'
   }
 }, {
   sequelize,
   modelName: 'AuditLog',
   tableName: 'audit_logs',
   timestamps: false, // We're manually handling created_at
+  deletedAt: 'deleted_at',
+  paranoid: true,
   indexes: [
     {
       fields: ['user_id']
@@ -271,6 +299,9 @@ AuditLog.init({
     {
       name: 'audit_logs_entity_action_idx',
       fields: ['entity', 'action', 'created_at']
+    },
+    {
+      fields: ['deleted_at']
     }
   ]
 });
@@ -294,6 +325,37 @@ AuditLog.addHook('beforeCreate', (auditLog) => {
     auditLog.created_at = new Date();
   }
 });
+
+// Add scopes
+AuditLog.addScope('withDeleted', {
+  paranoid: false
+});
+
+AuditLog.addScope('onlyDeleted', {
+  where: {
+    deleted_at: {
+      [sequelize.Op.ne]: null
+    }
+  },
+  paranoid: false
+});
+
+// Class methods
+AuditLog.findWithDeleted = function(options = {}) {
+  return this.scope('withDeleted').findAll(options);
+};
+
+AuditLog.findOnlyDeleted = function(options = {}) {
+  return this.scope('onlyDeleted').findAll(options);
+};
+
+AuditLog.restoreById = async function(id) {
+  const log = await this.findByPk(id, { paranoid: false });
+  if (log && log.deleted_at) {
+    return await log.restore();
+  }
+  throw new Error('Audit log not found or not deleted');
+};
 
 // Add associations
 AuditLog.associate = (models) => {

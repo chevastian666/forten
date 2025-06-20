@@ -8,6 +8,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const compression = require('compression');
 const { createServer } = require('http');
 const { WebSocketManager } = require('./websocket');
 const { logger, api: apiLogger } = require('./config/logger');
@@ -32,6 +33,9 @@ const pinRoutes = require('./routes/pin.routes');
 const eventRoutes = require('./routes/event.routes');
 const accessRoutes = require('./routes/access.routes');
 const webhookRoutes = require('./routes/webhook.routes');
+const statisticsRoutes = require('./routes/statistics.routes');
+const softDeleteRoutes = require('./routes/softDelete.routes');
+const adminConfigRoutes = require('./routes/admin/config.routes');
 
 // Import models to initialize database
 const models = require('./models');
@@ -57,6 +61,55 @@ app.use(morgan('combined', { stream: logger.stream }));
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Gzip compression middleware
+app.use(compression({
+  // Only compress responses that are 1kb or larger
+  threshold: 1024,
+  
+  // Compression level (1-9, 6 is default balance of speed vs compression)
+  level: 6,
+  
+  // Memory level (1-9, 8 is default)
+  memLevel: 8,
+  
+  // Window size (9-15, 15 is maximum compression)
+  windowBits: 15,
+  
+  // Only compress responses for requests that include "gzip" in Accept-Encoding
+  filter: (req, res) => {
+    // Skip compression for certain content types
+    const contentType = res.getHeader('Content-Type') || '';
+    
+    // Don't compress images
+    if (contentType.startsWith('image/')) {
+      return false;
+    }
+    
+    // Don't compress already compressed formats
+    const compressedTypes = [
+      'application/zip',
+      'application/gzip', 
+      'application/x-gzip',
+      'application/x-compressed',
+      'application/x-zip-compressed',
+      'multipart/x-zip',
+      'application/pdf', // PDFs are often already compressed
+      'video/', // Video files are usually compressed
+      'audio/', // Audio files are usually compressed
+      'application/octet-stream' // Binary files
+    ];
+    
+    for (const type of compressedTypes) {
+      if (contentType.startsWith(type)) {
+        return false;
+      }
+    }
+    
+    // Use compression default filter for everything else
+    return compression.filter(req, res);
+  }
+}));
 
 // Add request ID middleware
 app.use((req, res, next) => {
@@ -109,6 +162,9 @@ app.use('/api/pins', pinRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/access', accessRoutes);
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api/statistics', statisticsRoutes);
+app.use('/api/soft-deletes', softDeleteRoutes);
+app.use('/api/admin/config', adminConfigRoutes);
 
 // Example protected routes to demonstrate audit functionality
 app.use('/api/demo', (req, res, next) => {
@@ -308,6 +364,70 @@ const startServer = async () => {
       });
     }
     
+    // Initialize aggregation service and start jobs
+    try {
+      const AggregationService = require('./services/aggregation.service');
+      const AggregationJobs = require('./jobs/aggregation.jobs');
+      
+      // Initialize service with models
+      AggregationService.initialize(models);
+      
+      // Start aggregation jobs
+      AggregationJobs.start(models);
+      logger.info('Aggregation service initialized and jobs scheduled');
+    } catch (error) {
+      logger.error('Failed to initialize aggregation service:', {
+        error: error.message
+      });
+    }
+    
+    // Initialize soft delete service
+    try {
+      const SoftDeleteService = require('./services/softDelete.service');
+      SoftDeleteService.initialize(models);
+      logger.info('Soft delete service initialized');
+    } catch (error) {
+      logger.error('Failed to initialize soft delete service:', {
+        error: error.message
+      });
+    }
+    
+    // Initialize dynamic configuration service
+    try {
+      const ConfigService = require('./services/config.service');
+      const redis = require('./config/redis');
+      const redisClient = redis.getClient();
+      
+      if (redisClient) {
+        await ConfigService.initialize(redisClient);
+        logger.info('Dynamic configuration service initialized');
+        
+        // Listen for configuration changes
+        ConfigService.on('configChanged', (change) => {
+          logger.info('Configuration changed', {
+            key: change.key,
+            oldValue: change.oldValue,
+            newValue: change.newValue,
+            requiresRestart: change.requiresRestart,
+            timestamp: change.timestamp
+          });
+          
+          // Emit WebSocket notification if available
+          if (webSocketManager) {
+            const io = webSocketManager.getIO();
+            io.to('administrators').emit('configChanged', change);
+          }
+        });
+      } else {
+        logger.warn('Redis not available, configuration service will use defaults');
+        await ConfigService.initialize();
+      }
+    } catch (error) {
+      logger.error('Failed to initialize configuration service:', {
+        error: error.message
+      });
+    }
+    
     // Start server
     server.listen(PORT, () => {
       logger.info(`FORTEN Backend Server running on port ${PORT}`, {
@@ -321,7 +441,11 @@ const startServer = async () => {
           websocket: 'ENABLED (with building rooms & auth)',
           notifications: 'ENABLED',
           logging: 'Winston ENABLED',
-          webhooks: 'ENABLED (with HMAC-SHA256 signatures)'
+          webhooks: 'ENABLED (with HMAC-SHA256 signatures)',
+          aggregation: 'ENABLED (with cron jobs)',
+          softDeletes: 'ENABLED (paranoid mode)',
+          dynamicConfig: 'ENABLED (Redis storage)',
+          compression: 'ENABLED (gzip, 1kb threshold)'
         }
       });
       
@@ -405,6 +529,37 @@ const startServer = async () => {
         console.log('  GET    /api/webhooks/:id/deliveries - Delivery history');
         console.log('  POST   /api/webhooks/trigger        - Trigger event');
         console.log('  GET    /api/webhooks/events         - Available events');
+        console.log('\n📊 Statistics endpoints:');
+        console.log('  GET    /api/statistics/daily/:buildingId   - Daily statistics');
+        console.log('  GET    /api/statistics/weekly/:buildingId  - Weekly statistics');
+        console.log('  GET    /api/statistics/monthly/:buildingId - Monthly statistics');
+        console.log('  GET    /api/statistics/summary/:buildingId - Summary across periods');
+        console.log('  GET    /api/statistics/comparison          - Compare buildings');
+        console.log('  POST   /api/statistics/aggregate           - Manual aggregation');
+        console.log('  GET    /api/statistics/jobs/status         - Job status');
+        console.log('  GET    /api/statistics/export/:buildingId  - Export statistics');
+        console.log('\n🗑️  Soft Delete endpoints:');
+        console.log('  GET    /api/soft-deletes                   - Get deleted records');
+        console.log('  POST   /api/soft-deletes/:model/:id/restore - Restore record');
+        console.log('  DELETE /api/soft-deletes/:model/:id/permanent - Permanently delete');
+        console.log('  POST   /api/soft-deletes/:model/bulk-restore - Bulk restore');
+        console.log('  GET    /api/soft-deletes/statistics        - Delete statistics');
+        console.log('  POST   /api/soft-deletes/cleanup           - Cleanup old records');
+        console.log('  GET    /api/soft-deletes/search            - Search deleted records');
+        console.log('  GET    /api/soft-deletes/models            - Supported models');
+        console.log('\\n⚙️  Dynamic Configuration endpoints:');
+        console.log('  GET    /api/admin/config                  - Get all configurations');
+        console.log('  GET    /api/admin/config/:key             - Get specific configuration');
+        console.log('  PUT    /api/admin/config/:key             - Update configuration');
+        console.log('  POST   /api/admin/config/bulk-update      - Bulk update configurations');
+        console.log('  POST   /api/admin/config/:key/reset       - Reset to default');
+        console.log('  POST   /api/admin/config/reset-all        - Reset all to defaults');
+        console.log('  POST   /api/admin/config/validate         - Validate configurations');
+        console.log('  GET    /api/admin/config/export           - Export configuration');
+        console.log('  POST   /api/admin/config/import           - Import configuration');
+        console.log('  GET    /api/admin/config/stats            - Configuration statistics');
+        console.log('  GET    /api/admin/config/categories       - Available categories');
+        console.log('  GET    /api/admin/config/health           - Health check');
       }
     });
   } catch (error) {
@@ -445,6 +600,28 @@ process.on('SIGTERM', async () => {
       });
     }
     
+    // Stop aggregation jobs
+    try {
+      const AggregationJobs = require('./jobs/aggregation.jobs');
+      AggregationJobs.stop();
+      logger.info('Aggregation jobs stopped');
+    } catch (error) {
+      logger.error('Error stopping aggregation jobs:', {
+        error: error.message
+      });
+    }
+    
+    // Shutdown configuration service
+    try {
+      const ConfigService = require('./services/config.service');
+      await ConfigService.shutdown();
+      logger.info('Configuration service shutdown');
+    } catch (error) {
+      logger.error('Error shutting down configuration service:', {
+        error: error.message
+      });
+    }
+    
     // Cleanup existing infrastructure if available
     try {
       const { cleanup } = require('./infrastructure/initialization');
@@ -481,6 +658,28 @@ process.on('SIGINT', async () => {
       await notificationService.shutdown();
     } catch (error) {
       logger.error('Error shutting down notification service:', {
+        error: error.message
+      });
+    }
+    
+    // Stop aggregation jobs
+    try {
+      const AggregationJobs = require('./jobs/aggregation.jobs');
+      AggregationJobs.stop();
+      logger.info('Aggregation jobs stopped');
+    } catch (error) {
+      logger.error('Error stopping aggregation jobs:', {
+        error: error.message
+      });
+    }
+    
+    // Shutdown configuration service
+    try {
+      const ConfigService = require('./services/config.service');
+      await ConfigService.shutdown();
+      logger.info('Configuration service shutdown');
+    } catch (error) {
+      logger.error('Error shutting down configuration service:', {
         error: error.message
       });
     }

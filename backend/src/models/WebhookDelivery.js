@@ -84,12 +84,19 @@ const WebhookDelivery = sequelize.define('WebhookDelivery', {
     type: DataTypes.STRING(255),
     allowNull: false,
     comment: 'HMAC signature sent'
+  },
+  deleted_at: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    comment: 'Soft delete timestamp'
   }
 }, {
   tableName: 'webhook_deliveries',
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',
+  deletedAt: 'deleted_at',
+  paranoid: true,
   indexes: [
     {
       fields: ['webhook_id']
@@ -108,6 +115,9 @@ const WebhookDelivery = sequelize.define('WebhookDelivery', {
       where: {
         status: 'retrying'
       }
+    },
+    {
+      fields: ['deleted_at']
     }
   ]
 });
@@ -160,6 +170,18 @@ WebhookDelivery.prototype.scheduleRetry = function(retryConfig) {
   return this.save();
 };
 
+WebhookDelivery.prototype.softDelete = async function() {
+  return await this.destroy();
+};
+
+WebhookDelivery.prototype.restore = async function() {
+  return await this.restore();
+};
+
+WebhookDelivery.prototype.isDeleted = function() {
+  return this.deleted_at !== null;
+};
+
 // Class methods
 WebhookDelivery.getPendingRetries = async function() {
   return WebhookDelivery.findAll({
@@ -192,6 +214,36 @@ WebhookDelivery.cleanOldDeliveries = async function(daysToKeep = 30) {
       }
     }
   });
+};
+
+// Soft delete scopes and methods
+WebhookDelivery.addScope('withDeleted', {
+  paranoid: false
+});
+
+WebhookDelivery.addScope('onlyDeleted', {
+  where: {
+    deleted_at: {
+      [sequelize.Op.ne]: null
+    }
+  },
+  paranoid: false
+});
+
+WebhookDelivery.findWithDeleted = function(options = {}) {
+  return this.scope('withDeleted').findAll(options);
+};
+
+WebhookDelivery.findOnlyDeleted = function(options = {}) {
+  return this.scope('onlyDeleted').findAll(options);
+};
+
+WebhookDelivery.restoreById = async function(id) {
+  const delivery = await this.findByPk(id, { paranoid: false });
+  if (delivery && delivery.deleted_at) {
+    return await delivery.restore();
+  }
+  throw new Error('Webhook delivery not found or not deleted');
 };
 
 module.exports = WebhookDelivery;

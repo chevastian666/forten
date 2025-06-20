@@ -32,6 +32,27 @@ class User extends Model {
   get name() {
     return `${this.first_name} ${this.last_name}`;
   }
+
+  /**
+   * Soft delete the user
+   */
+  async softDelete() {
+    return await this.destroy();
+  }
+
+  /**
+   * Restore soft deleted user
+   */
+  async restore() {
+    return await this.restore();
+  }
+
+  /**
+   * Check if user is soft deleted
+   */
+  get isDeleted() {
+    return this.deleted_at !== null;
+  }
 }
 
 // Initialize the model
@@ -89,6 +110,11 @@ User.init({
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: DataTypes.NOW
+  },
+  deleted_at: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    comment: 'Soft delete timestamp'
   }
 }, {
   sequelize,
@@ -97,6 +123,8 @@ User.init({
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',
+  deletedAt: 'deleted_at',
+  paranoid: true,
   indexes: [
     {
       fields: ['email'],
@@ -107,6 +135,9 @@ User.init({
     },
     {
       fields: ['status']
+    },
+    {
+      fields: ['deleted_at']
     }
   ]
 });
@@ -130,6 +161,37 @@ User.prototype.toJSON = function() {
   delete values.password_hash;
   delete values.refresh_token;
   return values;
+};
+
+// Scopes
+User.addScope('withDeleted', {
+  paranoid: false
+});
+
+User.addScope('onlyDeleted', {
+  where: {
+    deleted_at: {
+      [sequelize.Op.ne]: null
+    }
+  },
+  paranoid: false
+});
+
+// Class methods
+User.findWithDeleted = function(options = {}) {
+  return this.scope('withDeleted').findAll(options);
+};
+
+User.findOnlyDeleted = function(options = {}) {
+  return this.scope('onlyDeleted').findAll(options);
+};
+
+User.restoreById = async function(id) {
+  const user = await this.findByPk(id, { paranoid: false });
+  if (user && user.deleted_at) {
+    return await user.restore();
+  }
+  throw new Error('User not found or not deleted');
 };
 
 // Associations
