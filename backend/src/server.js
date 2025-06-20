@@ -29,6 +29,8 @@ const notificationRoutes = require('./routes/notification.routes');
 const websocketRoutes = require('./routes/websocket.routes');
 const exportRoutes = require('./routes/export.routes');
 const pinRoutes = require('./routes/pin.routes');
+const eventRoutes = require('./routes/event.routes');
+const accessRoutes = require('./routes/access.routes');
 
 // Import models to initialize database
 const models = require('./models');
@@ -103,6 +105,8 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/websocket', websocketRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/pins', pinRoutes);
+app.use('/api/events', eventRoutes);
+app.use('/api/access', accessRoutes);
 
 // Example protected routes to demonstrate audit functionality
 app.use('/api/demo', (req, res, next) => {
@@ -350,6 +354,20 @@ const startServer = async () => {
         console.log('  POST   /api/pins/delivery           - Generate delivery PIN');
         console.log('  POST   /api/pins/emergency          - Generate emergency PIN');
         console.log('  DELETE /api/pins/cleanup            - Clean expired PINs');
+        console.log('\n📊 Events endpoints (Cursor Pagination):');
+        console.log('  GET    /api/events                  - Get paginated events');
+        console.log('  GET    /api/events/building/:id     - Events by building');
+        console.log('  GET    /api/events/critical         - Critical events');
+        console.log('  GET    /api/events/stats            - Event statistics');
+        console.log('  GET    /api/events/export           - Stream export');
+        console.log('\n🚪 Access endpoints (Cursor Pagination):');
+        console.log('  GET    /api/access                  - Get paginated access logs');
+        console.log('  GET    /api/access/person/:doc      - Access by person');
+        console.log('  GET    /api/access/failed/:building - Failed attempts');
+        console.log('  GET    /api/access/frequency/:id    - Access frequency');
+        console.log('  GET    /api/access/visitors/:id     - Top visitors');
+        console.log('  GET    /api/access/stats            - Access statistics');
+        console.log('  GET    /api/access/export           - Stream export');
       }
     });
   } catch (error) {
