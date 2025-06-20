@@ -21,6 +21,7 @@ const { cacheInvalidationMiddleware } = require('./middleware/cache.middleware')
 // Import routes
 const auditRoutes = require('./routes/audit.routes');
 const cacheRoutes = require('./routes/cache.routes');
+const metricsRoutes = require('./routes/metrics.routes');
 
 // Import models to initialize database
 const models = require('./models');
@@ -87,6 +88,7 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/api', auditRoutes);
 app.use('/api/cache', cacheRoutes);
+app.use('/api/metrics', metricsRoutes);
 
 // Example protected routes to demonstrate audit functionality
 app.use('/api/demo', (req, res, next) => {
@@ -205,12 +207,23 @@ const startServer = async () => {
       console.log('ℹ️ Clean architecture infrastructure not found, skipping...');
     }
     
+    // Start metrics service
+    try {
+      const metricsService = require('./services/metrics.service');
+      metricsService.startAutoUpdate();
+      console.log('📊 Metrics service started');
+    } catch (error) {
+      console.error('❌ Failed to start metrics service:', error.message);
+    }
+    
     // Start server
     server.listen(PORT, () => {
       console.log(`🚀 FORTEN Backend Server running on port ${PORT}`);
       console.log(`📱 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔍 Audit system: ENABLED`);
       console.log(`🔐 Database: PostgreSQL`);
+      console.log(`📊 Metrics service: ENABLED`);
+      console.log(`💾 Redis cache: ENABLED`);
       console.log(`🌐 WebSocket: ENABLED`);
       
       if (process.env.NODE_ENV === 'development') {
@@ -222,6 +235,14 @@ const startServer = async () => {
         console.log('  GET    /api/audit-logs       - Get audit logs');
         console.log('  GET    /api/audit-logs/stats - Get audit statistics');
         console.log('  POST   /api/audit-logs/export - Export audit logs');
+        console.log('\n📊 Metrics endpoints:');
+        console.log('  GET    /api/metrics/dashboard - Dashboard metrics');
+        console.log('  GET    /api/metrics/realtime  - Real-time metrics');
+        console.log('  POST   /api/metrics/update    - Force metrics update');
+        console.log('\n💾 Cache endpoints:');
+        console.log('  GET    /api/cache/stats       - Cache statistics');
+        console.log('  GET    /api/cache/health      - Cache health check');
+        console.log('  DELETE /api/cache/all         - Clear all cache');
       }
     });
   } catch (error) {
