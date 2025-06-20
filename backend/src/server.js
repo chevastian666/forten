@@ -31,6 +31,7 @@ const exportRoutes = require('./routes/export.routes');
 const pinRoutes = require('./routes/pin.routes');
 const eventRoutes = require('./routes/event.routes');
 const accessRoutes = require('./routes/access.routes');
+const webhookRoutes = require('./routes/webhook.routes');
 
 // Import models to initialize database
 const models = require('./models');
@@ -107,6 +108,7 @@ app.use('/api/export', exportRoutes);
 app.use('/api/pins', pinRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/access', accessRoutes);
+app.use('/api/webhooks', webhookRoutes);
 
 // Example protected routes to demonstrate audit functionality
 app.use('/api/demo', (req, res, next) => {
@@ -283,6 +285,29 @@ const startServer = async () => {
       });
     }
     
+    // Initialize webhook service with Redis
+    try {
+      const webhookService = require('./services/webhook.service');
+      const redis = require('./config/redis');
+      const redisClient = redis.getClient();
+      
+      // Get models from the already initialized models
+      const { Webhook, WebhookDelivery } = models;
+      
+      if (Webhook && WebhookDelivery && redisClient) {
+        await webhookService.initialize(Webhook, WebhookDelivery, redisClient);
+        logger.info('Webhook service initialized with Redis queue');
+      } else {
+        // Initialize without Redis if not available
+        await webhookService.initialize(Webhook, WebhookDelivery);
+        logger.info('Webhook service initialized (without Redis queue)');
+      }
+    } catch (error) {
+      logger.error('Failed to initialize webhook service:', {
+        error: error.message
+      });
+    }
+    
     // Start server
     server.listen(PORT, () => {
       logger.info(`FORTEN Backend Server running on port ${PORT}`, {
@@ -295,7 +320,8 @@ const startServer = async () => {
           rateLimiting: 'ENABLED',
           websocket: 'ENABLED (with building rooms & auth)',
           notifications: 'ENABLED',
-          logging: 'Winston ENABLED'
+          logging: 'Winston ENABLED',
+          webhooks: 'ENABLED (with HMAC-SHA256 signatures)'
         }
       });
       
@@ -368,6 +394,17 @@ const startServer = async () => {
         console.log('  GET    /api/access/visitors/:id     - Top visitors');
         console.log('  GET    /api/access/stats            - Access statistics');
         console.log('  GET    /api/access/export           - Stream export');
+        console.log('\n🔗 Webhook endpoints:');
+        console.log('  POST   /api/webhooks                - Create webhook');
+        console.log('  GET    /api/webhooks                - List webhooks');
+        console.log('  GET    /api/webhooks/:id            - Get webhook details');
+        console.log('  PUT    /api/webhooks/:id            - Update webhook');
+        console.log('  DELETE /api/webhooks/:id            - Delete webhook');
+        console.log('  POST   /api/webhooks/:id/test       - Test webhook');
+        console.log('  GET    /api/webhooks/:id/stats      - Webhook statistics');
+        console.log('  GET    /api/webhooks/:id/deliveries - Delivery history');
+        console.log('  POST   /api/webhooks/trigger        - Trigger event');
+        console.log('  GET    /api/webhooks/events         - Available events');
       }
     });
   } catch (error) {
