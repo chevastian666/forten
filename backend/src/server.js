@@ -11,11 +11,16 @@ const morgan = require('morgan');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 
+// Import Redis configuration
+const { initializeRedis } = require('./config/redis');
+
 // Import middleware
 const { auditMiddleware } = require('./middleware/audit.middleware');
+const { cacheInvalidationMiddleware } = require('./middleware/cache.middleware');
 
 // Import routes
 const auditRoutes = require('./routes/audit.routes');
+const cacheRoutes = require('./routes/cache.routes');
 
 // Import models to initialize database
 const models = require('./models');
@@ -57,6 +62,9 @@ app.use((req, res, next) => {
   next();
 });
 
+// Cache invalidation middleware - automatically invalidates cache on data changes
+app.use(cacheInvalidationMiddleware());
+
 // Audit middleware - logs all critical actions
 app.use(auditMiddleware({
   excludePaths: ['/health', '/metrics', '/api/auth/refresh'],
@@ -78,6 +86,7 @@ app.get('/health', (req, res) => {
 
 // API Routes
 app.use('/api', auditRoutes);
+app.use('/api/cache', cacheRoutes);
 
 // Example protected routes to demonstrate audit functionality
 app.use('/api/demo', (req, res, next) => {
@@ -174,6 +183,9 @@ app.use('*', (req, res) => {
 // Database and server initialization
 const startServer = async () => {
   try {
+    // Initialize Redis connection
+    await initializeRedis();
+    
     // Test database connection
     await models.sequelize.authenticate();
     console.log('✅ Database connection established successfully.');

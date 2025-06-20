@@ -5,6 +5,7 @@
 
 const AuditLog = require('../models/AuditLog');
 const AuditService = require('../services/audit.service');
+const CacheService = require('../services/cache.service');
 const { validationResult } = require('express-validator');
 const { Op } = require('sequelize');
 
@@ -34,6 +35,18 @@ class AuditController {
         sortBy = 'created_at',
         sortOrder = 'DESC'
       } = req.query;
+
+      // Generate cache key for this query
+      const cacheKey = CacheService.generateKey(CacheService.PATTERNS.AUDIT, {
+        page, limit, userId, action, entity, entityId, startDate, endDate, status, ipAddress, sortBy, sortOrder
+      });
+
+      // Try to get from cache first
+      const cachedResult = await CacheService.get(cacheKey);
+      if (cachedResult) {
+        res.set('X-Cache', 'HIT');
+        return res.json(cachedResult);
+      }
 
       const offset = (page - 1) * limit;
       const where = {};
@@ -78,7 +91,7 @@ class AuditController {
         request: req
       });
 
-      res.json({
+      const result = {
         success: true,
         data: rows,
         pagination: {
@@ -87,7 +100,13 @@ class AuditController {
           limit: parseInt(limit),
           pages: Math.ceil(count / limit)
         }
-      });
+      };
+
+      // Cache the result
+      await CacheService.set(cacheKey, result, CacheService.TTL.AUDIT_LOGS);
+      res.set('X-Cache', 'MISS');
+
+      res.json(result);
     } catch (error) {
       console.error('Error fetching audit logs:', error);
       res.status(500).json({
@@ -228,6 +247,20 @@ class AuditController {
     try {
       const { startDate, endDate } = req.query;
 
+      // Generate cache key for stats
+      const statsCacheKey = CacheService.generateKey(CacheService.PATTERNS.STATS, {
+        type: 'audit',
+        startDate,
+        endDate
+      });
+
+      // Try to get from cache first
+      const cachedStats = await CacheService.get(statsCacheKey);
+      if (cachedStats) {
+        res.set('X-Cache', 'HIT');
+        return res.json(cachedStats);
+      }
+
       const where = {};
       if (startDate || endDate) {
         where.created_at = {};
@@ -284,7 +317,7 @@ class AuditController {
         })
       ]);
 
-      res.json({
+      const statsResult = {
         success: true,
         data: {
           summary: {
@@ -297,7 +330,13 @@ class AuditController {
           by_entity: entityCounts,
           top_users: topUsers
         }
-      });
+      };
+
+      // Cache the stats result
+      await CacheService.set(statsCacheKey, statsResult, CacheService.TTL.METRICS);
+      res.set('X-Cache', 'MISS');
+
+      res.json(statsResult);
     } catch (error) {
       console.error('Error fetching audit stats:', error);
       res.status(500).json({
