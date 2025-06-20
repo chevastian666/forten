@@ -24,6 +24,7 @@ const auditRoutes = require('./routes/audit.routes');
 const cacheRoutes = require('./routes/cache.routes');
 const metricsRoutes = require('./routes/metrics.routes');
 const rateLimitRoutes = require('./routes/rateLimit.routes');
+const notificationRoutes = require('./routes/notification.routes');
 
 // Import models to initialize database
 const models = require('./models');
@@ -102,6 +103,7 @@ app.use('/api', auditRoutes);
 app.use('/api/cache', cacheRoutes);
 app.use('/api/metrics', metricsRoutes);
 app.use('/api/rate-limit', rateLimitRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Example protected routes to demonstrate audit functionality
 app.use('/api/demo', (req, res, next) => {
@@ -202,13 +204,17 @@ const startServer = async () => {
     await initializeRedis();
     
     // Test database connection
-    await models.sequelize.authenticate();
-    console.log('✅ Database connection established successfully.');
-    
-    // Sync database models (in development)
-    if (process.env.NODE_ENV === 'development') {
-      await models.sequelize.sync({ alter: true });
-      console.log('📊 Database models synchronized successfully.');
+    try {
+      await models.sequelize.authenticate();
+      console.log('✅ Database connection established successfully.');
+      
+      // Sync database models (in development)
+      if (process.env.NODE_ENV === 'development') {
+        await models.sequelize.sync({ alter: true });
+        console.log('📊 Database models synchronized successfully.');
+      }
+    } catch (error) {
+      console.warn('⚠️  Database not available, continuing without database...');
     }
     
     // Initialize existing infrastructure if available
@@ -229,6 +235,15 @@ const startServer = async () => {
       console.error('❌ Failed to start metrics service:', error.message);
     }
     
+    // Initialize notification service
+    try {
+      const { notificationService } = require('./services/notification.service');
+      await notificationService.initialize(io);
+      console.log('📢 Notification service initialized');
+    } catch (error) {
+      console.error('❌ Failed to initialize notification service:', error.message);
+    }
+    
     // Start server
     server.listen(PORT, () => {
       console.log(`🚀 FORTEN Backend Server running on port ${PORT}`);
@@ -239,6 +254,7 @@ const startServer = async () => {
       console.log(`💾 Redis cache: ENABLED`);
       console.log(`🛡️  Rate limiting: ENABLED`);
       console.log(`🌐 WebSocket: ENABLED`);
+      console.log(`📢 Notification system: ENABLED`);
       
       if (process.env.NODE_ENV === 'development') {
         console.log('\n📋 Demo endpoints available:');
@@ -262,6 +278,13 @@ const startServer = async () => {
         console.log('  GET    /api/rate-limit/usage  - Current usage');
         console.log('  GET    /api/rate-limit/config - Configuration');
         console.log('  GET    /api/rate-limit/health - Health check');
+        console.log('\n📢 Notification endpoints:');
+        console.log('  GET    /api/notifications/health     - Health check');
+        console.log('  GET    /api/notifications/stats      - Queue statistics');
+        console.log('  GET    /api/notifications/dashboard  - Dashboard data');
+        console.log('  POST   /api/notifications/send       - Send custom notification');
+        console.log('  POST   /api/notifications/security-alert - Send security alert');
+        console.log('  POST   /api/notifications/test       - Test notification system');
       }
     });
   } catch (error) {
@@ -277,6 +300,14 @@ process.on('SIGTERM', async () => {
     console.log('🔌 HTTP server closed');
     await models.sequelize.close();
     console.log('🗄️ Database connection closed');
+    
+    // Shutdown notification service
+    try {
+      const { notificationService } = require('./services/notification.service');
+      await notificationService.shutdown();
+    } catch (error) {
+      console.error('❌ Error shutting down notification service:', error);
+    }
     
     // Cleanup existing infrastructure if available
     try {
@@ -296,6 +327,15 @@ process.on('SIGINT', async () => {
     console.log('🔌 HTTP server closed');
     await models.sequelize.close();
     console.log('🗄️ Database connection closed');
+    
+    // Shutdown notification service
+    try {
+      const { notificationService } = require('./services/notification.service');
+      await notificationService.shutdown();
+    } catch (error) {
+      console.error('❌ Error shutting down notification service:', error);
+    }
+    
     process.exit(0);
   });
 });
