@@ -1,6 +1,6 @@
 /**
  * WebSocket Notification Processor
- * Handles real-time notifications via WebSocket connections
+ * Handles real-time notifications via WebSocket connections with building rooms support
  */
 
 /**
@@ -14,8 +14,9 @@ async function processWebSocketNotification(job) {
     // Update job progress
     job.progress(10);
     
-    // Get Socket.IO instance (will be injected by the queue processor)
+    // Get Socket.IO instance and building rooms manager
     const io = job.opts.io || global.io;
+    const buildingRoomsManager = job.opts.buildingRoomsManager || global.buildingRoomsManager;
     
     if (!io) {
       throw new Error('Socket.IO instance not available');
@@ -79,7 +80,13 @@ async function processWebSocketNotification(job) {
             break;
             
           case 'building':
-            io.to(`building_${target.id}`).emit('notification', notification);
+            // Use building rooms manager if available
+            if (buildingRoomsManager) {
+              await buildingRoomsManager.sendNotificationToBuilding(target.id, notification);
+            } else {
+              // Fallback to direct room emission
+              io.to(`building_${target.id}`).emit('notification', notification);
+            }
             results.push({
               type: 'building',
               target: target.id,

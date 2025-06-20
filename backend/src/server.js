@@ -9,7 +9,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const { createServer } = require('http');
-const { Server } = require('socket.io');
+const { WebSocketManager } = require('./websocket');
 
 // Import Redis configuration
 const { initializeRedis } = require('./config/redis');
@@ -25,6 +25,7 @@ const cacheRoutes = require('./routes/cache.routes');
 const metricsRoutes = require('./routes/metrics.routes');
 const rateLimitRoutes = require('./routes/rateLimit.routes');
 const notificationRoutes = require('./routes/notification.routes');
+const websocketRoutes = require('./routes/websocket.routes');
 
 // Import models to initialize database
 const models = require('./models');
@@ -34,16 +35,8 @@ const app = express();
 const server = createServer(app);
 const PORT = process.env.PORT || 3001;
 
-// Initialize Socket.io
-const io = new Server(server, {
-  cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    credentials: true
-  }
-});
-
-// Make io accessible to routes
-app.set('io', io);
+// Initialize WebSocket Manager
+let webSocketManager = null;
 
 // Security middleware
 app.use(helmet());
@@ -104,6 +97,7 @@ app.use('/api/cache', cacheRoutes);
 app.use('/api/metrics', metricsRoutes);
 app.use('/api/rate-limit', rateLimitRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/websocket', websocketRoutes);
 
 // Example protected routes to demonstrate audit functionality
 app.use('/api/demo', (req, res, next) => {
@@ -235,9 +229,31 @@ const startServer = async () => {
       console.error('❌ Failed to start metrics service:', error.message);
     }
     
+    // Initialize WebSocket Manager
+    try {
+      webSocketManager = new WebSocketManager(server);
+      console.log('🌐 WebSocket manager initialized with building rooms');
+      
+      // Make io accessible to routes
+      app.set('io', webSocketManager.getIO());
+      app.set('buildingRoomsManager', webSocketManager.getBuildingRoomsManager());
+      
+      // Generate test tokens in development
+      if (process.env.NODE_ENV === 'development') {
+        const testTokens = webSocketManager.generateTestTokens();
+        if (testTokens) {
+          app.set('testTokens', testTokens);
+        }
+      }
+      
+    } catch (error) {
+      console.error('❌ Failed to initialize WebSocket manager:', error.message);
+    }
+    
     // Initialize notification service
     try {
       const { notificationService } = require('./services/notification.service');
+      const io = webSocketManager ? webSocketManager.getIO() : null;
       await notificationService.initialize(io);
       console.log('📢 Notification service initialized');
     } catch (error) {
@@ -253,7 +269,7 @@ const startServer = async () => {
       console.log(`📊 Metrics service: ENABLED`);
       console.log(`💾 Redis cache: ENABLED`);
       console.log(`🛡️  Rate limiting: ENABLED`);
-      console.log(`🌐 WebSocket: ENABLED`);
+      console.log(`🌐 WebSocket: ENABLED (with building rooms & auth)`);
       console.log(`📢 Notification system: ENABLED`);
       
       if (process.env.NODE_ENV === 'development') {
@@ -285,6 +301,17 @@ const startServer = async () => {
         console.log('  POST   /api/notifications/send       - Send custom notification');
         console.log('  POST   /api/notifications/security-alert - Send security alert');
         console.log('  POST   /api/notifications/test       - Test notification system');
+        console.log('\n🌐 WebSocket endpoints:');
+        console.log('  Connect with JWT token in auth header or query parameter');
+        console.log('  Building rooms: building_<buildingId>');
+        console.log('  Role rooms: role_<role>, administrators, operators, security_team');
+        console.log('  Heartbeat: Every 30 seconds');
+        console.log('\n🌐 WebSocket testing endpoints:');
+        console.log('  GET    /api/websocket/test-tokens   - Get JWT test tokens');
+        console.log('  GET    /api/websocket/stats         - Connection statistics');
+        console.log('  GET    /api/websocket/health        - System health check');
+        console.log('  GET    /api/websocket/client-example - Connection examples');
+        console.log('  POST   /api/websocket/test-notification - Send test notification');
       }
     });
   } catch (error) {
@@ -300,6 +327,15 @@ process.on('SIGTERM', async () => {
     console.log('🔌 HTTP server closed');
     await models.sequelize.close();
     console.log('🗄️ Database connection closed');
+    
+    // Shutdown WebSocket manager
+    try {
+      if (webSocketManager) {
+        await webSocketManager.shutdown();
+      }
+    } catch (error) {
+      console.error('❌ Error shutting down WebSocket manager:', error);
+    }
     
     // Shutdown notification service
     try {
@@ -327,6 +363,15 @@ process.on('SIGINT', async () => {
     console.log('🔌 HTTP server closed');
     await models.sequelize.close();
     console.log('🗄️ Database connection closed');
+    
+    // Shutdown WebSocket manager
+    try {
+      if (webSocketManager) {
+        await webSocketManager.shutdown();
+      }
+    } catch (error) {
+      console.error('❌ Error shutting down WebSocket manager:', error);
+    }
     
     // Shutdown notification service
     try {

@@ -140,8 +140,9 @@ class NotificationService {
 
     // WebSocket processor
     websocketQueue.process('send-websocket', async (job) => {
-      // Inject Socket.IO instance
+      // Inject Socket.IO instance and building rooms manager
       job.opts.io = this.socketIo;
+      job.opts.buildingRoomsManager = global.buildingRoomsManager;
       return await this.processors.websocket(job);
     });
 
