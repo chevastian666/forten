@@ -1,0 +1,318 @@
+version: '3.8'
+
+services:
+  # Load Balancer
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - api-gateway
+    networks:
+      - forten-network
+    restart: unless-stopped
+
+  # Infrastructure Services
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-forten}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: forten_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - forten-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-forten}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-forten}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: forten_analytics
+    ports:
+      - "5433:5432"
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+    networks:
+      - forten-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - forten-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-forten}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - forten-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Monitoring Infrastructure
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - forten-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3010:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - forten-network
+    restart: unless-stopped
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+    networks:
+      - forten-network
+    restart: unless-stopped
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      AUTH_SERVICE_URL: http://auth-service:3001
+      MONITORING_SERVICE_URL: http://monitoring-service:3002
+      ACCESS_SERVICE_URL: http://access-service:3003
+      COMMUNICATION_SERVICE_URL: http://communication-service:3004
+      ANALYTICS_SERVICE_URL: http://analytics-service:3005
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      RATE_LIMIT_MAX: 1000
+      RATE_LIMIT_WINDOW: 900000
+    depends_on:
+      - redis
+    networks:
+      - forten-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      replicas: 2
+
+  # Auth Service
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-forten}:${POSTGRES_PASSWORD}@postgres:5432/forten_auth
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-forten}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      EMAIL_SMTP_HOST: ${EMAIL_SMTP_HOST}
+      EMAIL_SMTP_PORT: ${EMAIL_SMTP_PORT}
+      EMAIL_SMTP_USER: ${EMAIL_SMTP_USER}
+      EMAIL_SMTP_PASS: ${EMAIL_SMTP_PASS}
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - forten-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      replicas: 2
+
+  # Monitoring Service
+  monitoring-service:
+    build:
+      context: ./monitoring-service
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      DATABASE_URL: postgresql://${POSTGRES_USER:-forten}:${POSTGRES_PASSWORD}@postgres:5432/forten_monitoring
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-forten}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      HIKCENTRAL_API_URL: ${HIKCENTRAL_API_URL}
+      HIKCENTRAL_API_KEY: ${HIKCENTRAL_API_KEY}
+      QBOX_API_URL: ${QBOX_API_URL}
+      QBOX_API_KEY: ${QBOX_API_KEY}
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - forten-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      replicas: 2
+
+  # Access Service
+  access-service:
+    build:
+      context: ./access-service
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3003
+      DATABASE_URL: postgresql://${POSTGRES_USER:-forten}:${POSTGRES_PASSWORD}@postgres:5432/forten_access
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-forten}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      QBOX_API_URL: ${QBOX_API_URL}
+      QBOX_API_KEY: ${QBOX_API_KEY}
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - forten-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      replicas: 2
+
+  # Communication Service
+  communication-service:
+    build:
+      context: ./communication-service
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3004
+      DATABASE_URL: postgresql://${POSTGRES_USER:-forten}:${POSTGRES_PASSWORD}@postgres:5432/forten_communication
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-forten}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      TWILIO_WHATSAPP_NUMBER: ${TWILIO_WHATSAPP_NUMBER}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
+      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - forten-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      replicas: 2
+
+  # Analytics Service
+  analytics-service:
+    build:
+      context: ./analytics-service
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3005
+      DATABASE_URL: postgresql://${POSTGRES_USER:-forten}:${POSTGRES_PASSWORD}@timescaledb:5432/forten_analytics
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-forten}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+    depends_on:
+      - timescaledb
+      - redis
+      - rabbitmq
+    networks:
+      - forten-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      replicas: 2
+
+networks:
+  forten-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  timescale_data:
+  redis_data:
+  rabbitmq_data:
+  prometheus_data:
+  grafana_data:

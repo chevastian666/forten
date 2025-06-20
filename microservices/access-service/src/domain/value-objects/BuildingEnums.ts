@@ -1,0 +1,6 @@
+export enum BuildingStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  MAINTENANCE = 'MAINTENANCE',
+  EMERGENCY = 'EMERGENCY'
+}
