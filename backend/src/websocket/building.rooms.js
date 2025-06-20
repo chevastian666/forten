@@ -8,6 +8,7 @@ const {
   getUserAccessibleBuildings,
   authorizeSocketAction 
 } = require('./auth.middleware');
+const { websocket: wsLogger } = require('../config/logger');
 
 class BuildingRoomsManager {
   constructor(io) {
@@ -23,7 +24,9 @@ class BuildingRoomsManager {
     };
     
     this.initializeHeartbeat();
-    console.log('🏢 Building Rooms Manager initialized');
+    wsLogger.info('Building Rooms Manager initialized', {
+      heartbeatFrequency: this.heartbeatFrequency
+    });
   }
 
   /**
@@ -36,7 +39,9 @@ class BuildingRoomsManager {
       this.updateConnectionStats();
     }, this.heartbeatFrequency);
     
-    console.log(`💓 Heartbeat initialized (${this.heartbeatFrequency}ms interval)`);
+    wsLogger.debug('Heartbeat initialized', {
+      interval: `${this.heartbeatFrequency}ms`
+    });
   }
 
   /**
@@ -44,7 +49,11 @@ class BuildingRoomsManager {
    */
   async handleConnection(socket) {
     try {
-      console.log(`🔌 New connection: ${socket.id} (User: ${socket.user.email})`);
+      wsLogger.info('New connection', {
+        socketId: socket.id,
+        user: socket.user.email,
+        role: socket.user.role
+      });
       
       // Join user to appropriate building rooms
       await this.joinUserToBuildingRooms(socket);
@@ -71,10 +80,18 @@ class BuildingRoomsManager {
         timestamp: new Date().toISOString()
       });
       
-      console.log(`✅ User ${socket.user.email} joined rooms: ${Array.from(socket.rooms).join(', ')}`);
+      wsLogger.info('User joined rooms', {
+        user: socket.user.email,
+        rooms: Array.from(socket.rooms),
+        buildingsCount: socket.user.buildings?.length || 0
+      });
       
     } catch (error) {
-      console.error(`❌ Error handling connection for ${socket.id}:`, error);
+      wsLogger.error('Error handling connection', {
+        socketId: socket.id,
+        error: error.message,
+        stack: error.stack
+      });
       socket.emit('connection_error', { 
         message: 'Failed to establish connection',
         error: error.message 
@@ -104,7 +121,11 @@ class BuildingRoomsManager {
       // Track room membership
       this.trackRoomMembership(socket.user.id, roomId, buildingId);
       
-      console.log(`🏢 User ${socket.user.email} joined building room: ${roomId}`);
+      wsLogger.debug('User joined building room', {
+        user: socket.user.email,
+        roomId,
+        buildingId
+      });
     }
   }
 
@@ -123,7 +144,10 @@ class BuildingRoomsManager {
     socket.join('admin_global');
     socket.join('all_buildings');
     
-    console.log(`👑 Admin ${socket.user.email} joined all building rooms and admin rooms`);
+    wsLogger.info('Admin joined all rooms', {
+      user: socket.user.email,
+      roomCount: this.rooms.size
+    });
   }
 
   /**
@@ -158,7 +182,11 @@ class BuildingRoomsManager {
     // All authenticated users room
     socket.join('authenticated_users');
     
-    console.log(`👤 User ${socket.user.email} (${role}) joined role-based rooms`);
+    wsLogger.debug('User joined role-based rooms', {
+      user: socket.user.email,
+      role,
+      rooms: Array.from(roleRooms)
+    });
   }
 
   /**
@@ -242,7 +270,10 @@ class BuildingRoomsManager {
       });
       
     } catch (error) {
-      console.error(`❌ Error joining building:`, error);
+      wsLogger.error('Error joining building', {
+        error: error.message,
+        buildingId: data.buildingId
+      });
       callback({ error: 'Failed to join building' });
     }
   }
@@ -278,7 +309,10 @@ class BuildingRoomsManager {
       });
       
     } catch (error) {
-      console.error(`❌ Error leaving building:`, error);
+      wsLogger.error('Error leaving building', {
+        error: error.message,
+        buildingId: data.buildingId
+      });
       callback({ error: 'Failed to leave building' });
     }
   }
@@ -304,7 +338,9 @@ class BuildingRoomsManager {
       });
       
     } catch (error) {
-      console.error(`❌ Error getting rooms:`, error);
+      wsLogger.error('Error getting rooms', {
+        error: error.message
+      });
       callback({ error: 'Failed to get rooms' });
     }
   }
@@ -346,7 +382,10 @@ class BuildingRoomsManager {
       });
       
     } catch (error) {
-      console.error(`❌ Error getting building occupancy:`, error);
+      wsLogger.error('Error getting building occupancy', {
+        error: error.message,
+        buildingId: data.buildingId
+      });
       callback({ error: 'Failed to get building occupancy' });
     }
   }
@@ -389,7 +428,10 @@ class BuildingRoomsManager {
       });
       
     } catch (error) {
-      console.error(`❌ Error sending message to building:`, error);
+      wsLogger.error('Error sending message to building', {
+        error: error.message,
+        buildingId: data.buildingId
+      });
       callback({ error: 'Failed to send message' });
     }
   }
@@ -399,7 +441,12 @@ class BuildingRoomsManager {
    */
   handleDisconnection(socket, reason) {
     try {
-      console.log(`🔌 Socket disconnected: ${socket.id} (${socket.user.email}) - Reason: ${reason}`);
+      wsLogger.info('Socket disconnected', {
+        socketId: socket.id,
+        user: socket.user.email,
+        reason,
+        roomsLeft: roomsToLeave
+      });
       
       // Clean up room memberships
       this.cleanupUserRooms(socket.user.id);
@@ -422,7 +469,10 @@ class BuildingRoomsManager {
       this.connectionStats.totalConnections--;
       
     } catch (error) {
-      console.error(`❌ Error handling disconnection:`, error);
+      wsLogger.error('Error handling disconnection', {
+        error: error.message,
+        socketId: socket.id
+      });
     }
   }
 
@@ -472,7 +522,11 @@ class BuildingRoomsManager {
         const timeSinceActive = now - Math.max(lastActive, lastHeartbeat);
         
         if (timeSinceActive > inactiveThreshold) {
-          console.log(`🧹 Disconnecting inactive socket: ${socket.id} (${socket.user.email})`);
+          wsLogger.debug('Disconnecting inactive socket', {
+            socketId: socket.id,
+            user: socket.user.email,
+            lastActivity: lastActivity.toISOString()
+          });
           socket.emit('connection_timeout', { reason: 'Inactive for too long' });
           socket.disconnect(true);
         }
@@ -605,7 +659,11 @@ class BuildingRoomsManager {
       timestamp: new Date().toISOString()
     });
     
-    console.log(`📢 Notification sent to building ${buildingId}:`, notification.type);
+    wsLogger.info('Notification sent to building', {
+      buildingId,
+      notificationType: notification.type,
+      recipientCount: notification.recipientCount || 'unknown'
+    });
   }
 
   /**
@@ -621,7 +679,10 @@ class BuildingRoomsManager {
       });
     });
     
-    console.log(`📡 Global notification broadcasted to ${buildingRooms.length} buildings:`, notification.type);
+    wsLogger.info('Global notification broadcasted', {
+      buildingCount: buildingRooms.length,
+      notificationType: notification.type
+    });
   }
 
   /**
@@ -630,10 +691,10 @@ class BuildingRoomsManager {
   shutdown() {
     if (this.heartbeatInterval) {
       clearInterval(this.heartbeatInterval);
-      console.log('💓 Heartbeat stopped');
+      wsLogger.debug('Heartbeat stopped');
     }
     
-    console.log('🏢 Building Rooms Manager shutdown completed');
+    wsLogger.info('Building Rooms Manager shutdown completed');
   }
 }
 

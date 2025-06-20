@@ -10,6 +10,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const { createServer } = require('http');
 const { WebSocketManager } = require('./websocket');
+const { logger, api: apiLogger } = require('./config/logger');
 
 // Import Redis configuration
 const { initializeRedis } = require('./config/redis');
@@ -46,8 +47,8 @@ app.use(cors({
   credentials: true
 }));
 
-// Request logging
-app.use(morgan('combined'));
+// Request logging with Winston
+app.use(morgan('combined', { stream: logger.stream }));
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -173,7 +174,13 @@ app.delete('/api/demo/users/:id', (req, res) => {
 
 // Error handling middleware
 app.use((error, req, res, next) => {
-  console.error('Server error:', error);
+  apiLogger.error('Server error:', {
+    error: error.message,
+    stack: error.stack,
+    path: req.path,
+    method: req.method,
+    ip: req.ip
+  });
   
   // Store error message for audit logging
   res.locals.errorMessage = error.message;
@@ -202,39 +209,43 @@ const startServer = async () => {
     // Test database connection
     try {
       await models.sequelize.authenticate();
-      console.log('✅ Database connection established successfully.');
+      logger.info('Database connection established successfully.');
       
       // Sync database models (in development)
       if (process.env.NODE_ENV === 'development') {
         await models.sequelize.sync({ alter: true });
-        console.log('📊 Database models synchronized successfully.');
+        logger.info('Database models synchronized successfully.');
       }
     } catch (error) {
-      console.warn('⚠️  Database not available, continuing without database...');
+      logger.warn('Database not available, continuing without database...', {
+        error: error.message
+      });
     }
     
     // Initialize existing infrastructure if available
     try {
       const { initializeInfrastructure } = require('./infrastructure/initialization');
       await initializeInfrastructure(io);
-      console.log('🏗️ Clean architecture infrastructure initialized.');
+      logger.info('Clean architecture infrastructure initialized.');
     } catch (error) {
-      console.log('ℹ️ Clean architecture infrastructure not found, skipping...');
+      logger.debug('Clean architecture infrastructure not found, skipping...');
     }
     
     // Start metrics service
     try {
       const metricsService = require('./services/metrics.service');
       metricsService.startAutoUpdate();
-      console.log('📊 Metrics service started');
+      logger.info('Metrics service started');
     } catch (error) {
-      console.error('❌ Failed to start metrics service:', error.message);
+      logger.error('Failed to start metrics service:', {
+        error: error.message
+      });
     }
     
     // Initialize WebSocket Manager
     try {
       webSocketManager = new WebSocketManager(server);
-      console.log('🌐 WebSocket manager initialized with building rooms');
+      logger.info('WebSocket manager initialized with building rooms');
       
       // Make io accessible to routes
       app.set('io', webSocketManager.getIO());
@@ -249,7 +260,9 @@ const startServer = async () => {
       }
       
     } catch (error) {
-      console.error('❌ Failed to initialize WebSocket manager:', error.message);
+      logger.error('Failed to initialize WebSocket manager:', {
+        error: error.message
+      });
     }
     
     // Initialize notification service
@@ -257,22 +270,28 @@ const startServer = async () => {
       const { notificationService } = require('./services/notification.service');
       const io = webSocketManager ? webSocketManager.getIO() : null;
       await notificationService.initialize(io);
-      console.log('📢 Notification service initialized');
+      logger.info('Notification service initialized');
     } catch (error) {
-      console.error('❌ Failed to initialize notification service:', error.message);
+      logger.error('Failed to initialize notification service:', {
+        error: error.message
+      });
     }
     
     // Start server
     server.listen(PORT, () => {
-      console.log(`🚀 FORTEN Backend Server running on port ${PORT}`);
-      console.log(`📱 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🔍 Audit system: ENABLED`);
-      console.log(`🔐 Database: PostgreSQL`);
-      console.log(`📊 Metrics service: ENABLED`);
-      console.log(`💾 Redis cache: ENABLED`);
-      console.log(`🛡️  Rate limiting: ENABLED`);
-      console.log(`🌐 WebSocket: ENABLED (with building rooms & auth)`);
-      console.log(`📢 Notification system: ENABLED`);
+      logger.info(`FORTEN Backend Server running on port ${PORT}`, {
+        environment: process.env.NODE_ENV || 'development',
+        features: {
+          audit: 'ENABLED',
+          database: 'PostgreSQL',
+          metrics: 'ENABLED',
+          cache: 'Redis ENABLED',
+          rateLimiting: 'ENABLED',
+          websocket: 'ENABLED (with building rooms & auth)',
+          notifications: 'ENABLED',
+          logging: 'Winston ENABLED'
+        }
+      });
       
       if (process.env.NODE_ENV === 'development') {
         console.log('\n📋 Demo endpoints available:');
@@ -322,18 +341,21 @@ const startServer = async () => {
       }
     });
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
+    logger.error('Failed to start server:', {
+      error: error.message,
+      stack: error.stack
+    });
     process.exit(1);
   }
 };
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
-  console.log('📴 SIGTERM received, shutting down gracefully...');
+  logger.info('SIGTERM received, shutting down gracefully...');
   server.close(async () => {
-    console.log('🔌 HTTP server closed');
+    logger.info('HTTP server closed');
     await models.sequelize.close();
-    console.log('🗄️ Database connection closed');
+    logger.info('Database connection closed');
     
     // Shutdown WebSocket manager
     try {
@@ -341,7 +363,9 @@ process.on('SIGTERM', async () => {
         await webSocketManager.shutdown();
       }
     } catch (error) {
-      console.error('❌ Error shutting down WebSocket manager:', error);
+      logger.error('Error shutting down WebSocket manager:', {
+        error: error.message
+      });
     }
     
     // Shutdown notification service
@@ -349,7 +373,9 @@ process.on('SIGTERM', async () => {
       const { notificationService } = require('./services/notification.service');
       await notificationService.shutdown();
     } catch (error) {
-      console.error('❌ Error shutting down notification service:', error);
+      logger.error('Error shutting down notification service:', {
+        error: error.message
+      });
     }
     
     // Cleanup existing infrastructure if available
@@ -365,11 +391,11 @@ process.on('SIGTERM', async () => {
 });
 
 process.on('SIGINT', async () => {
-  console.log('📴 SIGINT received, shutting down gracefully...');
+  logger.info('SIGINT received, shutting down gracefully...');
   server.close(async () => {
-    console.log('🔌 HTTP server closed');
+    logger.info('HTTP server closed');
     await models.sequelize.close();
-    console.log('🗄️ Database connection closed');
+    logger.info('Database connection closed');
     
     // Shutdown WebSocket manager
     try {
@@ -377,7 +403,9 @@ process.on('SIGINT', async () => {
         await webSocketManager.shutdown();
       }
     } catch (error) {
-      console.error('❌ Error shutting down WebSocket manager:', error);
+      logger.error('Error shutting down WebSocket manager:', {
+        error: error.message
+      });
     }
     
     // Shutdown notification service
@@ -385,7 +413,9 @@ process.on('SIGINT', async () => {
       const { notificationService } = require('./services/notification.service');
       await notificationService.shutdown();
     } catch (error) {
-      console.error('❌ Error shutting down notification service:', error);
+      logger.error('Error shutting down notification service:', {
+        error: error.message
+      });
     }
     
     process.exit(0);

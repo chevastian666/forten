@@ -9,6 +9,7 @@ const { createObjectCsvWriter } = require('csv-writer');
 const fs = require('fs').promises;
 const path = require('path');
 const { Op } = require('sequelize');
+const { export: exportLogger } = require('../config/logger');
 
 // Export configuration
 const EXPORT_CONFIG = {
@@ -34,7 +35,9 @@ class ExportService {
     try {
       await fs.mkdir(EXPORT_CONFIG.TEMP_DIR, { recursive: true });
     } catch (error) {
-      console.error('Error creating temp directory:', error);
+      exportLogger.error('Error creating temp directory:', {
+        error: error.message
+      });
     }
   }
 
@@ -43,7 +46,11 @@ class ExportService {
    */
   async exportData(format, dataType, filters = {}) {
     try {
-      console.log(`📊 Starting export: ${format} format, ${dataType} data type`);
+      exportLogger.info('Starting export', {
+        format,
+        dataType,
+        filters
+      });
       
       // Validate format
       if (!Object.values(EXPORT_CONFIG.FORMATS).includes(format)) {
@@ -77,7 +84,12 @@ class ExportService {
           throw new Error(`Unsupported format: ${format}`);
       }
 
-      console.log(`✅ Export completed: ${filename}`);
+      exportLogger.info('Export completed successfully', {
+        filename,
+        format,
+        dataType,
+        recordCount: data.data.length
+      });
       
       return {
         success: true,
@@ -90,7 +102,11 @@ class ExportService {
       };
 
     } catch (error) {
-      console.error('❌ Export error:', error);
+      exportLogger.error('Export error:', {
+        error: error.message,
+        format,
+        dataType
+      });
       throw error;
     }
   }
@@ -166,7 +182,9 @@ class ExportService {
       };
 
     } catch (error) {
-      console.error('CSV export error:', error);
+      exportLogger.error('CSV export error:', {
+        error: error.message
+      });
       throw new Error(`Failed to export CSV: ${error.message}`);
     }
   }
@@ -269,7 +287,9 @@ class ExportService {
       };
 
     } catch (error) {
-      console.error('Excel export error:', error);
+      exportLogger.error('Excel export error:', {
+        error: error.message
+      });
       throw new Error(`Failed to export Excel: ${error.message}`);
     }
   }
@@ -327,7 +347,9 @@ class ExportService {
         stream.on('error', reject);
 
       } catch (error) {
-        console.error('PDF export error:', error);
+        exportLogger.error('PDF export error:', {
+          error: error.message
+        });
         reject(new Error(`Failed to export PDF: ${error.message}`));
       }
     });
@@ -765,11 +787,15 @@ class ExportService {
         
         if (now - stats.mtimeMs > maxAge) {
           await fs.unlink(filepath);
-          console.log(`🧹 Deleted old export file: ${file}`);
+          exportLogger.debug('Deleted old export file', {
+            file
+          });
         }
       }
     } catch (error) {
-      console.error('Error cleaning up old exports:', error);
+      exportLogger.error('Error cleaning up old exports:', {
+        error: error.message
+      });
     }
   }
 }

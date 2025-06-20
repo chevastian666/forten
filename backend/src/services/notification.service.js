@@ -30,6 +30,7 @@ const {
 const { processEmailNotification } = require('../queues/processors/email.processor');
 const { processWebSocketNotification } = require('../queues/processors/websocket.processor');
 const { processWhatsAppNotification } = require('../queues/processors/whatsapp.processor');
+const { notification: notifLogger } = require('../config/logger');
 
 class NotificationService {
   constructor() {
@@ -47,7 +48,7 @@ class NotificationService {
    */
   async initialize(socketIo = null) {
     try {
-      console.log('🚀 Initializing Notification Service...');
+      notifLogger.info('Initializing Notification Service...');
       
       this.socketIo = socketIo;
       
@@ -58,11 +59,16 @@ class NotificationService {
       await this.setupCleanup();
       
       this.isInitialized = true;
-      console.log('✅ Notification Service initialized successfully');
+      notifLogger.info('Notification Service initialized successfully', {
+        hasSocketIO: !!socketIo
+      });
       
       return { success: true, message: 'Notification service initialized' };
     } catch (error) {
-      console.error('❌ Failed to initialize Notification Service:', error);
+      notifLogger.error('Failed to initialize Notification Service:', {
+        error: error.message,
+        stack: error.stack
+      });
       throw error;
     }
   }
@@ -74,7 +80,12 @@ class NotificationService {
     // Main notification processor - distributes to specific queues
     notificationQueue.process('process-notification', async (job) => {
       const { data } = job;
-      console.log(`📢 Processing notification: ${data.type}`);
+      notifLogger.debug('Processing notification', {
+        type: data.type,
+        priority: data.priority,
+        channels: data.channels,
+        userId: data.userId
+      });
       
       job.progress(10);
       
@@ -112,12 +123,19 @@ class NotificationService {
               break;
               
             default:
-              console.warn(`⚠️  Unknown channel: ${channel}`);
+              notifLogger.warn('Unknown channel', {
+                channel,
+                notificationType: data.type
+              });
           }
           
           job.progress(30 + (results.length / data.channels.length) * 60);
         } catch (error) {
-          console.error(`❌ Failed to queue ${channel} notification:`, error);
+          notifLogger.error('Failed to queue notification', {
+            channel,
+            error: error.message,
+            notificationType: data.type
+          });
           results.push({ channel, status: 'failed', error: error.message });
         }
       }
@@ -151,7 +169,7 @@ class NotificationService {
       return await this.processors.whatsapp(job);
     });
 
-    console.log('✅ Notification processors setup completed');
+    notifLogger.info('Notification processors setup completed');
   }
 
   /**
@@ -163,11 +181,15 @@ class NotificationService {
       try {
         await cleanOldJobs(24 * 60 * 60 * 1000); // 24 hours
       } catch (error) {
-        console.error('❌ Auto cleanup failed:', error);
+        notifLogger.error('Auto cleanup failed:', {
+          error: error.message
+        });
       }
     }, 60 * 60 * 1000); // 1 hour
 
-    console.log('⏰ Automatic cleanup scheduled (every hour)');
+    notifLogger.info('Automatic cleanup scheduled', {
+      interval: 'every hour'
+    });
   }
 
   /**
@@ -306,7 +328,7 @@ class NotificationService {
    */
   async shutdown() {
     try {
-      console.log('🛑 Shutting down Notification Service...');
+      notifLogger.info('Shutting down Notification Service...');
       
       // Pause all queues
       await pauseAllQueues();
@@ -320,9 +342,11 @@ class NotificationService {
       ]);
       
       this.isInitialized = false;
-      console.log('✅ Notification Service shutdown completed');
+      notifLogger.info('Notification Service shutdown completed');
     } catch (error) {
-      console.error('❌ Error during notification service shutdown:', error);
+      notifLogger.error('Error during notification service shutdown:', {
+        error: error.message
+      });
       throw error;
     }
   }
@@ -347,7 +371,9 @@ class NotificationService {
         timestamp: new Date().toISOString()
       };
     } catch (error) {
-      console.error('❌ Error getting dashboard data:', error);
+      notifLogger.error('Error getting dashboard data:', {
+        error: error.message
+      });
       throw error;
     }
   }
@@ -396,7 +422,10 @@ class NotificationService {
         timestamp: new Date().toISOString()
       };
     } catch (error) {
-      console.error('❌ Notification test failed:', error);
+      notifLogger.error('Notification test failed:', {
+        error: error.message,
+        stack: error.stack
+      });
       throw error;
     }
   }

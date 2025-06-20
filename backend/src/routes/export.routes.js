@@ -6,6 +6,7 @@
 const express = require('express');
 const { query, param, body, validationResult } = require('express-validator');
 const exportController = require('../controllers/export.controller');
+const { export: exportLogger } = require('../config/logger');
 
 const router = express.Router();
 
@@ -34,7 +35,11 @@ const authenticate = (req, res, next) => {
 const exportRateLimit = (req, res, next) => {
   // In production, implement proper rate limiting
   // For now, just log the request
-  console.log(`📊 Export request from ${req.user?.email || 'unknown'} at ${new Date().toISOString()}`);
+  exportLogger.info('Export request received', {
+    user: req.user?.email || 'unknown',
+    path: req.path,
+    method: req.method
+  });
   next();
 };
 
@@ -358,7 +363,12 @@ router.post('/bulk',
  * Error handling middleware
  */
 router.use((error, req, res, next) => {
-  console.error('Export route error:', error);
+  exportLogger.error('Export route error', {
+    error: error.message,
+    stack: error.stack,
+    path: req.path,
+    method: req.method
+  });
   res.status(500).json({
     success: false,
     message: 'Internal server error during export',

@@ -4,6 +4,7 @@
  */
 
 const CacheService = require('../services/cache.service');
+const { cache: cacheLogger } = require('../config/logger');
 
 /**
  * Cache middleware factory
@@ -83,7 +84,10 @@ function cacheMiddleware(options = {}) {
 
           // Cache the response asynchronously
           CacheService.set(cacheKey, responseToCache, ttl)
-            .catch(error => console.error('Cache set error:', error));
+            .catch(error => cacheLogger.error('Cache set error:', {
+              error: error.message,
+              key: cacheKey
+            }));
         }
 
         return originalJson.call(this, data);
@@ -101,7 +105,10 @@ function cacheMiddleware(options = {}) {
 
           // Cache the response asynchronously
           CacheService.set(cacheKey, responseToCache, ttl)
-            .catch(error => console.error('Cache set error:', error));
+            .catch(error => cacheLogger.error('Cache set error:', {
+              error: error.message,
+              key: cacheKey
+            }));
         }
 
         return originalSend.call(this, data);
@@ -109,7 +116,11 @@ function cacheMiddleware(options = {}) {
 
       next();
     } catch (error) {
-      console.error('Cache middleware error:', error);
+      cacheLogger.error('Cache middleware error:', {
+        error: error.message,
+        path: req.path,
+        method: req.method
+      });
       // Continue without caching on error
       next();
     }
@@ -212,7 +223,11 @@ function cacheInvalidationMiddleware() {
       // Trigger cache invalidation after successful response
       if (res.statusCode >= 200 && res.statusCode < 300) {
         triggerCacheInvalidation(req, data)
-          .catch(error => console.error('Cache invalidation error:', error));
+          .catch(error => cacheLogger.error('Cache invalidation error:', {
+            error: error.message,
+            action,
+            entity
+          }));
       }
       return originalJson.call(this, data);
     };
@@ -221,7 +236,11 @@ function cacheInvalidationMiddleware() {
       // Trigger cache invalidation after successful response
       if (res.statusCode >= 200 && res.statusCode < 300) {
         triggerCacheInvalidation(req, data)
-          .catch(error => console.error('Cache invalidation error:', error));
+          .catch(error => cacheLogger.error('Cache invalidation error:', {
+            error: error.message,
+            action,
+            entity
+          }));
       }
       return originalSend.call(this, data);
     };
@@ -253,9 +272,17 @@ async function triggerCacheInvalidation(req, responseData) {
     // Invalidate related caches
     await CacheService.invalidateOnUpdate(entityType, entityId);
     
-    console.log(`Cache invalidated for entity: ${entityType}, id: ${entityId}`);
+    cacheLogger.debug('Cache invalidated', {
+      entityType,
+      entityId,
+      patterns: invalidatedPatterns
+    });
   } catch (error) {
-    console.error('Cache invalidation trigger error:', error);
+    cacheLogger.error('Cache invalidation trigger error:', {
+      error: error.message,
+      entityType,
+      entityId
+    });
   }
 }
 

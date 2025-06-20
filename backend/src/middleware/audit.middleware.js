@@ -5,6 +5,7 @@
 
 const AuditService = require('../services/audit.service');
 const { v4: uuidv4 } = require('uuid');
+const { audit: auditLogger } = require('../config/logger');
 
 /**
  * Audit middleware factory
@@ -69,7 +70,11 @@ function auditMiddleware(options = {}) {
           captureChanges
         });
       } catch (error) {
-        console.error('Audit middleware error:', error);
+        auditLogger.error('Audit middleware error:', {
+          error: error.message,
+          requestId: req.id,
+          path: req.path
+        });
       }
     });
   };
@@ -313,7 +318,11 @@ function auditAction(action, entity) {
           response_status: res.statusCode
         },
         request: req
-      }).catch(err => console.error('Audit error:', err));
+      }).catch(err => auditLogger.error('Audit error:', {
+        error: err.message,
+        requestId: req.id,
+        path: req.path
+      }));
 
       return originalJson.call(this, data);
     };
