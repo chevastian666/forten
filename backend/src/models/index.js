@@ -15,6 +15,11 @@ const Pin = require('./pin.model')(sequelize, Sequelize.DataTypes);
 const Webhook = require('./Webhook');
 const WebhookDelivery = require('./WebhookDelivery');
 
+// Import Statistics models
+const DailyStatistics = require('./DailyStatistics');
+const WeeklyStatistics = require('./WeeklyStatistics');
+const MonthlyStatistics = require('./MonthlyStatistics');
+
 // Import other models if they exist
 let Building, Event, Access;
 try {
@@ -32,7 +37,10 @@ const models = {
   AuditLog,
   Pin,
   Webhook,
-  WebhookDelivery
+  WebhookDelivery,
+  DailyStatistics,
+  WeeklyStatistics,
+  MonthlyStatistics
 };
 
 // Add other models if they exist

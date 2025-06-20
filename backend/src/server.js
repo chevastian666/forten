@@ -32,6 +32,7 @@ const pinRoutes = require('./routes/pin.routes');
 const eventRoutes = require('./routes/event.routes');
 const accessRoutes = require('./routes/access.routes');
 const webhookRoutes = require('./routes/webhook.routes');
+const statisticsRoutes = require('./routes/statistics.routes');
 
 // Import models to initialize database
 const models = require('./models');
@@ -109,6 +110,7 @@ app.use('/api/pins', pinRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/access', accessRoutes);
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api/statistics', statisticsRoutes);
 
 // Example protected routes to demonstrate audit functionality
 app.use('/api/demo', (req, res, next) => {
@@ -308,6 +310,23 @@ const startServer = async () => {
       });
     }
     
+    // Initialize aggregation service and start jobs
+    try {
+      const AggregationService = require('./services/aggregation.service');
+      const AggregationJobs = require('./jobs/aggregation.jobs');
+      
+      // Initialize service with models
+      AggregationService.initialize(models);
+      
+      // Start aggregation jobs
+      AggregationJobs.start(models);
+      logger.info('Aggregation service initialized and jobs scheduled');
+    } catch (error) {
+      logger.error('Failed to initialize aggregation service:', {
+        error: error.message
+      });
+    }
+    
     // Start server
     server.listen(PORT, () => {
       logger.info(`FORTEN Backend Server running on port ${PORT}`, {
@@ -321,7 +340,8 @@ const startServer = async () => {
           websocket: 'ENABLED (with building rooms & auth)',
           notifications: 'ENABLED',
           logging: 'Winston ENABLED',
-          webhooks: 'ENABLED (with HMAC-SHA256 signatures)'
+          webhooks: 'ENABLED (with HMAC-SHA256 signatures)',
+          aggregation: 'ENABLED (with cron jobs)'
         }
       });
       
@@ -405,6 +425,15 @@ const startServer = async () => {
         console.log('  GET    /api/webhooks/:id/deliveries - Delivery history');
         console.log('  POST   /api/webhooks/trigger        - Trigger event');
         console.log('  GET    /api/webhooks/events         - Available events');
+        console.log('\n📊 Statistics endpoints:');
+        console.log('  GET    /api/statistics/daily/:buildingId   - Daily statistics');
+        console.log('  GET    /api/statistics/weekly/:buildingId  - Weekly statistics');
+        console.log('  GET    /api/statistics/monthly/:buildingId - Monthly statistics');
+        console.log('  GET    /api/statistics/summary/:buildingId - Summary across periods');
+        console.log('  GET    /api/statistics/comparison          - Compare buildings');
+        console.log('  POST   /api/statistics/aggregate           - Manual aggregation');
+        console.log('  GET    /api/statistics/jobs/status         - Job status');
+        console.log('  GET    /api/statistics/export/:buildingId  - Export statistics');
       }
     });
   } catch (error) {
@@ -445,6 +474,17 @@ process.on('SIGTERM', async () => {
       });
     }
     
+    // Stop aggregation jobs
+    try {
+      const AggregationJobs = require('./jobs/aggregation.jobs');
+      AggregationJobs.stop();
+      logger.info('Aggregation jobs stopped');
+    } catch (error) {
+      logger.error('Error stopping aggregation jobs:', {
+        error: error.message
+      });
+    }
+    
     // Cleanup existing infrastructure if available
     try {
       const { cleanup } = require('./infrastructure/initialization');
@@ -481,6 +521,17 @@ process.on('SIGINT', async () => {
       await notificationService.shutdown();
     } catch (error) {
       logger.error('Error shutting down notification service:', {
+        error: error.message
+      });
+    }
+    
+    // Stop aggregation jobs
+    try {
+      const AggregationJobs = require('./jobs/aggregation.jobs');
+      AggregationJobs.stop();
+      logger.info('Aggregation jobs stopped');
+    } catch (error) {
+      logger.error('Error stopping aggregation jobs:', {
         error: error.message
       });
     }
