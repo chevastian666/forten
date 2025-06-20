@@ -26,6 +26,7 @@ const metricsRoutes = require('./routes/metrics.routes');
 const rateLimitRoutes = require('./routes/rateLimit.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const websocketRoutes = require('./routes/websocket.routes');
+const exportRoutes = require('./routes/export.routes');
 
 // Import models to initialize database
 const models = require('./models');
@@ -98,6 +99,7 @@ app.use('/api/metrics', metricsRoutes);
 app.use('/api/rate-limit', rateLimitRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/websocket', websocketRoutes);
+app.use('/api/export', exportRoutes);
 
 // Example protected routes to demonstrate audit functionality
 app.use('/api/demo', (req, res, next) => {
@@ -312,6 +314,11 @@ const startServer = async () => {
         console.log('  GET    /api/websocket/health        - System health check');
         console.log('  GET    /api/websocket/client-example - Connection examples');
         console.log('  POST   /api/websocket/test-notification - Send test notification');
+        console.log('\n📊 Export endpoints:');
+        console.log('  GET    /api/export/options          - Get export options');
+        console.log('  GET    /api/export/:dataType/:format - Export data');
+        console.log('  POST   /api/export/preview          - Preview export data');
+        console.log('  GET    /api/export/history          - Export history');
       }
     });
   } catch (error) {
