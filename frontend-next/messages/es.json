@@ -1,0 +1,152 @@
+{
+  "nav": {
+    "dashboard": "Panel de Control",
+    "buildings": "Edificios",
+    "residents": "Residentes",
+    "access": "Accesos",
+    "cameras": "Cámaras",
+    "events": "Eventos",
+    "settings": "Configuración"
+  },
+  "dashboard": {
+    "title": "Panel de Control",
+    "subtitle": "Vista general del sistema FORTEN",
+    "welcome": "Bienvenido de nuevo",
+    "metrics": {
+      "buildings": "Edificios",
+      "residents": "Residentes",
+      "active_cameras": "Cámaras Activas",
+      "events_today": "Eventos Hoy"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Iniciar Sesión",
+      "subtitle": "Ingresa a tu cuenta para continuar",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "login_button": "Iniciar Sesión",
+      "forgot_password": "¿Olvidaste tu contraseña?",
+      "error": "Error al iniciar sesión"
+    },
+    "forgot_password": {
+      "title": "Restablecer Contraseña",
+      "subtitle": "Te enviaremos un enlace para restablecer tu contraseña",
+      "email": "Correo electrónico",
+      "send_button": "Enviar Enlace",
+      "back_to_login": "Volver al inicio de sesión",
+      "success": "Enlace de restablecimiento enviado"
+    }
+  },
+  "buildings": {
+    "title": "Gestión de Edificios",
+    "subtitle": "Administra los edificios del sistema",
+    "new_building": "Nuevo Edificio",
+    "search": "Buscar edificios...",
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "maintenance": "Mantenimiento"
+    }
+  },
+  "residents": {
+    "title": "Gestión de Residentes",
+    "subtitle": "Administra los residentes y sus accesos",
+    "new_resident": "Nuevo Residente",
+    "search": "Buscar residentes...",
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "suspended": "Suspendido"
+    }
+  },
+  "access": {
+    "title": "Control de Accesos",
+    "subtitle": "Monitoreo de accesos y visitantes",
+    "new_access": "Nuevo Acceso",
+    "search": "Buscar accesos...",
+    "methods": {
+      "pin": "PIN",
+      "card": "Tarjeta",
+      "app": "App",
+      "qr": "QR",
+      "manual": "Manual"
+    },
+    "status": {
+      "granted": "Permitido",
+      "denied": "Denegado",
+      "expired": "Expirado",
+      "pending": "Pendiente"
+    }
+  },
+  "cameras": {
+    "title": "Sistema de Cámaras",
+    "subtitle": "Monitoreo y gestión de cámaras de seguridad",
+    "new_camera": "Nueva Cámara",
+    "search": "Buscar cámaras...",
+    "full_view": "Vista Completa",
+    "configure": "Configurar",
+    "status": {
+      "online": "En línea",
+      "offline": "Fuera de línea",
+      "maintenance": "Mantenimiento"
+    }
+  },
+  "events": {
+    "title": "Sistema de Eventos",
+    "subtitle": "Monitoreo de eventos de seguridad y accesos",
+    "new_event": "Nuevo Evento",
+    "search": "Buscar eventos...",
+    "export": "Exportar",
+    "configure_alerts": "Configurar Alertas",
+    "severity": {
+      "critical": "Crítica",
+      "high": "Alta",
+      "medium": "Media",
+      "low": "Baja",
+      "info": "Info"
+    },
+    "status": {
+      "active": "Activo",
+      "resolved": "Resuelto",
+      "acknowledged": "Reconocido",
+      "investigating": "Investigando"
+    }
+  },
+  "settings": {
+    "title": "Configuración del Sistema",
+    "subtitle": "Administra la configuración general del sistema FORTEN",
+    "save_changes": "Guardar Cambios",
+    "export_config": "Exportar Config",
+    "import_config": "Importar Config",
+    "restore": "Restaurar",
+    "tabs": {
+      "general": "General",
+      "security": "Seguridad",
+      "cameras": "Cámaras",
+      "notifications": "Notificaciones",
+      "integrations": "Integraciones",
+      "system": "Sistema"
+    }
+  },
+  "common": {
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "view": "Ver",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "add": "Agregar",
+    "remove": "Quitar",
+    "close": "Cerrar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "confirm": "Confirmar",
+    "actions": "Acciones"
+  }
+}

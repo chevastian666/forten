@@ -1,0 +1,152 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "buildings": "Buildings",
+    "residents": "Residents",
+    "access": "Access",
+    "cameras": "Cameras",
+    "events": "Events",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "FORTEN system overview",
+    "welcome": "Welcome back",
+    "metrics": {
+      "buildings": "Buildings",
+      "residents": "Residents",
+      "active_cameras": "Active Cameras",
+      "events_today": "Events Today"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "subtitle": "Sign in to your account to continue",
+      "email": "Email",
+      "password": "Password",
+      "login_button": "Sign In",
+      "forgot_password": "Forgot your password?",
+      "error": "Login error"
+    },
+    "forgot_password": {
+      "title": "Reset Password",
+      "subtitle": "We'll send you a link to reset your password",
+      "email": "Email",
+      "send_button": "Send Link",
+      "back_to_login": "Back to sign in",
+      "success": "Reset link sent"
+    }
+  },
+  "buildings": {
+    "title": "Building Management",
+    "subtitle": "Manage system buildings",
+    "new_building": "New Building",
+    "search": "Search buildings...",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "maintenance": "Maintenance"
+    }
+  },
+  "residents": {
+    "title": "Resident Management",
+    "subtitle": "Manage residents and their access",
+    "new_resident": "New Resident",
+    "search": "Search residents...",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "suspended": "Suspended"
+    }
+  },
+  "access": {
+    "title": "Access Control",
+    "subtitle": "Access and visitor monitoring",
+    "new_access": "New Access",
+    "search": "Search access...",
+    "methods": {
+      "pin": "PIN",
+      "card": "Card",
+      "app": "App",
+      "qr": "QR",
+      "manual": "Manual"
+    },
+    "status": {
+      "granted": "Granted",
+      "denied": "Denied",
+      "expired": "Expired",
+      "pending": "Pending"
+    }
+  },
+  "cameras": {
+    "title": "Camera System",
+    "subtitle": "Security camera monitoring and management",
+    "new_camera": "New Camera",
+    "search": "Search cameras...",
+    "full_view": "Full View",
+    "configure": "Configure",
+    "status": {
+      "online": "Online",
+      "offline": "Offline",
+      "maintenance": "Maintenance"
+    }
+  },
+  "events": {
+    "title": "Event System",
+    "subtitle": "Security and access event monitoring",
+    "new_event": "New Event",
+    "search": "Search events...",
+    "export": "Export",
+    "configure_alerts": "Configure Alerts",
+    "severity": {
+      "critical": "Critical",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low",
+      "info": "Info"
+    },
+    "status": {
+      "active": "Active",
+      "resolved": "Resolved",
+      "acknowledged": "Acknowledged",
+      "investigating": "Investigating"
+    }
+  },
+  "settings": {
+    "title": "System Settings",
+    "subtitle": "Manage general FORTEN system configuration",
+    "save_changes": "Save Changes",
+    "export_config": "Export Config",
+    "import_config": "Import Config",
+    "restore": "Restore",
+    "tabs": {
+      "general": "General",
+      "security": "Security",
+      "cameras": "Cameras",
+      "notifications": "Notifications",
+      "integrations": "Integrations",
+      "system": "System"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter", 
+    "export": "Export",
+    "import": "Import",
+    "add": "Add",
+    "remove": "Remove",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "confirm": "Confirm",
+    "actions": "Actions"
+  }
+}
