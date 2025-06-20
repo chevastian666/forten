@@ -34,6 +34,7 @@ const accessRoutes = require('./routes/access.routes');
 const webhookRoutes = require('./routes/webhook.routes');
 const statisticsRoutes = require('./routes/statistics.routes');
 const softDeleteRoutes = require('./routes/softDelete.routes');
+const adminConfigRoutes = require('./routes/admin/config.routes');
 
 // Import models to initialize database
 const models = require('./models');
@@ -113,6 +114,7 @@ app.use('/api/access', accessRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/statistics', statisticsRoutes);
 app.use('/api/soft-deletes', softDeleteRoutes);
+app.use('/api/admin/config', adminConfigRoutes);
 
 // Example protected routes to demonstrate audit functionality
 app.use('/api/demo', (req, res, next) => {
@@ -340,6 +342,42 @@ const startServer = async () => {
       });
     }
     
+    // Initialize dynamic configuration service
+    try {
+      const ConfigService = require('./services/config.service');
+      const redis = require('./config/redis');
+      const redisClient = redis.getClient();
+      
+      if (redisClient) {
+        await ConfigService.initialize(redisClient);
+        logger.info('Dynamic configuration service initialized');
+        
+        // Listen for configuration changes
+        ConfigService.on('configChanged', (change) => {
+          logger.info('Configuration changed', {
+            key: change.key,
+            oldValue: change.oldValue,
+            newValue: change.newValue,
+            requiresRestart: change.requiresRestart,
+            timestamp: change.timestamp
+          });
+          
+          // Emit WebSocket notification if available
+          if (webSocketManager) {
+            const io = webSocketManager.getIO();
+            io.to('administrators').emit('configChanged', change);
+          }
+        });
+      } else {
+        logger.warn('Redis not available, configuration service will use defaults');
+        await ConfigService.initialize();
+      }
+    } catch (error) {
+      logger.error('Failed to initialize configuration service:', {
+        error: error.message
+      });
+    }
+    
     // Start server
     server.listen(PORT, () => {
       logger.info(`FORTEN Backend Server running on port ${PORT}`, {
@@ -355,7 +393,8 @@ const startServer = async () => {
           logging: 'Winston ENABLED',
           webhooks: 'ENABLED (with HMAC-SHA256 signatures)',
           aggregation: 'ENABLED (with cron jobs)',
-          softDeletes: 'ENABLED (paranoid mode)'
+          softDeletes: 'ENABLED (paranoid mode)',
+          dynamicConfig: 'ENABLED (Redis storage)'
         }
       });
       
@@ -457,6 +496,19 @@ const startServer = async () => {
         console.log('  POST   /api/soft-deletes/cleanup           - Cleanup old records');
         console.log('  GET    /api/soft-deletes/search            - Search deleted records');
         console.log('  GET    /api/soft-deletes/models            - Supported models');
+        console.log('\\n⚙️  Dynamic Configuration endpoints:');
+        console.log('  GET    /api/admin/config                  - Get all configurations');
+        console.log('  GET    /api/admin/config/:key             - Get specific configuration');
+        console.log('  PUT    /api/admin/config/:key             - Update configuration');
+        console.log('  POST   /api/admin/config/bulk-update      - Bulk update configurations');
+        console.log('  POST   /api/admin/config/:key/reset       - Reset to default');
+        console.log('  POST   /api/admin/config/reset-all        - Reset all to defaults');
+        console.log('  POST   /api/admin/config/validate         - Validate configurations');
+        console.log('  GET    /api/admin/config/export           - Export configuration');
+        console.log('  POST   /api/admin/config/import           - Import configuration');
+        console.log('  GET    /api/admin/config/stats            - Configuration statistics');
+        console.log('  GET    /api/admin/config/categories       - Available categories');
+        console.log('  GET    /api/admin/config/health           - Health check');
       }
     });
   } catch (error) {
@@ -508,6 +560,17 @@ process.on('SIGTERM', async () => {
       });
     }
     
+    // Shutdown configuration service
+    try {
+      const ConfigService = require('./services/config.service');
+      await ConfigService.shutdown();
+      logger.info('Configuration service shutdown');
+    } catch (error) {
+      logger.error('Error shutting down configuration service:', {
+        error: error.message
+      });
+    }
+    
     // Cleanup existing infrastructure if available
     try {
       const { cleanup } = require('./infrastructure/initialization');
@@ -555,6 +618,17 @@ process.on('SIGINT', async () => {
       logger.info('Aggregation jobs stopped');
     } catch (error) {
       logger.error('Error stopping aggregation jobs:', {
+        error: error.message
+      });
+    }
+    
+    // Shutdown configuration service
+    try {
+      const ConfigService = require('./services/config.service');
+      await ConfigService.shutdown();
+      logger.info('Configuration service shutdown');
+    } catch (error) {
+      logger.error('Error shutting down configuration service:', {
         error: error.message
       });
     }
