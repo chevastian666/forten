@@ -1,0 +1,85 @@
+{
+  "name": "FORTEN CRM - Control Operativo",
+  "short_name": "FORTEN",
+  "description": "Sistema integral de portería digital y monitoreo 24h para edificios residenciales",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#4F46E5",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "lang": "es",
+  "dir": "ltr",
+  "categories": ["business", "productivity", "security"],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Accesos",
+      "url": "/access",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Cámaras",
+      "url": "/cameras",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Dashboard principal"
+    },
+    {
+      "src": "/screenshots/access.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Control de accesos"
+    },
+    {
+      "src": "/screenshots/cameras.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Monitoreo de cámaras"
+    }
+  ]
+}
