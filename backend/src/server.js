@@ -8,6 +8,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const compression = require('compression');
 const { createServer } = require('http');
 const { WebSocketManager } = require('./websocket');
 const { logger, api: apiLogger } = require('./config/logger');
@@ -60,6 +61,55 @@ app.use(morgan('combined', { stream: logger.stream }));
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Gzip compression middleware
+app.use(compression({
+  // Only compress responses that are 1kb or larger
+  threshold: 1024,
+  
+  // Compression level (1-9, 6 is default balance of speed vs compression)
+  level: 6,
+  
+  // Memory level (1-9, 8 is default)
+  memLevel: 8,
+  
+  // Window size (9-15, 15 is maximum compression)
+  windowBits: 15,
+  
+  // Only compress responses for requests that include "gzip" in Accept-Encoding
+  filter: (req, res) => {
+    // Skip compression for certain content types
+    const contentType = res.getHeader('Content-Type') || '';
+    
+    // Don't compress images
+    if (contentType.startsWith('image/')) {
+      return false;
+    }
+    
+    // Don't compress already compressed formats
+    const compressedTypes = [
+      'application/zip',
+      'application/gzip', 
+      'application/x-gzip',
+      'application/x-compressed',
+      'application/x-zip-compressed',
+      'multipart/x-zip',
+      'application/pdf', // PDFs are often already compressed
+      'video/', // Video files are usually compressed
+      'audio/', // Audio files are usually compressed
+      'application/octet-stream' // Binary files
+    ];
+    
+    for (const type of compressedTypes) {
+      if (contentType.startsWith(type)) {
+        return false;
+      }
+    }
+    
+    // Use compression default filter for everything else
+    return compression.filter(req, res);
+  }
+}));
 
 // Add request ID middleware
 app.use((req, res, next) => {
@@ -394,7 +444,8 @@ const startServer = async () => {
           webhooks: 'ENABLED (with HMAC-SHA256 signatures)',
           aggregation: 'ENABLED (with cron jobs)',
           softDeletes: 'ENABLED (paranoid mode)',
-          dynamicConfig: 'ENABLED (Redis storage)'
+          dynamicConfig: 'ENABLED (Redis storage)',
+          compression: 'ENABLED (gzip, 1kb threshold)'
         }
       });
       
