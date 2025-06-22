@@ -1,0 +1,43 @@
+/* Toast notification positioning and styling */
+.toast-container {
+  /* Ensure proper z-index above all content */
+  z-index: 9999 !important;
+  
+  /* Prevent overlap with sidebar on desktop */
+  position: fixed !important;
+}
+
+/* Individual toast styling */
+.toast-container > div {
+  /* Ensure consistent width and positioning */
+  min-width: 300px !important;
+  max-width: 380px !important;
+  
+  /* Prevent text overflow */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 600px) {
+  .toast-container {
+    left: 16px !important;
+    right: 16px !important;
+    width: auto !important;
+  }
+  
+  .toast-container > div {
+    min-width: auto !important;
+    max-width: none !important;
+    width: 100% !important;
+  }
+}
+
+/* Desktop layout adjustments to avoid sidebar */
+@media (min-width: 600px) {
+  /* When in main layout (not login or executive), ensure proper spacing */
+  .toast-container {
+    /* Account for the main content area positioning */
+    right: 20px !important;
+  }
+}

@@ -174,8 +174,8 @@ export class NotificationService {
     confidence: number;
     severity: 'low' | 'medium' | 'high' | 'critical';
   }, options?: NotificationOptions) {
-    const duration = alertData.severity === 'critical' ? 8000 : 
-                    alertData.severity === 'high' ? 6000 : 4000;
+    const duration = alertData.severity === 'critical' ? 6000 : 
+                    alertData.severity === 'high' ? 4000 : 3000;
 
     return toast.custom((t) => 
       React.createElement(AIAlertToast, {

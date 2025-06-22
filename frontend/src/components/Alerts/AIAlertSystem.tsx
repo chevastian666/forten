@@ -924,12 +924,12 @@ export const AIAlertSystem: React.FC = () => {
       NotificationService.systemAlert('Sistema de IA iniciado correctamente', 'system');
     }, 1000);
 
-    // Simulate new alerts every 15-30 seconds
+    // Simulate new alerts every 20-45 seconds
     const interval = setInterval(() => {
-      if (Math.random() > 0.3) { // 70% chance of new alert
+      if (Math.random() > 0.5) { // 50% chance of new alert
         simulateRealTimeAlerts();
       }
-    }, 15000 + Math.random() * 15000); // 15-30 seconds
+    }, 20000 + Math.random() * 25000); // 20-45 seconds
 
     return () => clearInterval(interval);
   }, [soundEnabled, handlePlaySound]);
