@@ -173,34 +173,60 @@ export const Dashboard: React.FC = () => {
               Bienvenido, {user?.firstName}
             </Typography>
 
-            {canAccessExecutive && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+            <Stack direction="row" spacing={2}>
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  NotificationService.success('Notificación de éxito');
+                  setTimeout(() => {
+                    NotificationService.error('Notificación de error');
+                  }, 500);
+                  setTimeout(() => {
+                    NotificationService.warning('Notificación de advertencia');
+                  }, 1000);
+                  setTimeout(() => {
+                    NotificationService.aiAlert({
+                      type: 'person',
+                      title: 'Persona detectada',
+                      location: 'Entrada Principal',
+                      confidence: 0.95,
+                      severity: 'high',
+                    });
+                  }, 1500);
+                }}
               >
-                <Button
-                  variant="contained"
-                  startIcon={<DashboardIcon />}
-                  onClick={() => {
-                    NotificationService.info('Navegando al Dashboard Ejecutivo...');
-                    navigate('/executive');
-                  }}
-                  sx={{
-                    background: 'linear-gradient(45deg, #FF6B35 30%, #FF8F65 90%)',
-                    boxShadow: '0 4px 16px rgba(255, 107, 53, 0.3)',
-                    '&:hover': {
-                      background: 'linear-gradient(45deg, #E85D25 30%, #FF6B35 90%)',
-                      boxShadow: '0 6px 20px rgba(255, 107, 53, 0.4)',
-                    },
-                  }}
+                Test Notificaciones
+              </Button>
+              
+              {canAccessExecutive && (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  Dashboard Ejecutivo
-                </Button>
-              </motion.div>
-            )}
+                  <Button
+                    variant="contained"
+                    startIcon={<DashboardIcon />}
+                    onClick={() => {
+                      NotificationService.info('Navegando al Dashboard Ejecutivo...');
+                      navigate('/executive');
+                    }}
+                    sx={{
+                      background: 'linear-gradient(45deg, #FF6B35 30%, #FF8F65 90%)',
+                      boxShadow: '0 4px 16px rgba(255, 107, 53, 0.3)',
+                      '&:hover': {
+                        background: 'linear-gradient(45deg, #E85D25 30%, #FF6B35 90%)',
+                        boxShadow: '0 6px 20px rgba(255, 107, 53, 0.4)',
+                      },
+                    }}
+                  >
+                    Dashboard Ejecutivo
+                  </Button>
+                </motion.div>
+              )}
+            </Stack>
           </Stack>
         </motion.div>
 

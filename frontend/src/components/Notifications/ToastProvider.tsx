@@ -1,44 +1,65 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { useTheme } from '@mui/material/styles';
-import './ToastProvider.css';
+import { Box } from '@mui/material';
 
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const theme = useTheme();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Force react-hot-toast to use our container
+    const fixPositioning = () => {
+      const toasterDiv = document.querySelector('div[style*="z-index: 9999"]');
+      if (toasterDiv && containerRef.current) {
+        containerRef.current.appendChild(toasterDiv);
+      }
+    };
+
+    // Try multiple times to catch the toaster after it's created
+    const timers = [
+      setTimeout(fixPositioning, 0),
+      setTimeout(fixPositioning, 100),
+      setTimeout(fixPositioning, 500),
+    ];
+
+    return () => timers.forEach(clearTimeout);
+  }, []);
 
   return (
     <>
       {children}
-      <div 
-        style={{
+      <Box
+        ref={containerRef}
+        sx={{
           position: 'fixed',
-          top: 20,
-          right: 20,
+          top: { xs: '70px', sm: '80px' },
+          right: { xs: '16px', sm: '24px' },
           zIndex: 9999,
+          width: { xs: 'calc(100vw - 32px)', sm: '360px' },
+          maxWidth: '360px',
           pointerEvents: 'none',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-end',
-          gap: 8,
-          maxWidth: 400,
+          '& > div': {
+            position: 'relative !important',
+            inset: 'unset !important',
+            width: '100% !important',
+            '& > div': {
+              width: '100% !important',
+              '& > div[role="status"]': {
+                width: '100% !important',
+                maxWidth: '100% !important',
+                marginRight: '0 !important',
+              }
+            }
+          }
         }}
-        className="custom-toast-wrapper"
-      >
-        <Toaster
-          position="top-center"
-          reverseOrder={false}
-          gutter={12}
-          containerClassName="toast-container"
-          containerStyle={{
-            position: 'static',
-            inset: 'auto',
-            transform: 'none',
-          }}
+      />
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+        gutter={8}
         toastOptions={{
-          // Ensure proper stacking and prevent overlap
-          className: 'toast-item',
-          // Default options for all toasts
-          duration: 3000, // Reduced duration to prevent accumulation
+          duration: 3000,
           style: {
             background: theme.palette.background.paper,
             color: theme.palette.text.primary,
@@ -47,15 +68,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             fontSize: '14px',
             fontFamily: theme.typography.fontFamily,
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
-            backdropFilter: 'blur(8px)',
-            maxWidth: '380px',
-            minWidth: '300px',
             padding: '12px 16px',
+            width: '100%',
+            maxWidth: '100%',
             pointerEvents: 'auto',
           },
-          // Success notifications
           success: {
-            duration: 3000,
             style: {
               background: 'rgba(129, 201, 149, 0.1)',
               color: '#81C995',
@@ -66,9 +84,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               secondary: 'rgba(129, 201, 149, 0.1)',
             },
           },
-          // Error notifications
           error: {
-            duration: 5000,
             style: {
               background: 'rgba(242, 139, 130, 0.1)',
               color: '#F28B82',
@@ -79,7 +95,6 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               secondary: 'rgba(242, 139, 130, 0.1)',
             },
           },
-          // Loading notifications
           loading: {
             style: {
               background: 'rgba(255, 107, 53, 0.1)',
@@ -87,17 +102,8 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               border: '1px solid rgba(255, 107, 53, 0.3)',
             },
           },
-          // Custom alert notifications
-          custom: {
-            style: {
-              background: 'rgba(138, 180, 248, 0.1)',
-              color: '#8AB4F8',
-              border: '1px solid rgba(138, 180, 248, 0.3)',
-            },
-          },
         }}
       />
-      </div>
     </>
   );
 };
