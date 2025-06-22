@@ -1,5 +1,45 @@
 /* FORTEN CRM - Access Control Specific Styles */
 
+/* Access Stats Grid */
+.access-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card.doors-status {
+    border-left-color: var(--primary-orange);
+}
+
+.stat-card.active-users {
+    border-left-color: var(--success);
+}
+
+.stat-card.access-events {
+    border-left-color: var(--info);
+}
+
+.stat-card.security-alerts {
+    border-left-color: var(--danger);
+}
+
+.stat-card.doors-status .stat-icon {
+    background: linear-gradient(135deg, var(--primary-orange), var(--light-orange));
+}
+
+.stat-card.active-users .stat-icon {
+    background: linear-gradient(135deg, var(--success), #34CE57);
+}
+
+.stat-card.access-events .stat-icon {
+    background: linear-gradient(135deg, var(--info), #20C997);
+}
+
+.stat-card.security-alerts .stat-icon {
+    background: linear-gradient(135deg, var(--danger), #E74C3C);
+}
+
 /* Control Actions Bar */
 .control-actions-bar {
     background: var(--white);
@@ -668,11 +708,355 @@
     }
 }
 
+/* Monitoring Grid */
+.monitoring-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Active Users Panel */
+.active-users-panel {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    border-left: 4px solid var(--success);
+}
+
+.panel-header {
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #FAFAFA 0%, #F5F5F5 100%);
+    border-bottom: 1px solid var(--medium-gray);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.panel-header h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--primary-black);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.panel-header h3 i {
+    color: var(--primary-orange);
+}
+
+.user-count-badge {
+    background: var(--success);
+    color: var(--white);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.users-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.user-item {
+    padding: 1.25rem 2rem;
+    border-bottom: 1px solid var(--medium-gray);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all var(--transition-fast);
+}
+
+.user-item:hover {
+    background: var(--light-gray);
+}
+
+.user-item:last-child {
+    border-bottom: none;
+}
+
+.user-item.visitor {
+    background: rgba(255, 193, 7, 0.05);
+}
+
+.user-avatar {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.user-avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.status-dot {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--white);
+}
+
+.status-dot.online {
+    background: var(--success);
+    animation: pulse 2s infinite;
+}
+
+.status-dot.visitor {
+    background: var(--warning);
+}
+
+.user-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.user-name {
+    font-weight: 600;
+    color: var(--primary-black);
+    font-size: 0.875rem;
+}
+
+.user-location {
+    font-size: 0.8125rem;
+    color: var(--dark-gray);
+}
+
+.user-time {
+    font-size: 0.75rem;
+    color: var(--dark-gray);
+    font-style: italic;
+}
+
+.user-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.panel-footer {
+    padding: 1rem 2rem;
+    border-top: 1px solid var(--medium-gray);
+    text-align: center;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--primary-orange);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.btn-link:hover {
+    color: var(--orange-hover);
+}
+
+/* Real-time Monitor Panel */
+.realtime-monitor-panel {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    border-left: 4px solid var(--info);
+}
+
+.live-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--danger);
+}
+
+.live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--danger);
+    animation: pulse 1s infinite;
+}
+
+.monitor-content {
+    padding: 2rem;
+}
+
+.access-chart {
+    margin-bottom: 1.5rem;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--light-gray);
+    border-radius: var(--radius-md);
+}
+
+.monitor-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+}
+
+.monitor-stat {
+    text-align: center;
+    padding: 1rem;
+    background: var(--light-gray);
+    border-radius: var(--radius-md);
+}
+
+.monitor-stat .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-black);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.monitor-stat .stat-label {
+    font-size: 0.75rem;
+    color: var(--dark-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+/* Quick Actions Panel */
+.quick-actions-panel {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    border-left: 4px solid var(--primary-orange);
+}
+
+.quick-actions-grid {
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.quick-action-btn {
+    padding: 1rem;
+    border: 1px solid var(--medium-gray);
+    border-radius: var(--radius-md);
+    background: var(--white);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: center;
+}
+
+.quick-action-btn:hover {
+    border-color: var(--primary-orange);
+    background: rgba(255, 107, 53, 0.05);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.quick-action-btn i {
+    font-size: 1.25rem;
+    color: var(--primary-orange);
+}
+
+.quick-action-btn span {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--primary-black);
+}
+
+/* Responsive Design Updates */
+@media (max-width: 1200px) {
+    .monitoring-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+    
+    .quick-actions-panel {
+        grid-column: 1 / -1;
+    }
+    
+    .quick-actions-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .access-stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    
+    .monitoring-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .monitor-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-actions-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+    
+    .user-item {
+        padding: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .user-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 480px) {
+    .panel-header {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .monitor-content {
+        padding: 1rem;
+    }
+    
+    .access-chart {
+        height: 150px;
+    }
+    
+    .quick-actions-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Print styles */
 @media print {
     .control-actions-bar,
     .door-controls,
-    .section-actions {
+    .section-actions,
+    .user-actions,
+    .quick-actions-panel {
         display: none;
     }
     
@@ -683,5 +1067,13 @@
     
     .activity-timeline {
         break-inside: avoid;
+    }
+    
+    .monitoring-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .users-list {
+        max-height: none;
     }
 }

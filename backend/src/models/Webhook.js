@@ -3,7 +3,7 @@
  * Database model for webhook subscriptions and delivery tracking
  */
 
-const { DataTypes } = require('sequelize');
+const { DataTypes, Op } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Webhook = sequelize.define('Webhook', {
@@ -278,7 +278,7 @@ Webhook.getActiveWebhooksForEvent = async function(eventType, eventData = {}) {
     where: {
       is_active: true,
       events: {
-        [sequelize.Op.contains]: [eventType]
+        [Op.contains]: [eventType]
       }
     }
   });
@@ -295,7 +295,7 @@ Webhook.addScope('withDeleted', {
 Webhook.addScope('onlyDeleted', {
   where: {
     deleted_at: {
-      [sequelize.Op.ne]: null
+      [Op.ne]: null
     }
   },
   paranoid: false

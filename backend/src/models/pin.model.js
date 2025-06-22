@@ -3,6 +3,8 @@
  * Database model for secure PIN storage and management
  */
 
+const { Op } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   const Pin = sequelize.define('Pin', {
     id: {
@@ -233,7 +235,7 @@ module.exports = (sequelize, DataTypes) => {
       {
         where: {
           is_active: true,
-          expires_at: { [sequelize.Op.lt]: new Date() }
+          expires_at: { [Op.lt]: new Date() }
         }
       }
     );
@@ -244,7 +246,7 @@ module.exports = (sequelize, DataTypes) => {
       where: {
         building_id: buildingId,
         is_active: true,
-        expires_at: { [sequelize.Op.gt]: new Date() }
+        expires_at: { [Op.gt]: new Date() }
       }
     });
   };
@@ -256,7 +258,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Pin.addScope('onlyDeleted', {
     where: {
-      deleted_at: { [sequelize.Op.ne]: null }
+      deleted_at: { [Op.ne]: null }
     },
     paranoid: false
   });

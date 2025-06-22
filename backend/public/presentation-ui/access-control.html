@@ -38,32 +38,32 @@
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="#visitors" class="menu-link">
+                        <a href="visitors.html" class="menu-link">
                             <i class="fas fa-users"></i>
                             <span>Visitantes</span>
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="#security" class="menu-link">
+                        <a href="security.html" class="menu-link">
                             <i class="fas fa-shield-virus"></i>
                             <span>Seguridad</span>
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="#reports" class="menu-link">
+                        <a href="reports.html" class="menu-link">
                             <i class="fas fa-chart-line"></i>
                             <span>Reportes</span>
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="#notifications" class="menu-link">
+                        <a href="notifications.html" class="menu-link">
                             <i class="fas fa-bell"></i>
                             <span>Notificaciones</span>
-                            <span class="notification-badge">5</span>
+                            <span class="notification-badge">7</span>
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="#settings" class="menu-link">
+                        <a href="settings.html" class="menu-link">
                             <i class="fas fa-cog"></i>
                             <span>Configuración</span>
                         </a>
@@ -120,6 +120,53 @@
 
             <!-- Access Control Content -->
             <div class="content-area">
+                <!-- Access Control Stats -->
+                <div class="access-stats-grid">
+                    <div class="stat-card doors-status">
+                        <div class="stat-icon">
+                            <i class="fas fa-door-open"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">6/7</div>
+                            <div class="stat-label">Puertas Operativas</div>
+                            <div class="stat-detail">1 en mantenimiento</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card active-users">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">23</div>
+                            <div class="stat-label">Usuarios Activos</div>
+                            <div class="stat-detail">En el edificio ahora</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card access-events">
+                        <div class="stat-icon">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">284</div>
+                            <div class="stat-label">Eventos Hoy</div>
+                            <div class="stat-detail">+15% vs ayer</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card security-alerts">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">2</div>
+                            <div class="stat-label">Alertas Activas</div>
+                            <div class="stat-detail">Requieren revisión</div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Control Actions Bar -->
                 <div class="control-actions-bar">
                     <div class="emergency-controls">
@@ -552,6 +599,183 @@
                                     <p><strong>Estado:</strong> Investigando</p>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Users and Real-time Monitoring -->
+                <div class="monitoring-grid">
+                    <!-- Active Users Panel -->
+                    <div class="active-users-panel">
+                        <div class="panel-header">
+                            <h3>
+                                <i class="fas fa-user-clock"></i>
+                                Usuarios Activos en el Edificio
+                            </h3>
+                            <div class="user-count-badge">23 activos</div>
+                        </div>
+                        
+                        <div class="users-list">
+                            <div class="user-item">
+                                <div class="user-avatar">
+                                    <img src="https://via.placeholder.com/40x40/FF6B35/FFFFFF?text=MG" alt="User">
+                                    <span class="status-dot online"></span>
+                                </div>
+                                <div class="user-info">
+                                    <div class="user-name">María García</div>
+                                    <div class="user-location">Oficinas Admin - Piso 2</div>
+                                    <div class="user-time">Entrada: 08:15 AM</div>
+                                </div>
+                                <div class="user-actions">
+                                    <button class="btn-icon small" title="Ubicar">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </button>
+                                    <button class="btn-icon small" title="Contactar">
+                                        <i class="fas fa-phone"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="user-item">
+                                <div class="user-avatar">
+                                    <img src="https://via.placeholder.com/40x40/28A745/FFFFFF?text=CL" alt="User">
+                                    <span class="status-dot online"></span>
+                                </div>
+                                <div class="user-info">
+                                    <div class="user-name">Carlos López</div>
+                                    <div class="user-location">Sala de Servidores</div>
+                                    <div class="user-time">Entrada: 07:45 AM</div>
+                                </div>
+                                <div class="user-actions">
+                                    <button class="btn-icon small" title="Ubicar">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </button>
+                                    <button class="btn-icon small" title="Contactar">
+                                        <i class="fas fa-phone"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="user-item">
+                                <div class="user-avatar">
+                                    <img src="https://via.placeholder.com/40x40/17A2B8/FFFFFF?text=RS" alt="User">
+                                    <span class="status-dot online"></span>
+                                </div>
+                                <div class="user-info">
+                                    <div class="user-name">Roberto Silva</div>
+                                    <div class="user-location">Entrada Principal</div>
+                                    <div class="user-time">Entrada: 08:45 AM</div>
+                                </div>
+                                <div class="user-actions">
+                                    <button class="btn-icon small" title="Ubicar">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </button>
+                                    <button class="btn-icon small" title="Contactar">
+                                        <i class="fas fa-phone"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="user-item visitor">
+                                <div class="user-avatar">
+                                    <img src="https://via.placeholder.com/40x40/FFC107/FFFFFF?text=AM" alt="Visitor">
+                                    <span class="status-dot visitor"></span>
+                                </div>
+                                <div class="user-info">
+                                    <div class="user-name">Ana Martínez (Visitante)</div>
+                                    <div class="user-location">Oficinas Admin - Reunión</div>
+                                    <div class="user-time">Entrada: 09:00 AM</div>
+                                </div>
+                                <div class="user-actions">
+                                    <button class="btn-icon small" title="Ubicar">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </button>
+                                    <button class="btn-icon small" title="Check-out">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="panel-footer">
+                            <button class="btn-link">Ver todos los usuarios</button>
+                        </div>
+                    </div>
+
+                    <!-- Real-time Access Monitor -->
+                    <div class="realtime-monitor-panel">
+                        <div class="panel-header">
+                            <h3>
+                                <i class="fas fa-chart-line"></i>
+                                Monitor en Tiempo Real
+                            </h3>
+                            <div class="live-indicator">
+                                <span class="live-dot"></span>
+                                EN VIVO
+                            </div>
+                        </div>
+                        
+                        <div class="monitor-content">
+                            <div class="access-chart">
+                                <canvas id="realTimeAccessChart" width="400" height="200"></canvas>
+                            </div>
+                            
+                            <div class="monitor-stats">
+                                <div class="monitor-stat">
+                                    <div class="stat-value">12</div>
+                                    <div class="stat-label">Accesos última hora</div>
+                                </div>
+                                <div class="monitor-stat">
+                                    <div class="stat-value">3.2s</div>
+                                    <div class="stat-label">Tiempo promedio</div>
+                                </div>
+                                <div class="monitor-stat">
+                                    <div class="stat-value">98.7%</div>
+                                    <div class="stat-label">Tasa de éxito</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions Panel -->
+                    <div class="quick-actions-panel">
+                        <div class="panel-header">
+                            <h3>
+                                <i class="fas fa-bolt"></i>
+                                Acciones Rápidas
+                            </h3>
+                        </div>
+                        
+                        <div class="quick-actions-grid">
+                            <button class="quick-action-btn">
+                                <i class="fas fa-user-plus"></i>
+                                <span>Nuevo Usuario</span>
+                            </button>
+                            
+                            <button class="quick-action-btn">
+                                <i class="fas fa-key"></i>
+                                <span>Acceso Temporal</span>
+                            </button>
+                            
+                            <button class="quick-action-btn">
+                                <i class="fas fa-door-open"></i>
+                                <span>Abrir Todas</span>
+                            </button>
+                            
+                            <button class="quick-action-btn">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Modo Seguridad</span>
+                            </button>
+                            
+                            <button class="quick-action-btn">
+                                <i class="fas fa-clock"></i>
+                                <span>Programar Acceso</span>
+                            </button>
+                            
+                            <button class="quick-action-btn">
+                                <i class="fas fa-file-export"></i>
+                                <span>Exportar Log</span>
+                            </button>
                         </div>
                     </div>
                 </div>

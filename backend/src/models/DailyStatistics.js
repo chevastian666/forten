@@ -3,7 +3,7 @@
  * Stores pre-calculated daily statistics for fast reporting
  */
 
-const { DataTypes } = require('sequelize');
+const { DataTypes, Op } = require('sequelize');
 const sequelize = require('../config/database');
 
 const DailyStatistics = sequelize.define('DailyStatistics', {
@@ -196,7 +196,7 @@ DailyStatistics.getDateRange = async function(buildingId, startDate, endDate) {
     where: {
       building_id: buildingId,
       date: {
-        [sequelize.Op.between]: [startDate, endDate]
+        [Op.between]: [startDate, endDate]
       }
     },
     order: [['date', 'ASC']]
@@ -232,7 +232,7 @@ DailyStatistics.addScope('withDeleted', {
 DailyStatistics.addScope('onlyDeleted', {
   where: {
     deleted_at: {
-      [require('sequelize').Op.ne]: null
+      [Op.ne]: null
     }
   },
   paranoid: false

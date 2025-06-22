@@ -4,8 +4,10 @@
 class AccessControlModule {
     constructor() {
         this.doors = new Map();
+        this.activeUsers = new Map();
         this.realtimeUpdateInterval = null;
         this.simulationMode = true;
+        this.accessChart = null;
         
         this.init();
     }
@@ -15,6 +17,10 @@ class AccessControlModule {
         this.setupEmergencyControls();
         this.setupFilters();
         this.initializeDoorStates();
+        this.initializeActiveUsers();
+        this.setupQuickActions();
+        this.setupUserActions();
+        this.initializeRealtimeChart();
         this.startRealtimeUpdates();
         this.setupTimelineUpdates();
         
@@ -609,6 +615,352 @@ class AccessControlModule {
             }
         `;
         document.head.appendChild(style);
+    }
+    
+    // Initialize active users
+    initializeActiveUsers() {
+        const userItems = document.querySelectorAll('.user-item');
+        
+        userItems.forEach((item, index) => {
+            const userData = this.extractUserData(item);
+            this.activeUsers.set(`user-${index}`, {
+                ...userData,
+                element: item,
+                lastActivity: new Date()
+            });
+        });
+    }
+    
+    // Setup quick actions
+    setupQuickActions() {
+        const quickActionButtons = document.querySelectorAll('.quick-action-btn');
+        
+        quickActionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const action = this.getQuickActionType(button);
+                this.handleQuickAction(action, button);
+            });
+        });
+    }
+    
+    // Setup user actions
+    setupUserActions() {
+        const userActionButtons = document.querySelectorAll('.user-actions .btn-icon');
+        
+        userActionButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.handleUserAction(button);
+            });
+        });
+    }
+    
+    // Initialize realtime chart
+    initializeRealtimeChart() {
+        const canvas = document.getElementById('realTimeAccessChart');
+        if (!canvas) return;
+        
+        // Simulate chart initialization
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#f8f9fa';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = '#FF6B35';
+        ctx.font = '16px Inter';
+        ctx.textAlign = 'center';
+        ctx.fillText('Gráfico en Tiempo Real', canvas.width / 2, canvas.height / 2);
+        ctx.fillText('Datos de acceso actualizándose...', canvas.width / 2, canvas.height / 2 + 25);
+        
+        // Update chart periodically
+        this.updateRealtimeChart();
+    }
+    
+    // Update realtime chart
+    updateRealtimeChart() {
+        setInterval(() => {
+            const canvas = document.getElementById('realTimeAccessChart');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw simple line chart simulation
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.strokeStyle = '#FF6B35';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            const dataPoints = 20;
+            for (let i = 0; i < dataPoints; i++) {
+                const x = (canvas.width / dataPoints) * i;
+                const y = canvas.height / 2 + Math.sin(i * 0.5 + Date.now() * 0.001) * 30;
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // Update stats
+            this.updateMonitorStats();
+        }, 5000);
+    }
+    
+    // Update monitor stats
+    updateMonitorStats() {
+        const statValues = document.querySelectorAll('.monitor-stat .stat-value');
+        
+        statValues.forEach(statElement => {
+            const parent = statElement.closest('.monitor-stat');
+            const label = parent.querySelector('.stat-label').textContent;
+            
+            if (label.includes('Accesos')) {
+                const newValue = Math.floor(Math.random() * 20) + 5;
+                this.animateNumberChange(statElement, newValue.toString());
+            } else if (label.includes('tiempo')) {
+                const time = (Math.random() * 3 + 1).toFixed(1);
+                this.animateNumberChange(statElement, `${time}s`);
+            } else if (label.includes('éxito')) {
+                const success = (Math.random() * 5 + 95).toFixed(1);
+                this.animateNumberChange(statElement, `${success}%`);
+            }
+        });
+    }
+    
+    // Handle quick actions
+    handleQuickAction(action, button) {
+        this.setButtonLoading(button, true);
+        
+        setTimeout(() => {
+            this.executeQuickAction(action);
+            this.setButtonLoading(button, false);
+        }, 1500);
+        
+        this.showQuickActionToast(action);
+    }
+    
+    // Execute quick action
+    executeQuickAction(action) {
+        switch (action) {
+            case 'nuevo-usuario':
+                this.openNewUserModal();
+                break;
+            case 'acceso-temporal':
+                this.createTemporaryAccess();
+                break;
+            case 'abrir-todas':
+                this.openAllDoors();
+                break;
+            case 'modo-seguridad':
+                this.activateSecurityMode();
+                break;
+            case 'programar-acceso':
+                this.openScheduleModal();
+                break;
+            case 'exportar-log':
+                this.exportAccessLog();
+                break;
+        }
+    }
+    
+    // Handle user actions
+    handleUserAction(button) {
+        const userItem = button.closest('.user-item');
+        const userName = userItem.querySelector('.user-name').textContent;
+        const action = this.getUserActionType(button);
+        
+        this.setButtonLoading(button, true);
+        
+        setTimeout(() => {
+            this.executeUserAction(action, userName, userItem);
+            this.setButtonLoading(button, false);
+        }, 1000);
+    }
+    
+    // Execute user action
+    executeUserAction(action, userName, userItem) {
+        switch (action) {
+            case 'locate':
+                this.locateUser(userName);
+                break;
+            case 'contact':
+                this.contactUser(userName);
+                break;
+            case 'checkout':
+                this.checkoutUser(userName, userItem);
+                break;
+        }
+    }
+    
+    // Quick action implementations
+    openNewUserModal() {
+        if (window.fortenApp) {
+            window.fortenApp.showToast('Abriendo formulario de nuevo usuario...', 'info');
+        }
+    }
+    
+    createTemporaryAccess() {
+        if (window.fortenApp) {
+            window.fortenApp.showToast('Generando código de acceso temporal...', 'info');
+        }
+        
+        setTimeout(() => {
+            if (window.fortenApp) {
+                window.fortenApp.showToast('Código temporal: #AC7829 (válido 4h)', 'success');
+            }
+        }, 2000);
+    }
+    
+    openAllDoors() {
+        const doorCards = document.querySelectorAll('.door-card');
+        let count = 0;
+        
+        doorCards.forEach((card, index) => {
+            setTimeout(() => {
+                this.updateDoorStatus(card, 'open');
+                count++;
+                
+                if (count === doorCards.length) {
+                    if (window.fortenApp) {
+                        window.fortenApp.showToast(`${count} puertas abiertas exitosamente`, 'success');
+                    }
+                }
+            }, index * 500);
+        });
+    }
+    
+    activateSecurityMode() {
+        document.body.classList.add('security-mode');
+        
+        if (window.fortenApp) {
+            window.fortenApp.showToast('Modo de seguridad activado', 'warning');
+        }
+        
+        setTimeout(() => {
+            document.body.classList.remove('security-mode');
+        }, 10000);
+    }
+    
+    openScheduleModal() {
+        if (window.fortenApp) {
+            window.fortenApp.showToast('Abriendo programador de accesos...', 'info');
+        }
+    }
+    
+    exportAccessLog() {
+        if (window.fortenApp) {
+            window.fortenApp.showToast('Exportando registro de accesos...', 'info');
+        }
+        
+        setTimeout(() => {
+            if (window.fortenApp) {
+                window.fortenApp.showToast('Archivo descargado: access_log_2024.csv', 'success');
+            }
+        }, 3000);
+    }
+    
+    // User action implementations
+    locateUser(userName) {
+        if (window.fortenApp) {
+            window.fortenApp.showToast(`Localizando a ${userName}...`, 'info');
+        }
+        
+        setTimeout(() => {
+            if (window.fortenApp) {
+                window.fortenApp.showToast(`${userName} ubicado en: Oficinas Admin - Piso 2`, 'success');
+            }
+        }, 2000);
+    }
+    
+    contactUser(userName) {
+        if (window.fortenApp) {
+            window.fortenApp.showToast(`Contactando a ${userName}...`, 'info');
+        }
+    }
+    
+    checkoutUser(userName, userItem) {
+        userItem.style.opacity = '0.6';
+        userItem.classList.add('checking-out');
+        
+        setTimeout(() => {
+            userItem.remove();
+            this.updateUserCount(-1);
+            
+            if (window.fortenApp) {
+                window.fortenApp.showToast(`${userName} ha salido del edificio`, 'info');
+            }
+        }, 1000);
+    }
+    
+    // Update user count
+    updateUserCount(delta) {
+        const userCountBadge = document.querySelector('.user-count-badge');
+        const statElement = document.querySelector('.active-users .stat-number');
+        
+        if (userCountBadge && statElement) {
+            const currentCount = parseInt(userCountBadge.textContent.split(' ')[0]) || 0;
+            const newCount = Math.max(0, currentCount + delta);
+            
+            userCountBadge.textContent = `${newCount} activos`;
+            this.animateNumberChange(statElement, newCount.toString());
+        }
+    }
+    
+    // Utility functions for new features
+    extractUserData(element) {
+        return {
+            name: element.querySelector('.user-name')?.textContent || '',
+            location: element.querySelector('.user-location')?.textContent || '',
+            time: element.querySelector('.user-time')?.textContent || '',
+            isVisitor: element.classList.contains('visitor')
+        };
+    }
+    
+    getQuickActionType(button) {
+        const text = button.querySelector('span').textContent.toLowerCase();
+        
+        if (text.includes('nuevo usuario')) return 'nuevo-usuario';
+        if (text.includes('acceso temporal')) return 'acceso-temporal';
+        if (text.includes('abrir todas')) return 'abrir-todas';
+        if (text.includes('modo seguridad')) return 'modo-seguridad';
+        if (text.includes('programar')) return 'programar-acceso';
+        if (text.includes('exportar')) return 'exportar-log';
+        
+        return 'unknown';
+    }
+    
+    getUserActionType(button) {
+        const icon = button.querySelector('i');
+        if (!icon) return 'unknown';
+        
+        const iconClass = icon.className;
+        
+        if (iconClass.includes('fa-map-marker-alt')) return 'locate';
+        if (iconClass.includes('fa-phone')) return 'contact';
+        if (iconClass.includes('fa-sign-out-alt')) return 'checkout';
+        
+        return 'unknown';
+    }
+    
+    showQuickActionToast(action) {
+        const messages = {
+            'nuevo-usuario': 'Iniciando proceso de registro de nuevo usuario...',
+            'acceso-temporal': 'Generando acceso temporal...',
+            'abrir-todas': 'Abriendo todas las puertas...',
+            'modo-seguridad': 'Activando protocolo de seguridad...',
+            'programar-acceso': 'Abriendo programador de accesos...',
+            'exportar-log': 'Preparando exportación de registros...'
+        };
+        
+        const message = messages[action] || `Ejecutando acción: ${action}`;
+        
+        if (window.fortenApp) {
+            window.fortenApp.showToast(message, 'info');
+        }
     }
     
     // Cleanup

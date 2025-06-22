@@ -81,10 +81,7 @@ Webhook.hasMany(WebhookDelivery, {
   as: 'deliveries'
 });
 
-WebhookDelivery.belongsTo(Webhook, {
-  foreignKey: 'webhook_id',
-  as: 'webhook'
-});
+// WebhookDelivery.belongsTo association is handled in WebhookDelivery.associate method
 
 // Set up webhook associations if they have associate methods
 if (Webhook.associate) {
