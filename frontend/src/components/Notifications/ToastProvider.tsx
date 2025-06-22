@@ -5,24 +5,35 @@ import './ToastProvider.css';
 
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const theme = useTheme();
-  
-  const containerStyle: React.CSSProperties = {
-    position: 'fixed',
-    top: 20,
-    right: 20,
-    zIndex: 9999,
-    pointerEvents: 'none',
-  };
 
   return (
     <>
       {children}
-      <Toaster
-        position="top-right"
-        reverseOrder={false}
-        gutter={12}
-        containerClassName="toast-container"
-        containerStyle={containerStyle}
+      <div 
+        style={{
+          position: 'fixed',
+          top: 20,
+          right: 20,
+          zIndex: 9999,
+          pointerEvents: 'none',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          gap: 8,
+          maxWidth: 400,
+        }}
+        className="custom-toast-wrapper"
+      >
+        <Toaster
+          position="top-center"
+          reverseOrder={false}
+          gutter={12}
+          containerClassName="toast-container"
+          containerStyle={{
+            position: 'static',
+            inset: 'auto',
+            transform: 'none',
+          }}
         toastOptions={{
           // Ensure proper stacking and prevent overlap
           className: 'toast-item',
@@ -86,6 +97,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           },
         }}
       />
+      </div>
     </>
   );
 };
