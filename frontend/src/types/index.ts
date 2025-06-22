@@ -35,16 +35,16 @@ export interface Event {
   id: string;
   buildingId: string;
   userId?: string;
-  type: 'door_open' | 'door_close' | 'visitor_call' | 'resident_call' | 
-        'access_granted' | 'access_denied' | 'camera_view' | 'alarm' | 
-        'maintenance' | 'system';
+  type: 'security' | 'maintenance' | 'access' | 'system' | 'emergency';
+  title: string;
   description: string;
   metadata?: Record<string, any>;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  resolved: boolean;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: 'pending' | 'resolved';
   resolvedAt?: string;
   resolvedBy?: string;
   createdAt: string;
+  updatedAt: string;
   Building?: Building;
   User?: User;
 }
@@ -52,18 +52,16 @@ export interface Event {
 export interface Access {
   id: string;
   buildingId: string;
+  visitorName: string;
+  visitorDocument: string;
+  unitNumber: string;
   pin: string;
-  name: string;
-  phone?: string;
-  type: 'visitor' | 'temporary' | 'service' | 'emergency';
   validFrom: string;
   validUntil: string;
-  maxUses: number;
-  currentUses: number;
-  isActive: boolean;
-  createdBy?: string;
-  notes?: string;
+  used: boolean;
+  usedAt?: string;
   createdAt: string;
+  updatedAt: string;
   Building?: Building;
 }
 
