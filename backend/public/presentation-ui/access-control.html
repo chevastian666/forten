@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORTEN - Control de Acceso</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/access-control.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span class="logo-text">FORTEN</span>
+                </div>
+                <div class="logo-subtitle">Sistema de Portería Digital</div>
+            </div>
+            
+            <div class="sidebar-menu">
+                <ul class="menu-list">
+                    <li class="menu-item">
+                        <a href="index.html" class="menu-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="menu-item active">
+                        <a href="access-control.html" class="menu-link">
+                            <i class="fas fa-door-open"></i>
+                            <span>Control de Acceso</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="visitors.html" class="menu-link">
+                            <i class="fas fa-users"></i>
+                            <span>Visitantes</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="security.html" class="menu-link">
+                            <i class="fas fa-shield-virus"></i>
+                            <span>Seguridad</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="reports.html" class="menu-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Reportes</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="notifications.html" class="menu-link">
+                            <i class="fas fa-bell"></i>
+                            <span>Notificaciones</span>
+                            <span class="notification-badge">7</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="settings.html" class="menu-link">
+                            <i class="fas fa-cog"></i>
+                            <span>Configuración</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">Admin Usuario</div>
+                        <div class="user-role">Administrador</div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">Control de Acceso</h1>
+                </div>
+                
+                <div class="header-right">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Buscar puertas, usuarios...">
+                    </div>
+                    
+                    <div class="header-actions">
+                        <button class="action-btn notification-btn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-dot"></span>
+                        </button>
+                        
+                        <button class="action-btn">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        
+                        <div class="user-menu">
+                            <img src="https://via.placeholder.com/40x40/FF6B35/FFFFFF?text=AU" alt="Avatar" class="user-avatar-small">
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Access Control Content -->
+            <div class="content-area">
+                <!-- Access Control Stats -->
+                <div class="access-stats-grid">
+                    <div class="stat-card doors-status">
+                        <div class="stat-icon">
+                            <i class="fas fa-door-open"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">6/7</div>
+                            <div class="stat-label">Puertas Operativas</div>
+                            <div class="stat-detail">1 en mantenimiento</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card active-users">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">23</div>
+                            <div class="stat-label">Usuarios Activos</div>
+                            <div class="stat-detail">En el edificio ahora</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card access-events">
+                        <div class="stat-icon">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">284</div>
+                            <div class="stat-label">Eventos Hoy</div>
+                            <div class="stat-detail">+15% vs ayer</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card security-alerts">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">2</div>
+                            <div class="stat-label">Alertas Activas</div>
+                            <div class="stat-detail">Requieren revisión</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Control Actions Bar -->
+                <div class="control-actions-bar">
+                    <div class="emergency-controls">
+                        <button class="emergency-btn lockdown">
+                            <i class="fas fa-lock"></i>
+                            Bloqueo Total
+                        </button>
+                        <button class="emergency-btn unlock-all">
+                            <i class="fas fa-unlock"></i>
+                            Desbloquear Todo
+                        </button>
+                        <button class="emergency-btn emergency">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Emergencia
+                        </button>
+                    </div>
+                    
+                    <div class="control-filters">
+                        <select class="filter-select">
+                            <option value="all">Todas las Zonas</option>
+                            <option value="main">Edificio Principal</option>
+                            <option value="parking">Estacionamiento</option>
+                            <option value="server">Sala de Servidores</option>
+                        </select>
+                        
+                        <select class="filter-select">
+                            <option value="all">Todos los Estados</option>
+                            <option value="open">Abierto</option>
+                            <option value="locked">Cerrado</option>
+                            <option value="maintenance">Mantenimiento</option>
+                        </select>
+                        
+                        <button class="btn-refresh">
+                            <i class="fas fa-sync-alt"></i>
+                            Actualizar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Door Control Grid -->
+                <div class="door-control-grid">
+                    <!-- Main Entrance -->
+                    <div class="door-card main-entrance">
+                        <div class="door-header">
+                            <div class="door-title">
+                                <h3>Entrada Principal</h3>
+                                <span class="door-zone">Edificio A - Planta Baja</span>
+                            </div>
+                            <div class="door-status open">
+                                <span class="status-indicator"></span>
+                                <span class="status-text">Abierto</span>
+                            </div>
+                        </div>
+                        
+                        <div class="door-visual">
+                            <div class="door-icon open">
+                                <i class="fas fa-door-open"></i>
+                            </div>
+                            <div class="door-activity">
+                                <div class="activity-indicator active"></div>
+                                <span class="activity-text">Actividad reciente</span>
+                            </div>
+                        </div>
+                        
+                        <div class="door-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">127</span>
+                                <span class="stat-label">Accesos hoy</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">08:45</span>
+                                <span class="stat-label">Último acceso</span>
+                            </div>
+                        </div>
+                        
+                        <div class="door-controls">
+                            <button class="control-btn primary">
+                                <i class="fas fa-unlock"></i>
+                                Abrir
+                            </button>
+                            <button class="control-btn secondary">
+                                <i class="fas fa-lock"></i>
+                                Cerrar
+                            </button>
+                            <button class="control-btn info">
+                                <i class="fas fa-eye"></i>
+                                Monitor
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Security Door -->
+                    <div class="door-card security">
+                        <div class="door-header">
+                            <div class="door-title">
+                                <h3>Sala de Servidores</h3>
+                                <span class="door-zone">Edificio A - Sótano</span>
+                            </div>
+                            <div class="door-status locked">
+                                <span class="status-indicator"></span>
+                                <span class="status-text">Cerrado</span>
+                            </div>
+                        </div>
+                        
+                        <div class="door-visual">
+                            <div class="door-icon locked">
+                                <i class="fas fa-door-closed"></i>
+                            </div>
+                            <div class="security-level">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Seguridad Alta</span>
+                            </div>
+                        </div>
+                        
+                        <div class="door-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">3</span>
+                                <span class="stat-label">Accesos hoy</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">14:22</span>
+                                <span class="stat-label">Último acceso</span>
+                            </div>
+                        </div>
+                        
+                        <div class="door-controls">
+                            <button class="control-btn primary">
+                                <i class="fas fa-unlock"></i>
+                                Abrir
+                            </button>
+                            <button class="control-btn secondary">
+                                <i class="fas fa-lock"></i>
+                                Cerrar
+                            </button>
+                            <button class="control-btn warning">
+                                <i class="fas fa-user-shield"></i>
+                                Autorizar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Parking Access -->
+                    <div class="door-card parking">
+                        <div class="door-header">
+                            <div class="door-title">
+                                <h3>Estacionamiento</h3>
+                                <span class="door-zone">Acceso Vehicular</span>
+                            </div>
+                            <div class="door-status open">
+                                <span class="status-indicator"></span>
+                                <span class="status-text">Operativo</span>
+                            </div>
+                        </div>
+                        
+                        <div class="door-visual">
+                            <div class="door-icon barrier">
+                                <i class="fas fa-road"></i>
+                            </div>
+                            <div class="vehicle-count">
+                                <i class="fas fa-car"></i>
+                                <span>23/50 vehículos</span>
+                            </div>
+                        </div>
+                        
+                        <div class="door-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">45</span>
+                                <span class="stat-label">Entradas hoy</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">08:32</span>
+                                <span class="stat-label">Última entrada</span>
+                            </div>
+                        </div>
+                        
+                        <div class="door-controls">
+                            <button class="control-btn primary">
+                                <i class="fas fa-arrow-up"></i>
+                                Subir Barrera
+                            </button>
+                            <button class="control-btn secondary">
+                                <i class="fas fa-arrow-down"></i>
+                                Bajar Barrera
+                            </button>
+                            <button class="control-btn info">
+                                <i class="fas fa-camera"></i>
+                                Cámaras
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Emergency Exit -->
+                    <div class="door-card emergency-exit">
+                        <div class="door-header">
+                            <div class="door-title">
+                                <h3>Salida de Emergencia</h3>
+                                <span class="door-zone">Edificio A - Lateral</span>
+                            </div>
+                            <div class="door-status locked">
+                                <span class="status-indicator"></span>
+                                <span class="status-text">Cerrado</span>
+                            </div>
+                        </div>
+                        
+                        <div class="door-visual">
+                            <div class="door-icon emergency">
+                                <i class="fas fa-running"></i>
+                            </div>
+                            <div class="emergency-status">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Sólo Emergencia</span>
+                            </div>
+                        </div>
+                        
+                        <div class="door-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">0</span>
+                                <span class="stat-label">Usos hoy</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">--:--</span>
+                                <span class="stat-label">Último uso</span>
+                            </div>
+                        </div>
+                        
+                        <div class="door-controls">
+                            <button class="control-btn danger">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Emergencia
+                            </button>
+                            <button class="control-btn secondary">
+                                <i class="fas fa-tools"></i>
+                                Mantenimiento
+                            </button>
+                            <button class="control-btn info">
+                                <i class="fas fa-eye"></i>
+                                Estado
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Office Access -->
+                    <div class="door-card office">
+                        <div class="door-header">
+                            <div class="door-title">
+                                <h3>Oficinas Administrativas</h3>
+                                <span class="door-zone">Edificio A - Piso 2</span>
+                            </div>
+                            <div class="door-status open">
+                                <span class="status-indicator"></span>
+                                <span class="status-text">Abierto</span>
+                            </div>
+                        </div>
+                        
+                        <div class="door-visual">
+                            <div class="door-icon open">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <div class="office-hours">
+                                <i class="fas fa-clock"></i>
+                                <span>Horario: 08:00 - 18:00</span>
+                            </div>
+                        </div>
+                        
+                        <div class="door-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">89</span>
+                                <span class="stat-label">Accesos hoy</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">08:15</span>
+                                <span class="stat-label">Último acceso</span>
+                            </div>
+                        </div>
+                        
+                        <div class="door-controls">
+                            <button class="control-btn primary">
+                                <i class="fas fa-unlock"></i>
+                                Abrir
+                            </button>
+                            <button class="control-btn secondary">
+                                <i class="fas fa-lock"></i>
+                                Cerrar
+                            </button>
+                            <button class="control-btn warning">
+                                <i class="fas fa-clock"></i>
+                                Programar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Loading Bay -->
+                    <div class="door-card loading-bay">
+                        <div class="door-header">
+                            <div class="door-title">
+                                <h3>Muelle de Carga</h3>
+                                <span class="door-zone">Área de Servicio</span>
+                            </div>
+                            <div class="door-status maintenance">
+                                <span class="status-indicator"></span>
+                                <span class="status-text">Mantenimiento</span>
+                            </div>
+                        </div>
+                        
+                        <div class="door-visual">
+                            <div class="door-icon maintenance">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <div class="maintenance-info">
+                                <i class="fas fa-tools"></i>
+                                <span>Mantenimiento programado</span>
+                            </div>
+                        </div>
+                        
+                        <div class="door-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">12</span>
+                                <span class="stat-label">Accesos ayer</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">16:45</span>
+                                <span class="stat-label">Último acceso</span>
+                            </div>
+                        </div>
+                        
+                        <div class="door-controls">
+                            <button class="control-btn disabled" disabled>
+                                <i class="fas fa-tools"></i>
+                                En Mantenimiento
+                            </button>
+                            <button class="control-btn info">
+                                <i class="fas fa-calendar"></i>
+                                Programar
+                            </button>
+                            <button class="control-btn warning">
+                                <i class="fas fa-phone"></i>
+                                Contactar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Access Activity -->
+                <div class="access-activity-section">
+                    <div class="section-header">
+                        <h2>Actividad Reciente de Accesos</h2>
+                        <div class="section-actions">
+                            <button class="btn-small">
+                                <i class="fas fa-download"></i>
+                                Exportar
+                            </button>
+                            <button class="btn-small">
+                                <i class="fas fa-filter"></i>
+                                Filtrar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-timeline">
+                        <div class="timeline-item success">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <h4>Acceso Autorizado</h4>
+                                    <span class="timeline-time">08:45 AM</span>
+                                </div>
+                                <div class="timeline-details">
+                                    <p><strong>Usuario:</strong> María García</p>
+                                    <p><strong>Puerta:</strong> Entrada Principal</p>
+                                    <p><strong>Método:</strong> Tarjeta de acceso</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item warning">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <h4>Intento de Acceso Denegado</h4>
+                                    <span class="timeline-time">08:32 AM</span>
+                                </div>
+                                <div class="timeline-details">
+                                    <p><strong>Usuario:</strong> Desconocido</p>
+                                    <p><strong>Puerta:</strong> Sala de Servidores</p>
+                                    <p><strong>Motivo:</strong> Tarjeta no válida</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item success">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <h4>Vehículo Autorizado</h4>
+                                    <span class="timeline-time">08:28 AM</span>
+                                </div>
+                                <div class="timeline-details">
+                                    <p><strong>Placa:</strong> ABC-1234</p>
+                                    <p><strong>Ubicación:</strong> Estacionamiento</p>
+                                    <p><strong>Método:</strong> Reconocimiento de placa</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item info">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <h4>Acceso Manual Autorizado</h4>
+                                    <span class="timeline-time">08:15 AM</span>
+                                </div>
+                                <div class="timeline-details">
+                                    <p><strong>Usuario:</strong> Carlos López</p>
+                                    <p><strong>Puerta:</strong> Oficinas Administrativas</p>
+                                    <p><strong>Autorizado por:</strong> Admin Sistema</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item danger">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <h4>Alerta de Seguridad</h4>
+                                    <span class="timeline-time">07:58 AM</span>
+                                </div>
+                                <div class="timeline-details">
+                                    <p><strong>Tipo:</strong> Puerta forzada</p>
+                                    <p><strong>Ubicación:</strong> Salida de emergencia</p>
+                                    <p><strong>Estado:</strong> Investigando</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Users and Real-time Monitoring -->
+                <div class="monitoring-grid">
+                    <!-- Active Users Panel -->
+                    <div class="active-users-panel">
+                        <div class="panel-header">
+                            <h3>
+                                <i class="fas fa-user-clock"></i>
+                                Usuarios Activos en el Edificio
+                            </h3>
+                            <div class="user-count-badge">23 activos</div>
+                        </div>
+                        
+                        <div class="users-list">
+                            <div class="user-item">
+                                <div class="user-avatar">
+                                    <img src="https://via.placeholder.com/40x40/FF6B35/FFFFFF?text=MG" alt="User">
+                                    <span class="status-dot online"></span>
+                                </div>
+                                <div class="user-info">
+                                    <div class="user-name">María García</div>
+                                    <div class="user-location">Oficinas Admin - Piso 2</div>
+                                    <div class="user-time">Entrada: 08:15 AM</div>
+                                </div>
+                                <div class="user-actions">
+                                    <button class="btn-icon small" title="Ubicar">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </button>
+                                    <button class="btn-icon small" title="Contactar">
+                                        <i class="fas fa-phone"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="user-item">
+                                <div class="user-avatar">
+                                    <img src="https://via.placeholder.com/40x40/28A745/FFFFFF?text=CL" alt="User">
+                                    <span class="status-dot online"></span>
+                                </div>
+                                <div class="user-info">
+                                    <div class="user-name">Carlos López</div>
+                                    <div class="user-location">Sala de Servidores</div>
+                                    <div class="user-time">Entrada: 07:45 AM</div>
+                                </div>
+                                <div class="user-actions">
+                                    <button class="btn-icon small" title="Ubicar">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </button>
+                                    <button class="btn-icon small" title="Contactar">
+                                        <i class="fas fa-phone"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="user-item">
+                                <div class="user-avatar">
+                                    <img src="https://via.placeholder.com/40x40/17A2B8/FFFFFF?text=RS" alt="User">
+                                    <span class="status-dot online"></span>
+                                </div>
+                                <div class="user-info">
+                                    <div class="user-name">Roberto Silva</div>
+                                    <div class="user-location">Entrada Principal</div>
+                                    <div class="user-time">Entrada: 08:45 AM</div>
+                                </div>
+                                <div class="user-actions">
+                                    <button class="btn-icon small" title="Ubicar">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </button>
+                                    <button class="btn-icon small" title="Contactar">
+                                        <i class="fas fa-phone"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="user-item visitor">
+                                <div class="user-avatar">
+                                    <img src="https://via.placeholder.com/40x40/FFC107/FFFFFF?text=AM" alt="Visitor">
+                                    <span class="status-dot visitor"></span>
+                                </div>
+                                <div class="user-info">
+                                    <div class="user-name">Ana Martínez (Visitante)</div>
+                                    <div class="user-location">Oficinas Admin - Reunión</div>
+                                    <div class="user-time">Entrada: 09:00 AM</div>
+                                </div>
+                                <div class="user-actions">
+                                    <button class="btn-icon small" title="Ubicar">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </button>
+                                    <button class="btn-icon small" title="Check-out">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="panel-footer">
+                            <button class="btn-link">Ver todos los usuarios</button>
+                        </div>
+                    </div>
+
+                    <!-- Real-time Access Monitor -->
+                    <div class="realtime-monitor-panel">
+                        <div class="panel-header">
+                            <h3>
+                                <i class="fas fa-chart-line"></i>
+                                Monitor en Tiempo Real
+                            </h3>
+                            <div class="live-indicator">
+                                <span class="live-dot"></span>
+                                EN VIVO
+                            </div>
+                        </div>
+                        
+                        <div class="monitor-content">
+                            <div class="access-chart">
+                                <canvas id="realTimeAccessChart" width="400" height="200"></canvas>
+                            </div>
+                            
+                            <div class="monitor-stats">
+                                <div class="monitor-stat">
+                                    <div class="stat-value">12</div>
+                                    <div class="stat-label">Accesos última hora</div>
+                                </div>
+                                <div class="monitor-stat">
+                                    <div class="stat-value">3.2s</div>
+                                    <div class="stat-label">Tiempo promedio</div>
+                                </div>
+                                <div class="monitor-stat">
+                                    <div class="stat-value">98.7%</div>
+                                    <div class="stat-label">Tasa de éxito</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions Panel -->
+                    <div class="quick-actions-panel">
+                        <div class="panel-header">
+                            <h3>
+                                <i class="fas fa-bolt"></i>
+                                Acciones Rápidas
+                            </h3>
+                        </div>
+                        
+                        <div class="quick-actions-grid">
+                            <button class="quick-action-btn">
+                                <i class="fas fa-user-plus"></i>
+                                <span>Nuevo Usuario</span>
+                            </button>
+                            
+                            <button class="quick-action-btn">
+                                <i class="fas fa-key"></i>
+                                <span>Acceso Temporal</span>
+                            </button>
+                            
+                            <button class="quick-action-btn">
+                                <i class="fas fa-door-open"></i>
+                                <span>Abrir Todas</span>
+                            </button>
+                            
+                            <button class="quick-action-btn">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Modo Seguridad</span>
+                            </button>
+                            
+                            <button class="quick-action-btn">
+                                <i class="fas fa-clock"></i>
+                                <span>Programar Acceso</span>
+                            </button>
+                            
+                            <button class="quick-action-btn">
+                                <i class="fas fa-file-export"></i>
+                                <span>Exportar Log</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/access-control.js"></script>
+</body>
+</html>

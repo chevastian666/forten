@@ -67,8 +67,8 @@ export const Events: React.FC = () => {
   const [filters, setFilters] = useState({
     buildingId: '',
     type: '',
-    severity: '',
-    resolved: '',
+    priority: '',
+    status: '',
   });
 
   useEffect(() => {
@@ -79,8 +79,8 @@ export const Events: React.FC = () => {
     const params: any = {};
     if (filters.buildingId) params.buildingId = filters.buildingId;
     if (filters.type) params.type = filters.type;
-    if (filters.severity) params.severity = filters.severity;
-    if (filters.resolved !== '') params.resolved = filters.resolved === 'true';
+    if (filters.priority) params.priority = filters.priority;
+    if (filters.status) params.status = filters.status;
     
     dispatch(fetchEvents(params));
   };
@@ -118,7 +118,7 @@ export const Events: React.FC = () => {
               label="Edificio"
             >
               <MenuItem value="">Todos</MenuItem>
-              {buildings.map((building) => (
+              {buildings?.map((building) => (
                 <MenuItem key={building.id} value={building.id}>
                   {building.name}
                 </MenuItem>
@@ -134,20 +134,20 @@ export const Events: React.FC = () => {
               label="Tipo"
             >
               <MenuItem value="">Todos</MenuItem>
-              {Object.entries(typeLabels).map(([value, label]) => (
-                <MenuItem key={value} value={value}>
-                  {label}
-                </MenuItem>
-              ))}
+              <MenuItem value="security">Seguridad</MenuItem>
+              <MenuItem value="maintenance">Mantenimiento</MenuItem>
+              <MenuItem value="access">Acceso</MenuItem>
+              <MenuItem value="system">Sistema</MenuItem>
+              <MenuItem value="emergency">Emergencia</MenuItem>
             </Select>
           </FormControl>
 
           <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>Severidad</InputLabel>
+            <InputLabel>Prioridad</InputLabel>
             <Select
-              value={filters.severity}
-              onChange={(e) => setFilters({ ...filters, severity: e.target.value })}
-              label="Severidad"
+              value={filters.priority}
+              onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
+              label="Prioridad"
             >
               <MenuItem value="">Todas</MenuItem>
               <MenuItem value="low">Baja</MenuItem>
@@ -160,13 +160,13 @@ export const Events: React.FC = () => {
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Estado</InputLabel>
             <Select
-              value={filters.resolved}
-              onChange={(e) => setFilters({ ...filters, resolved: e.target.value })}
+              value={filters.status}
+              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
               label="Estado"
             >
               <MenuItem value="">Todos</MenuItem>
-              <MenuItem value="false">Sin resolver</MenuItem>
-              <MenuItem value="true">Resueltos</MenuItem>
+              <MenuItem value="pending">Pendiente</MenuItem>
+              <MenuItem value="resolved">Resuelto</MenuItem>
             </Select>
           </FormControl>
 
@@ -187,14 +187,14 @@ export const Events: React.FC = () => {
               <TableCell>Fecha/Hora</TableCell>
               <TableCell>Edificio</TableCell>
               <TableCell>Tipo</TableCell>
-              <TableCell>Descripción</TableCell>
-              <TableCell align="center">Severidad</TableCell>
+              <TableCell>Título</TableCell>
+              <TableCell align="center">Prioridad</TableCell>
               <TableCell align="center">Estado</TableCell>
               <TableCell align="center">Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {events.map((event) => (
+            {events && events.length > 0 ? events.map((event) => (
               <TableRow key={event.id} hover>
                 <TableCell>
                   <Typography variant="body2">
@@ -208,24 +208,24 @@ export const Events: React.FC = () => {
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2">
-                    {typeLabels[event.type] || event.type}
+                    {event.type?.charAt(0).toUpperCase() + event.type?.slice(1) || 'N/A'}
                   </Typography>
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2">
-                    {event.description}
+                    {event.title || 'Sin título'}
                   </Typography>
                 </TableCell>
                 <TableCell align="center">
                   <Chip
-                    icon={severityIcons[event.severity] as React.ReactElement || <Info fontSize="small" />}
-                    label={event.severity.toUpperCase()}
-                    color={severityColors[event.severity] || 'default'}
+                    icon={severityIcons[event.priority] as React.ReactElement || <Info fontSize="small" />}
+                    label={event.priority?.toUpperCase() || 'N/A'}
+                    color={severityColors[event.priority] || 'default'}
                     size="small"
                   />
                 </TableCell>
                 <TableCell align="center">
-                  {event.resolved ? (
+                  {event.status === 'resolved' ? (
                     <Chip
                       icon={<CheckCircle fontSize="small" />}
                       label="Resuelto"
@@ -241,7 +241,7 @@ export const Events: React.FC = () => {
                   )}
                 </TableCell>
                 <TableCell align="center">
-                  {!event.resolved && (
+                  {event.status !== 'resolved' && (
                     <Tooltip title="Marcar como resuelto">
                       <IconButton
                         size="small"
@@ -254,7 +254,15 @@ export const Events: React.FC = () => {
                   )}
                 </TableCell>
               </TableRow>
-            ))}
+            )) : (
+              <TableRow>
+                <TableCell colSpan={7} align="center">
+                  <Typography variant="body2" color="text.secondary" sx={{ py: 4 }}>
+                    No hay eventos para mostrar
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>

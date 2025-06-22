@@ -1,0 +1,10 @@
+{
+  "name": "Door Access Event",
+  "category": "access",
+  "description": "Notification when door is opened",
+  "subject": "Access Event: Door Opened",
+  "variables": ["timestamp", "doorName", "userName", "method", "location"],
+  "priority": "medium",
+  "channels": ["websocket", "whatsapp"],
+  "lastModified": "2024-01-15T10:00:00Z"
+}

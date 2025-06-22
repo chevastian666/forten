@@ -1,0 +1,11 @@
+<div class="alert alert-warning">
+  <h2>⚠️ Suspicious Activity Detected</h2>
+  <p><strong>Time:</strong> {{formatDateTime timestamp}}</p>
+  <p><strong>User ID:</strong> {{userId}}</p>
+  <p><strong>Activity:</strong> {{activity}}</p>
+  <p><strong>Risk Level:</strong> {{uppercase risk_level}}</p>
+  <p><strong>Details:</strong> {{details}}</p>
+  {{#ifEquals risk_level "high"}}
+  <p class="critical">This activity requires immediate attention!</p>
+  {{/ifEquals}}
+</div>

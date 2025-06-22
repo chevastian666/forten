@@ -6,6 +6,9 @@ import {
   Box,
   Paper,
   LinearProgress,
+  Stack,
+  Button,
+  Fab,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import {
@@ -15,11 +18,15 @@ import {
   Videocam,
   VpnKey,
   TrendingUp,
+  Dashboard as DashboardIcon,
 } from '@mui/icons-material';
 import { useAppSelector } from '../hooks/useAppSelector';
 import { useAppDispatch } from '../hooks/useAppDispatch';
 import { fetchEventStats } from '../store/eventSlice';
 import { fetchBuildings } from '../store/buildingSlice';
+import { ActivityChart } from '../components/ActivityChart';
+import { WeeklyActivityChart } from '../components/WeeklyActivityChart';
+import { useNavigate } from 'react-router-dom';
 
 const StatCard: React.FC<{
   title: string;
@@ -61,6 +68,7 @@ const StatCard: React.FC<{
 
 export const Dashboard: React.FC = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { stats } = useAppSelector((state) => state.events);
   const { buildings } = useAppSelector((state) => state.buildings);
   const user = useAppSelector((state) => state.auth.user);
@@ -70,13 +78,40 @@ export const Dashboard: React.FC = () => {
     dispatch(fetchBuildings({ status: 'active', limit: 5 }));
   }, [dispatch]);
 
-  const activeBuildings = buildings.filter(b => b.status === 'active').length;
+  const activeBuildings = buildings?.filter(b => b.status === 'active').length || 0;
+
+  const canAccessExecutive = user?.role === 'admin' || user?.role === 'manager';
 
   return (
-    <Box>
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold' }}>
-        Bienvenido, {user?.firstName}
-      </Typography>
+    <Box sx={{ position: 'relative' }}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ mb: 3 }}
+      >
+        <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+          Bienvenido, {user?.firstName}
+        </Typography>
+
+        {canAccessExecutive && (
+          <Button
+            variant="contained"
+            startIcon={<DashboardIcon />}
+            onClick={() => navigate('/executive')}
+            sx={{
+              background: 'linear-gradient(45deg, #FF6B35 30%, #FF8F65 90%)',
+              boxShadow: '0 4px 16px rgba(255, 107, 53, 0.3)',
+              '&:hover': {
+                background: 'linear-gradient(45deg, #E85D25 30%, #FF6B35 90%)',
+                boxShadow: '0 6px 20px rgba(255, 107, 53, 0.4)',
+              },
+            }}
+          >
+            Dashboard Ejecutivo
+          </Button>
+        )}
+      </Stack>
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -124,58 +159,61 @@ export const Dashboard: React.FC = () => {
         <Grid size={{ xs: 12, md: 8 }}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
-              Actividad Reciente
+              Actividad Temporal
             </Typography>
-            <Box sx={{ height: 400 }}>
-              {/* Aquí iría un gráfico de actividad */}
-              <Typography color="text.secondary" align="center" sx={{ mt: 10 }}>
-                Gráfico de actividad temporal (pendiente de implementación)
-              </Typography>
-            </Box>
+            <ActivityChart type="area" height={350} />
           </Paper>
         </Grid>
         
         <Grid size={{ xs: 12, md: 4 }}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Edificios Activos
-            </Typography>
-            <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
-              {buildings.map((building) => (
-                <Box
-                  key={building.id}
-                  sx={{
-                    p: 2,
-                    mb: 1,
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    borderRadius: 1,
-                  }}
-                >
-                  <Typography variant="subtitle1" fontWeight="medium">
-                    {building.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {building.address}
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Videocam fontSize="small" sx={{ mr: 0.5 }} />
-                      <Typography variant="body2">
-                        {building.totalCameras} cámaras
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <VpnKey fontSize="small" sx={{ mr: 0.5 }} />
-                      <Typography variant="body2">
-                        {building.totalUnits} unidades
-                      </Typography>
+          <Stack spacing={3}>
+            {/* Weekly Activity Chart */}
+            <Paper sx={{ p: 3 }}>
+              <WeeklyActivityChart height={200} />
+            </Paper>
+
+            {/* Buildings List */}
+            <Paper sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Edificios Activos
+              </Typography>
+              <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
+                {buildings?.map((building) => (
+                  <Box
+                    key={building.id}
+                    sx={{
+                      p: 2,
+                      mb: 1,
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      borderRadius: 1,
+                    }}
+                  >
+                    <Typography variant="subtitle1" fontWeight="medium">
+                      {building.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {building.address}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Videocam fontSize="small" sx={{ mr: 0.5 }} />
+                        <Typography variant="body2">
+                          {building.totalCameras} cámaras
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <VpnKey fontSize="small" sx={{ mr: 0.5 }} />
+                        <Typography variant="body2">
+                          {building.totalUnits} unidades
+                        </Typography>
+                      </Box>
                     </Box>
                   </Box>
-                </Box>
-              ))}
-            </Box>
-          </Paper>
+                ))}
+              </Box>
+            </Paper>
+          </Stack>
         </Grid>
       </Grid>
     </Box>

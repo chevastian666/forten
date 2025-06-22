@@ -1,0 +1,18 @@
+{
+  "name": "Forced Door Entry",
+  "category": "access",
+  "description": "Critical alert for forced door entry",
+  "subject": "CRITICAL: Forced Door Entry Detected",
+  "variables": [
+    "timestamp",
+    "doorName",
+    "location",
+    "sensorData"
+  ],
+  "priority": "critical",
+  "channels": [
+    "email",
+    "whatsapp",
+    "websocket"
+  ]
+}

@@ -3,7 +3,7 @@
  * Stores audit trail for all critical actions in the system
  */
 
-const { DataTypes, Model } = require('sequelize');
+const { DataTypes, Model, Op } = require('sequelize');
 const sequelize = require('../config/database');
 
 class AuditLog extends Model {
@@ -334,7 +334,7 @@ AuditLog.addScope('withDeleted', {
 AuditLog.addScope('onlyDeleted', {
   where: {
     deleted_at: {
-      [sequelize.Op.ne]: null
+      [Op.ne]: null
     }
   },
   paranoid: false

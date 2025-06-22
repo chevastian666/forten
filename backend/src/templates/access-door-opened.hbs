@@ -1,0 +1,18 @@
+<div class="notification access-event">
+  <h3>🚪 Door Access Event</h3>
+  <div class="event-details">
+    <p><strong>Time:</strong> {{formatDateTime timestamp}}</p>
+    <p><strong>Door:</strong> {{doorName}}</p>
+    <p><strong>User:</strong> {{userName}}</p>
+    <p><strong>Access Method:</strong> {{capitalize method}}</p>
+    <p><strong>Location:</strong> {{location}}</p>
+  </div>
+  {{#ifEquals method "emergency"}}
+  <div class="emergency-notice">
+    <p>⚡ Emergency access protocol activated</p>
+  </div>
+  {{/ifEquals}}
+  <div class="footer">
+    <p>Access granted at {{formatTime timestamp}} on {{formatDate timestamp}}</p>
+  </div>
+</div>

@@ -36,6 +36,7 @@ const webhookRoutes = require('./routes/webhook.routes');
 const statisticsRoutes = require('./routes/statistics.routes');
 const softDeleteRoutes = require('./routes/softDelete.routes');
 const adminConfigRoutes = require('./routes/admin/config.routes');
+const geolocationRoutes = require('./routes/geolocation.routes');
 
 // Import models to initialize database
 const models = require('./models');
@@ -165,6 +166,7 @@ app.use('/api/webhooks', webhookRoutes);
 app.use('/api/statistics', statisticsRoutes);
 app.use('/api/soft-deletes', softDeleteRoutes);
 app.use('/api/admin/config', adminConfigRoutes);
+app.use('/api/geolocation', geolocationRoutes);
 
 // Example protected routes to demonstrate audit functionality
 app.use('/api/demo', (req, res, next) => {
@@ -428,6 +430,59 @@ const startServer = async () => {
       });
     }
     
+    // Initialize geolocation service
+    try {
+      const GeolocationService = require('./services/geolocation.service');
+      const redis = require('./config/redis');
+      const redisClient = redis.getClient();
+      
+      await GeolocationService.initialize(models, redisClient);
+      logger.info('Geolocation service initialized');
+      
+      // Listen for geolocation alerts
+      GeolocationService.on('geolocationAlert', (alert) => {
+        logger.warn('Geolocation security alert', {
+          alertId: alert.id,
+          type: alert.type,
+          severity: alert.severity,
+          ip: alert.details.ip,
+          country: alert.details.country,
+          userId: alert.userId
+        });
+        
+        // Emit WebSocket notification if available
+        if (webSocketManager) {
+          const io = webSocketManager.getIO();
+          io.to('administrators').emit('securityAlert', alert);
+          
+          // Also notify the specific user if available
+          if (alert.userId) {
+            io.to(`user_${alert.userId}`).emit('securityAlert', alert);
+          }
+        }
+        
+        // Integrate with notification service if available
+        try {
+          const { notificationService } = require('./services/notification.service');
+          notificationService.sendSecurityAlert({
+            type: 'geolocation_anomaly',
+            severity: alert.severity,
+            title: alert.title,
+            message: alert.message,
+            details: alert.details,
+            userId: alert.userId
+          });
+        } catch (notifError) {
+          logger.debug('Notification service not available for geolocation alert');
+        }
+      });
+      
+    } catch (error) {
+      logger.error('Failed to initialize geolocation service:', {
+        error: error.message
+      });
+    }
+    
     // Start server
     server.listen(PORT, () => {
       logger.info(`FORTEN Backend Server running on port ${PORT}`, {
@@ -445,7 +500,8 @@ const startServer = async () => {
           aggregation: 'ENABLED (with cron jobs)',
           softDeletes: 'ENABLED (paranoid mode)',
           dynamicConfig: 'ENABLED (Redis storage)',
-          compression: 'ENABLED (gzip, 1kb threshold)'
+          compression: 'ENABLED (gzip, 1kb threshold)',
+          geolocation: 'ENABLED (geoip-lite, anomaly detection)'
         }
       });
       
@@ -560,6 +616,15 @@ const startServer = async () => {
         console.log('  GET    /api/admin/config/stats            - Configuration statistics');
         console.log('  GET    /api/admin/config/categories       - Available categories');
         console.log('  GET    /api/admin/config/health           - Health check');
+        console.log('\\n🌍 Geolocation endpoints:');
+        console.log('  GET    /api/geolocation/lookup/:ip        - Lookup IP geolocation');
+        console.log('  POST   /api/geolocation/analyze           - Analyze access for anomalies');
+        console.log('  GET    /api/geolocation/current           - Analyze current request');
+        console.log('  GET    /api/geolocation/stats/:userId     - User access statistics');
+        console.log('  GET    /api/geolocation/config            - Service configuration');
+        console.log('  PUT    /api/geolocation/config            - Update configuration');
+        console.log('  POST   /api/geolocation/test              - Test functionality');
+        console.log('  GET    /api/geolocation/health            - Health check');
       }
     });
   } catch (error) {
@@ -622,6 +687,17 @@ process.on('SIGTERM', async () => {
       });
     }
     
+    // Shutdown geolocation service
+    try {
+      const GeolocationService = require('./services/geolocation.service');
+      await GeolocationService.shutdown();
+      logger.info('Geolocation service shutdown');
+    } catch (error) {
+      logger.error('Error shutting down geolocation service:', {
+        error: error.message
+      });
+    }
+    
     // Cleanup existing infrastructure if available
     try {
       const { cleanup } = require('./infrastructure/initialization');
@@ -680,6 +756,17 @@ process.on('SIGINT', async () => {
       logger.info('Configuration service shutdown');
     } catch (error) {
       logger.error('Error shutting down configuration service:', {
+        error: error.message
+      });
+    }
+    
+    // Shutdown geolocation service
+    try {
+      const GeolocationService = require('./services/geolocation.service');
+      await GeolocationService.shutdown();
+      logger.info('Geolocation service shutdown');
+    } catch (error) {
+      logger.error('Error shutting down geolocation service:', {
         error: error.message
       });
     }

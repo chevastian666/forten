@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORTEN - Gestión de Visitantes</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/visitors.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span class="logo-text">FORTEN</span>
+                </div>
+                <div class="logo-subtitle">Sistema de Portería Digital</div>
+            </div>
+            
+            <div class="sidebar-menu">
+                <ul class="menu-list">
+                    <li class="menu-item">
+                        <a href="index.html" class="menu-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="access-control.html" class="menu-link">
+                            <i class="fas fa-door-open"></i>
+                            <span>Control de Acceso</span>
+                        </a>
+                    </li>
+                    <li class="menu-item active">
+                        <a href="visitors.html" class="menu-link">
+                            <i class="fas fa-users"></i>
+                            <span>Visitantes</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="security.html" class="menu-link">
+                            <i class="fas fa-shield-virus"></i>
+                            <span>Seguridad</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="reports.html" class="menu-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Reportes</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="notifications.html" class="menu-link">
+                            <i class="fas fa-bell"></i>
+                            <span>Notificaciones</span>
+                            <span class="notification-badge">7</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="settings.html" class="menu-link">
+                            <i class="fas fa-cog"></i>
+                            <span>Configuración</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">Admin Usuario</div>
+                        <div class="user-role">Administrador</div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">Gestión de Visitantes</h1>
+                </div>
+                
+                <div class="header-right">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Buscar visitantes...">
+                    </div>
+                    
+                    <div class="header-actions">
+                        <button class="action-btn notification-btn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-dot"></span>
+                        </button>
+                        
+                        <button class="action-btn">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        
+                        <div class="user-menu">
+                            <img src="https://via.placeholder.com/40x40/FF6B35/FFFFFF?text=AU" alt="Avatar" class="user-avatar-small">
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Visitors Content -->
+            <div class="content-area">
+                <!-- Visitor Stats Row -->
+                <div class="visitor-stats-grid">
+                    <div class="stat-card visitors-today">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">47</div>
+                            <div class="stat-label">Visitantes Hoy</div>
+                            <div class="stat-detail">+15% vs ayer</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card visitors-inside">
+                        <div class="stat-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">23</div>
+                            <div class="stat-label">Dentro del Edificio</div>
+                            <div class="stat-detail">En tiempo real</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card pending-approval">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">5</div>
+                            <div class="stat-label">Esperando Aprobación</div>
+                            <div class="stat-detail">Requieren atención</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card avg-visit-time">
+                        <div class="stat-icon">
+                            <i class="fas fa-stopwatch"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">2.4h</div>
+                            <div class="stat-label">Tiempo Promedio</div>
+                            <div class="stat-detail">De visita</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Bar -->
+                <div class="visitor-action-bar">
+                    <div class="action-left">
+                        <button class="btn-primary visitor-register-btn">
+                            <i class="fas fa-user-plus"></i>
+                            Registrar Visitante
+                        </button>
+                        <button class="btn-secondary visitor-checkin-btn">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Check-in Rápido
+                        </button>
+                    </div>
+                    
+                    <div class="action-right">
+                        <select class="filter-select status-filter">
+                            <option value="all">Todos los Estados</option>
+                            <option value="pending">Esperando</option>
+                            <option value="inside">Dentro</option>
+                            <option value="exited">Salieron</option>
+                            <option value="expired">Expirados</option>
+                        </select>
+                        
+                        <select class="filter-select date-filter">
+                            <option value="today">Hoy</option>
+                            <option value="week">Esta Semana</option>
+                            <option value="month">Este Mes</option>
+                            <option value="custom">Rango Personalizado</option>
+                        </select>
+                        
+                        <button class="btn-icon export-btn">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Visitors Grid -->
+                <div class="visitors-grid">
+                    <!-- Visitors Table -->
+                    <div class="visitors-table-container">
+                        <div class="table-header">
+                            <h3>
+                                <i class="fas fa-list"></i>
+                                Lista de Visitantes
+                            </h3>
+                            <div class="table-actions">
+                                <button class="btn-icon">
+                                    <i class="fas fa-filter"></i>
+                                </button>
+                                <button class="btn-icon">
+                                    <i class="fas fa-sort"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="visitors-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Visitante</th>
+                                        <th>Empresa</th>
+                                        <th>Anfitrión</th>
+                                        <th>Entrada</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="visitor-row">
+                                        <td>
+                                            <div class="visitor-info">
+                                                <img src="https://via.placeholder.com/40x40/FF6B35/FFFFFF?text=AM" alt="Visitor" class="visitor-photo">
+                                                <div class="visitor-details">
+                                                    <div class="visitor-name">Ana Martínez</div>
+                                                    <div class="visitor-id">ID: 4789</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="company-info">
+                                                <div class="company-name">Tech Solutions</div>
+                                                <div class="company-type">Proveedor</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="host-info">
+                                                <div class="host-name">Carlos López</div>
+                                                <div class="host-dept">IT Department</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="time-info">
+                                                <div class="entry-time">09:15 AM</div>
+                                                <div class="entry-date">Hoy</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge inside">Dentro</span>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="btn-icon small" title="Ver detalles">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn-icon small" title="Check-out">
+                                                    <i class="fas fa-sign-out-alt"></i>
+                                                </button>
+                                                <button class="btn-icon small" title="Mensaje">
+                                                    <i class="fas fa-comment"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="visitor-row">
+                                        <td>
+                                            <div class="visitor-info">
+                                                <img src="https://via.placeholder.com/40x40/28A745/FFFFFF?text=JR" alt="Visitor" class="visitor-photo">
+                                                <div class="visitor-details">
+                                                    <div class="visitor-name">José Rodríguez</div>
+                                                    <div class="visitor-id">ID: 4790</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="company-info">
+                                                <div class="company-name">Consultoría ABC</div>
+                                                <div class="company-type">Cliente</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="host-info">
+                                                <div class="host-name">María García</div>
+                                                <div class="host-dept">Ventas</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="time-info">
+                                                <div class="entry-time">10:30 AM</div>
+                                                <div class="entry-date">Hoy</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge pending">Esperando</span>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="btn-icon small approve" title="Aprobar">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button class="btn-icon small reject" title="Rechazar">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                                <button class="btn-icon small" title="Contactar">
+                                                    <i class="fas fa-phone"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="visitor-row">
+                                        <td>
+                                            <div class="visitor-info">
+                                                <img src="https://via.placeholder.com/40x40/17A2B8/FFFFFF?text=LC" alt="Visitor" class="visitor-photo">
+                                                <div class="visitor-details">
+                                                    <div class="visitor-name">Laura Castro</div>
+                                                    <div class="visitor-id">ID: 4791</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="company-info">
+                                                <div class="company-name">Auditores S.A.</div>
+                                                <div class="company-type">Servicios</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="host-info">
+                                                <div class="host-name">Roberto Silva</div>
+                                                <div class="host-dept">Finanzas</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="time-info">
+                                                <div class="entry-time">08:45 AM</div>
+                                                <div class="entry-date">Hoy</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge exited">Salió</span>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <button class="btn-icon small" title="Ver historial">
+                                                    <i class="fas fa-history"></i>
+                                                </button>
+                                                <button class="btn-icon small" title="Generar reporte">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                </button>
+                                                <button class="btn-icon small" title="Reenviar invitación">
+                                                    <i class="fas fa-envelope"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Quick Registration Panel -->
+                    <div class="quick-registration-panel">
+                        <div class="panel-header">
+                            <h3>
+                                <i class="fas fa-plus-circle"></i>
+                                Registro Rápido
+                            </h3>
+                        </div>
+                        
+                        <div class="panel-content">
+                            <form class="quick-form">
+                                <div class="form-group">
+                                    <label>Nombre Completo</label>
+                                    <input type="text" placeholder="Ej: Juan Pérez" class="form-input">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Empresa</label>
+                                    <input type="text" placeholder="Ej: Tech Solutions" class="form-input">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Anfitrión</label>
+                                    <select class="form-select">
+                                        <option>Seleccionar anfitrión...</option>
+                                        <option>Carlos López - IT</option>
+                                        <option>María García - Ventas</option>
+                                        <option>Roberto Silva - Finanzas</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Motivo de Visita</label>
+                                    <select class="form-select">
+                                        <option>Reunión de trabajo</option>
+                                        <option>Presentación comercial</option>
+                                        <option>Entrega/Recogida</option>
+                                        <option>Mantenimiento</option>
+                                        <option>Otro</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-primary full-width">
+                                        <i class="fas fa-user-plus"></i>
+                                        Registrar Visitante
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Schedule -->
+                <div class="todays-schedule-section">
+                    <div class="section-header">
+                        <h3>
+                            <i class="fas fa-calendar-day"></i>
+                            Agenda de Hoy
+                        </h3>
+                        <div class="schedule-date">
+                            <span id="current-date"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="schedule-timeline">
+                        <div class="schedule-item upcoming">
+                            <div class="schedule-time">11:00</div>
+                            <div class="schedule-content">
+                                <div class="schedule-visitor">
+                                    <img src="https://via.placeholder.com/32x32/FF6B35/FFFFFF?text=DR" alt="Visitor">
+                                    <div class="visitor-schedule-info">
+                                        <div class="visitor-schedule-name">Dr. Ricardo Mendoza</div>
+                                        <div class="visitor-schedule-company">Consultoría Médica</div>
+                                    </div>
+                                </div>
+                                <div class="schedule-details">
+                                    <div class="schedule-host">Anfitrión: Ana López</div>
+                                    <div class="schedule-purpose">Reunión de revisión médica</div>
+                                </div>
+                                <div class="schedule-actions">
+                                    <button class="btn-small">Pre-aprobar</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="schedule-item">
+                            <div class="schedule-time">14:30</div>
+                            <div class="schedule-content">
+                                <div class="schedule-visitor">
+                                    <img src="https://via.placeholder.com/32x32/28A745/FFFFFF?text=SS" alt="Visitor">
+                                    <div class="visitor-schedule-info">
+                                        <div class="visitor-schedule-name">Sofía Sánchez</div>
+                                        <div class="visitor-schedule-company">Marketing Digital</div>
+                                    </div>
+                                </div>
+                                <div class="schedule-details">
+                                    <div class="schedule-host">Anfitrión: Pedro Ramos</div>
+                                    <div class="schedule-purpose">Presentación de propuesta</div>
+                                </div>
+                                <div class="schedule-actions">
+                                    <button class="btn-small">Contactar</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="schedule-item">
+                            <div class="schedule-time">16:00</div>
+                            <div class="schedule-content">
+                                <div class="schedule-visitor">
+                                    <img src="https://via.placeholder.com/32x32/17A2B8/FFFFFF?text=MT" alt="Visitor">
+                                    <div class="visitor-schedule-info">
+                                        <div class="visitor-schedule-name">Miguel Torres</div>
+                                        <div class="visitor-schedule-company">Mantenimiento Tech</div>
+                                    </div>
+                                </div>
+                                <div class="schedule-details">
+                                    <div class="schedule-host">Anfitrión: Sistema</div>
+                                    <div class="schedule-purpose">Mantenimiento de servidores</div>
+                                </div>
+                                <div class="schedule-actions">
+                                    <button class="btn-small warning">Acceso especial</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/visitors.js"></script>
+</body>
+</html>

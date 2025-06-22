@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORTEN Geolocation Security Testing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        select, input, button, textarea {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button.danger {
+            background-color: #dc3545;
+        }
+        button.danger:hover {
+            background-color: #c82333;
+        }
+        button.success {
+            background-color: #28a745;
+        }
+        button.success:hover {
+            background-color: #218838;
+        }
+        button.warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        button.warning:hover {
+            background-color: #e0a800;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .test-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .test-card {
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .test-title {
+            font-weight: bold;
+            color: #333;
+        }
+        .risk-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .risk-low {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .risk-medium {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .risk-high {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .location-info {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .risks-list {
+            margin: 10px 0;
+        }
+        .risk-item {
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .risk-item.high {
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        .risk-item.medium {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        .risk-item.low {
+            background-color: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .ip-input {
+            width: 200px;
+        }
+        .config-section {
+            background-color: #e9ecef;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .config-item {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .config-label {
+            min-width: 150px;
+            font-weight: bold;
+        }
+        .countries-input {
+            width: 300px;
+        }
+        .map-container {
+            width: 100%;
+            height: 400px;
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            margin: 20px 0;
+        }
+        .current-location {
+            background-color: #e7f3ff;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .alert-simulation {
+            background-color: #fff5f5;
+            border: 2px solid #f56565;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .coordinates {
+            font-family: monospace;
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 FORTEN Geolocation Security Testing</h1>
+        <p>Test geolocation services, anomaly detection, and security alerts</p>
+
+        <div id="status"></div>
+
+        <!-- Health Check Section -->
+        <div class="section">
+            <h2>Service Health</h2>
+            <div class="controls">
+                <button onclick="checkHealth()">Check Health</button>
+                <button onclick="loadConfig()">Load Config</button>
+            </div>
+            <div id="healthStatus">
+                <div class="loading">Click "Check Health" to view service status</div>
+            </div>
+        </div>
+
+        <!-- Current Location Analysis -->
+        <div class="section">
+            <h2>Current Location Analysis</h2>
+            <div class="controls">
+                <button onclick="analyzeCurrentLocation()">Analyze Current Request</button>
+            </div>
+            <div id="currentLocationResult">
+                <div class="loading">Click "Analyze Current Request" to see your location analysis</div>
+            </div>
+        </div>
+
+        <!-- IP Lookup Section -->
+        <div class="section">
+            <h2>IP Geolocation Lookup</h2>
+            <div class="controls">
+                <input type="text" id="ipInput" class="ip-input" placeholder="Enter IP address" value="8.8.8.8">
+                <button onclick="lookupIP()">Lookup IP</button>
+                <button onclick="analyzeIP()">Analyze for Anomalies</button>
+            </div>
+            <div id="ipLookupResult"></div>
+        </div>
+
+        <!-- Bulk Testing Section -->
+        <div class="section">
+            <h2>Bulk Security Testing</h2>
+            <div class="controls">
+                <button onclick="runSecurityTests()">Run Security Tests</button>
+                <button onclick="runCustomTests()">Test Custom IPs</button>
+                <button onclick="simulateAlert()">Simulate Security Alert</button>
+            </div>
+            
+            <!-- Custom IPs Input -->
+            <div class="config-section" id="customIPsSection" style="display: none;">
+                <h3>Custom Test IPs</h3>
+                <textarea id="customIPs" placeholder="Enter IPs, one per line or comma-separated" rows="4" style="width: 100%;"></textarea>
+                <div class="controls">
+                    <button onclick="executeCustomTests()">Execute Tests</button>
+                    <button onclick="hideCustomIPs()">Cancel</button>
+                </div>
+            </div>
+            
+            <div id="bulkTestResults"></div>
+        </div>
+
+        <!-- Configuration Section -->
+        <div class="section">
+            <h2>Service Configuration</h2>
+            <div class="controls">
+                <button onclick="showConfigEditor()">Edit Configuration</button>
+                <button onclick="resetConfig()">Reset to Defaults</button>
+            </div>
+            
+            <div class="config-section" id="configEditor" style="display: none;">
+                <h3>Geolocation Configuration</h3>
+                <div class="config-item">
+                    <label class="config-label">Allowed Countries:</label>
+                    <input type="text" id="allowedCountries" class="countries-input" placeholder="UY,AR,BR,CL,PY">
+                </div>
+                <div class="config-item">
+                    <label class="config-label">Risky Countries:</label>
+                    <input type="text" id="riskyCountries" class="countries-input" placeholder="CN,RU,KP,IR,SY">
+                </div>
+                <div class="config-item">
+                    <label class="config-label">Rapid Change (min):</label>
+                    <input type="number" id="rapidChangeThreshold" min="1" max="1440" value="30">
+                </div>
+                <div class="config-item">
+                    <label class="config-label">Distance Threshold (km):</label>
+                    <input type="number" id="distanceThreshold" min="100" max="20000" value="1000">
+                </div>
+                <div class="controls">
+                    <button onclick="updateConfig()" class="success">Update Configuration</button>
+                    <button onclick="hideConfigEditor()">Cancel</button>
+                </div>
+            </div>
+            
+            <div id="configDisplay"></div>
+        </div>
+
+        <!-- User Statistics Section -->
+        <div class="section">
+            <h2>User Access Statistics</h2>
+            <div class="controls">
+                <input type="text" id="userIdInput" placeholder="User ID" value="user-123">
+                <input type="number" id="daysInput" placeholder="Days" value="30" min="1" max="365">
+                <button onclick="loadUserStats()">Load Statistics</button>
+            </div>
+            <div id="userStatsResult"></div>
+        </div>
+
+        <!-- Alert Simulation -->
+        <div class="section">
+            <h2>Security Alert Simulation</h2>
+            <div class="alert-simulation" id="alertSimulation" style="display: none;">
+                <h3>🚨 Security Alert Detected</h3>
+                <div id="alertDetails"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentConfig = {};
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkHealth();
+            loadConfig();
+        });
+
+        // Check service health
+        async function checkHealth() {
+            try {
+                showStatus('Checking geolocation service health...', 'info');
+                
+                const response = await fetch('/api/geolocation/health');
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayHealth(result.data);
+                    showStatus('Health check completed', 'success');
+                } else {
+                    showError(result.message);
+                }
+            } catch (error) {
+                showError('Error checking health: ' + error.message);
+            }
+        }
+
+        // Display health status
+        function displayHealth(health) {
+            const container = document.getElementById('healthStatus');
+            
+            const statusColor = health.status === 'healthy' ? '#28a745' : '#dc3545';
+            
+            container.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: ${statusColor}">
+                            ${health.status.toUpperCase()}
+                        </div>
+                        <div class="stat-label">Service Status</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${health.initialized ? 'YES' : 'NO'}</div>
+                        <div class="stat-label">Initialized</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${health.geoipWorking ? 'YES' : 'NO'}</div>
+                        <div class="stat-label">GeoIP Working</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${health.cacheEnabled ? 'YES' : 'NO'}</div>
+                        <div class="stat-label">Cache Enabled</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${health.allowedCountries}</div>
+                        <div class="stat-label">Allowed Countries</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Load configuration
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/geolocation/config');
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentConfig = result.data;
+                    displayConfig(result.data);
+                }
+            } catch (error) {
+                console.error('Error loading config:', error);
+            }
+        }
+
+        // Display configuration
+        function displayConfig(config) {
+            const container = document.getElementById('configDisplay');
+            
+            container.innerHTML = `
+                <div class="info">
+                    <strong>Current Configuration:</strong><br>
+                    <strong>Allowed Countries:</strong> ${config.allowedCountries?.join(', ') || 'N/A'}<br>
+                    <strong>Cache Enabled:</strong> ${config.cacheEnabled ? 'Yes' : 'No'}<br>
+                    <strong>Rapid Change Threshold:</strong> ${config.rapidChangeThreshold || 'N/A'} minutes<br>
+                    <strong>Initialized:</strong> ${config.isInitialized ? 'Yes' : 'No'}
+                </div>
+            `;
+        }
+
+        // Analyze current location
+        async function analyzeCurrentLocation() {
+            try {
+                showStatus('Analyzing current request location...', 'info');
+                
+                const response = await fetch('/api/geolocation/current');
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayCurrentLocation(result.data);
+                    showStatus('Current location analyzed', 'success');
+                } else {
+                    showError(result.message);
+                }
+            } catch (error) {
+                showError('Error analyzing current location: ' + error.message);
+            }
+        }
+
+        // Display current location analysis
+        function displayCurrentLocation(data) {
+            const container = document.getElementById('currentLocationResult');
+            const analysis = data.analysis;
+            const location = analysis.location;
+            
+            container.innerHTML = `
+                <div class="current-location">
+                    <div class="test-header">
+                        <div class="test-title">Your Current Location Analysis</div>
+                        <div class="risk-badge risk-${analysis.riskLevel}">${analysis.riskLevel} Risk</div>
+                    </div>
+                    
+                    <div class="location-info">
+                        <strong>IP:</strong> ${data.ip}<br>
+                        <strong>Country:</strong> ${location.country} (${location.region})<br>
+                        <strong>City:</strong> ${location.city}<br>
+                        <strong>Timezone:</strong> ${location.timezone || 'Unknown'}<br>
+                        <strong>Coordinates:</strong> <span class="coordinates">${location.coordinates[0]}, ${location.coordinates[1]}</span><br>
+                        <strong>Provider:</strong> ${location.provider}<br>
+                        <strong>Private IP:</strong> ${location.isPrivate ? 'Yes' : 'No'}
+                    </div>
+                    
+                    ${analysis.risks.length > 0 ? `
+                        <div class="risks-list">
+                            <strong>Security Risks:</strong>
+                            ${analysis.risks.map(risk => `
+                                <div class="risk-item ${risk.level}">
+                                    <strong>${risk.type}:</strong> ${risk.message}
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '<div class="success">No security risks detected</div>'}
+                    
+                    ${analysis.alerts.length > 0 ? `
+                        <div class="error">
+                            <strong>Security Alerts Generated:</strong> ${analysis.alerts.length}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Lookup IP
+        async function lookupIP() {
+            const ip = document.getElementById('ipInput').value.trim();
+            if (!ip) {
+                showError('Please enter an IP address');
+                return;
+            }
+            
+            try {
+                showStatus(`Looking up ${ip}...`, 'info');
+                
+                const response = await fetch(`/api/geolocation/lookup/${encodeURIComponent(ip)}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayIPLookup(result.data);
+                    showStatus('IP lookup completed', 'success');
+                } else {
+                    showError(result.message);
+                }
+            } catch (error) {
+                showError('Error looking up IP: ' + error.message);
+            }
+        }
+
+        // Analyze IP for anomalies
+        async function analyzeIP() {
+            const ip = document.getElementById('ipInput').value.trim();
+            if (!ip) {
+                showError('Please enter an IP address');
+                return;
+            }
+            
+            try {
+                showStatus(`Analyzing ${ip} for security anomalies...`, 'info');
+                
+                const response = await fetch('/api/geolocation/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        ip,
+                        context: { test: true, timestamp: new Date() }
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayAnalysisResult(result.data, ip);
+                    showStatus('IP analysis completed', 'success');
+                } else {
+                    showError(result.message);
+                }
+            } catch (error) {
+                showError('Error analyzing IP: ' + error.message);
+            }
+        }
+
+        // Display IP lookup result
+        function displayIPLookup(location) {
+            const container = document.getElementById('ipLookupResult');
+            
+            container.innerHTML = `
+                <div class="location-info">
+                    <strong>IP:</strong> ${location.ip}<br>
+                    <strong>Country:</strong> ${location.country}<br>
+                    <strong>Region:</strong> ${location.region}<br>
+                    <strong>City:</strong> ${location.city}<br>
+                    <strong>Timezone:</strong> ${location.timezone || 'Unknown'}<br>
+                    <strong>Coordinates:</strong> <span class="coordinates">${location.coordinates[0]}, ${location.coordinates[1]}</span><br>
+                    <strong>Provider:</strong> ${location.provider}<br>
+                    <strong>Private IP:</strong> ${location.isPrivate ? 'Yes' : 'No'}
+                </div>
+            `;
+        }
+
+        // Display analysis result
+        function displayAnalysisResult(analysis, ip) {
+            const container = document.getElementById('ipLookupResult');
+            const location = analysis.location;
+            
+            container.innerHTML = `
+                <div class="test-card">
+                    <div class="test-header">
+                        <div class="test-title">Security Analysis: ${ip}</div>
+                        <div class="risk-badge risk-${analysis.riskLevel}">${analysis.riskLevel} Risk</div>
+                    </div>
+                    
+                    <div class="location-info">
+                        <strong>Country:</strong> ${location.country} (${location.region})<br>
+                        <strong>City:</strong> ${location.city}<br>
+                        <strong>Coordinates:</strong> <span class="coordinates">${location.coordinates[0]}, ${location.coordinates[1]}</span><br>
+                        <strong>Provider:</strong> ${location.provider}<br>
+                        <strong>Private IP:</strong> ${location.isPrivate ? 'Yes' : 'No'}
+                    </div>
+                    
+                    ${analysis.risks.length > 0 ? `
+                        <div class="risks-list">
+                            <strong>Security Risks:</strong>
+                            ${analysis.risks.map(risk => `
+                                <div class="risk-item ${risk.level}">
+                                    <strong>${risk.type}:</strong> ${risk.message}
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '<div class="success">No security risks detected</div>'}
+                    
+                    ${analysis.alerts.length > 0 ? `
+                        <div class="error">
+                            <strong>Security Alerts:</strong> ${analysis.alerts.length} generated
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Run security tests
+        async function runSecurityTests() {
+            try {
+                showStatus('Running comprehensive security tests...', 'info');
+                
+                const response = await fetch('/api/geolocation/test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayBulkTestResults(result.data);
+                    showStatus('Security tests completed', 'success');
+                } else {
+                    showError(result.message);
+                }
+            } catch (error) {
+                showError('Error running security tests: ' + error.message);
+            }
+        }
+
+        // Display bulk test results
+        function displayBulkTestResults(data) {
+            const container = document.getElementById('bulkTestResults');
+            const { results, summary } = data;
+            
+            let html = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${summary.totalTested}</div>
+                        <div class="stat-label">Total Tested</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${summary.successful}</div>
+                        <div class="stat-label">Successful</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${summary.highRisk}</div>
+                        <div class="stat-label">High Risk</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${summary.mediumRisk}</div>
+                        <div class="stat-label">Medium Risk</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${summary.lowRisk}</div>
+                        <div class="stat-label">Low Risk</div>
+                    </div>
+                </div>
+                
+                <div class="test-results">
+            `;
+            
+            results.forEach(result => {
+                if (result.error) {
+                    html += `
+                        <div class="test-card">
+                            <div class="test-title">❌ ${result.ip}</div>
+                            <div class="error">Error: ${result.error}</div>
+                        </div>
+                    `;
+                } else {
+                    const analysis = result.analysis;
+                    html += `
+                        <div class="test-card">
+                            <div class="test-header">
+                                <div class="test-title">${result.ip}</div>
+                                <div class="risk-badge risk-${analysis.riskLevel}">${analysis.riskLevel}</div>
+                            </div>
+                            
+                            <div class="location-info">
+                                <strong>Location:</strong> ${result.location.city}, ${result.location.country}<br>
+                                <strong>Provider:</strong> ${result.location.provider}
+                            </div>
+                            
+                            ${analysis.risks.length > 0 ? `
+                                <div class="risks-list">
+                                    ${analysis.risks.map(risk => `
+                                        <div class="risk-item ${risk.level}">
+                                            ${risk.type}: ${risk.message}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : '<div class="success">✅ No risks detected</div>'}
+                            
+                            ${analysis.alertsCount > 0 ? `
+                                <div class="error">🚨 ${analysis.alertsCount} alerts generated</div>
+                            ` : ''}
+                        </div>
+                    `;
+                }
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Show custom test section
+        function runCustomTests() {
+            document.getElementById('customIPsSection').style.display = 'block';
+        }
+
+        // Hide custom test section
+        function hideCustomIPs() {
+            document.getElementById('customIPsSection').style.display = 'none';
+        }
+
+        // Execute custom tests
+        async function executeCustomTests() {
+            const customIPs = document.getElementById('customIPs').value.trim();
+            if (!customIPs) {
+                showError('Please enter IP addresses to test');
+                return;
+            }
+            
+            // Parse IPs (support both newline and comma separation)
+            const ips = customIPs.split(/[\n,]/).map(ip => ip.trim()).filter(ip => ip);
+            
+            try {
+                showStatus(`Testing ${ips.length} custom IPs...`, 'info');
+                
+                const response = await fetch('/api/geolocation/test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ testIPs: ips })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayBulkTestResults(result.data);
+                    hideCustomIPs();
+                    showStatus('Custom tests completed', 'success');
+                } else {
+                    showError(result.message);
+                }
+            } catch (error) {
+                showError('Error running custom tests: ' + error.message);
+            }
+        }
+
+        // Show configuration editor
+        function showConfigEditor() {
+            if (currentConfig.allowedCountries) {
+                document.getElementById('allowedCountries').value = currentConfig.allowedCountries.join(',');
+            }
+            document.getElementById('configEditor').style.display = 'block';
+        }
+
+        // Hide configuration editor
+        function hideConfigEditor() {
+            document.getElementById('configEditor').style.display = 'none';
+        }
+
+        // Update configuration
+        async function updateConfig() {
+            const allowedCountries = document.getElementById('allowedCountries').value.split(',').map(c => c.trim().toUpperCase());
+            const riskyCountries = document.getElementById('riskyCountries').value.split(',').map(c => c.trim().toUpperCase());
+            const rapidChangeThreshold = parseInt(document.getElementById('rapidChangeThreshold').value);
+            const distanceThreshold = parseInt(document.getElementById('distanceThreshold').value);
+            
+            try {
+                showStatus('Updating configuration...', 'info');
+                
+                const response = await fetch('/api/geolocation/config', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        allowedCountries,
+                        riskyCountries,
+                        rapidChangeThresholdMinutes: rapidChangeThreshold,
+                        rapidChangeDistanceKm: distanceThreshold
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    hideConfigEditor();
+                    loadConfig();
+                    showStatus('Configuration updated successfully', 'success');
+                } else {
+                    showError(result.message);
+                }
+            } catch (error) {
+                showError('Error updating configuration: ' + error.message);
+            }
+        }
+
+        // Load user statistics
+        async function loadUserStats() {
+            const userId = document.getElementById('userIdInput').value.trim();
+            const days = document.getElementById('daysInput').value;
+            
+            if (!userId) {
+                showError('Please enter a user ID');
+                return;
+            }
+            
+            try {
+                showStatus(`Loading statistics for ${userId}...`, 'info');
+                
+                const response = await fetch(`/api/geolocation/stats/${encodeURIComponent(userId)}?days=${days}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayUserStats(result.data, userId, days);
+                    showStatus('User statistics loaded', 'success');
+                } else {
+                    showError(result.message);
+                }
+            } catch (error) {
+                showError('Error loading user statistics: ' + error.message);
+            }
+        }
+
+        // Display user statistics
+        function displayUserStats(stats, userId, days) {
+            const container = document.getElementById('userStatsResult');
+            
+            if (stats.error) {
+                container.innerHTML = `<div class="error">Error: ${stats.error}</div>`;
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="info">
+                    <strong>Statistics for ${userId} (last ${days} days)</strong>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.totalAccess || 0}</div>
+                        <div class="stat-label">Total Access</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.uniqueCountries || 0}</div>
+                        <div class="stat-label">Countries</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.uniqueCities || 0}</div>
+                        <div class="stat-label">Cities</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${(stats.riskDistribution?.high || 0)}</div>
+                        <div class="stat-label">High Risk</div>
+                    </div>
+                </div>
+                
+                ${stats.countries?.length > 0 ? `
+                    <div class="location-info">
+                        <strong>Countries Accessed:</strong> ${stats.countries.join(', ')}<br>
+                        <strong>Cities:</strong> ${stats.cities?.join(', ') || 'None'}
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        // Simulate security alert
+        function simulateAlert() {
+            const alertDiv = document.getElementById('alertSimulation');
+            const detailsDiv = document.getElementById('alertDetails');
+            
+            const sampleAlert = {
+                id: 'alert-' + Date.now(),
+                type: 'GEOLOCATION_ANOMALY',
+                severity: 'high',
+                title: 'Access from High-Risk Country',
+                message: 'User accessed system from China, which is not in the allowed countries list',
+                details: {
+                    ip: '220.181.38.148',
+                    country: 'CN',
+                    city: 'Beijing',
+                    riskType: 'SUSPICIOUS_COUNTRY',
+                    userId: 'user-123',
+                    timestamp: new Date().toISOString(),
+                    coordinates: [39.9042, 116.4074]
+                }
+            };
+            
+            detailsDiv.innerHTML = `
+                <div><strong>Alert ID:</strong> ${sampleAlert.id}</div>
+                <div><strong>Type:</strong> ${sampleAlert.type}</div>
+                <div><strong>Severity:</strong> ${sampleAlert.severity.toUpperCase()}</div>
+                <div><strong>Title:</strong> ${sampleAlert.title}</div>
+                <div><strong>Message:</strong> ${sampleAlert.message}</div>
+                <div><strong>IP:</strong> ${sampleAlert.details.ip}</div>
+                <div><strong>Location:</strong> ${sampleAlert.details.city}, ${sampleAlert.details.country}</div>
+                <div><strong>User:</strong> ${sampleAlert.details.userId}</div>
+                <div><strong>Time:</strong> ${new Date(sampleAlert.details.timestamp).toLocaleString('es-UY')}</div>
+            `;
+            
+            alertDiv.style.display = 'block';
+            
+            // Hide after 10 seconds
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 10000);
+            
+            showStatus('Security alert simulated', 'warning');
+        }
+
+        // Status helpers
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = type;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function showError(message) {
+            showStatus(message, 'error');
+        }
+    </script>
+</body>
+</html>

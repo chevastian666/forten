@@ -27,6 +27,7 @@ import {
   Notifications,
   ExitToApp,
   Person,
+  Map,
 } from '@mui/icons-material';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAppSelector } from '../../hooks/useAppSelector';
@@ -35,12 +36,20 @@ import { logoutUser } from '../../store/authSlice';
 
 const drawerWidth = 240;
 
-const menuItems = [
+interface MenuItemType {
+  text: string;
+  icon: React.ReactNode;
+  path: string;
+  roles?: string[];
+}
+
+const menuItems: MenuItemType[] = [
   { text: 'Dashboard', icon: <Dashboard />, path: '/' },
   { text: 'Edificios', icon: <Business />, path: '/buildings' },
   { text: 'Monitoreo', icon: <Videocam />, path: '/monitoring' },
   { text: 'Eventos', icon: <EventNote />, path: '/events' },
   { text: 'Accesos', icon: <VpnKey />, path: '/access' },
+  { text: 'Mapa 3D', icon: <Map />, path: '/map3d', roles: ['admin', 'manager'] },
 ];
 
 export const MainLayout: React.FC = () => {
@@ -77,19 +86,26 @@ export const MainLayout: React.FC = () => {
       </Toolbar>
       <Divider />
       <List>
-        {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton
-              selected={location.pathname === item.path}
-              onClick={() => navigate(item.path)}
-            >
-              <ListItemIcon sx={{ color: location.pathname === item.path ? 'primary.main' : 'inherit' }}>
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+        {menuItems.map((item) => {
+          // Check if user has required role for this menu item
+          if (item.roles && user && !item.roles.includes(user.role)) {
+            return null;
+          }
+          
+          return (
+            <ListItem key={item.text} disablePadding>
+              <ListItemButton
+                selected={location.pathname === item.path}
+                onClick={() => navigate(item.path)}
+              >
+                <ListItemIcon sx={{ color: location.pathname === item.path ? 'primary.main' : 'inherit' }}>
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
       </List>
     </Box>
   );

@@ -3,7 +3,7 @@
  * User model for authentication and audit associations
  */
 
-const { DataTypes, Model } = require('sequelize');
+const { DataTypes, Model, Op } = require('sequelize');
 const sequelize = require('../config/database');
 const bcrypt = require('bcryptjs');
 
@@ -171,7 +171,7 @@ User.addScope('withDeleted', {
 User.addScope('onlyDeleted', {
   where: {
     deleted_at: {
-      [sequelize.Op.ne]: null
+      [Op.ne]: null
     }
   },
   paranoid: false

@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORTEN - Reportes y Análisis</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/reports.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span class="logo-text">FORTEN</span>
+                </div>
+                <div class="logo-subtitle">Sistema de Portería Digital</div>
+            </div>
+            
+            <div class="sidebar-menu">
+                <ul class="menu-list">
+                    <li class="menu-item">
+                        <a href="index.html" class="menu-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="access-control.html" class="menu-link">
+                            <i class="fas fa-door-open"></i>
+                            <span>Control de Acceso</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="visitors.html" class="menu-link">
+                            <i class="fas fa-users"></i>
+                            <span>Visitantes</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="security.html" class="menu-link">
+                            <i class="fas fa-shield-virus"></i>
+                            <span>Seguridad</span>
+                        </a>
+                    </li>
+                    <li class="menu-item active">
+                        <a href="reports.html" class="menu-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Reportes</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="notifications.html" class="menu-link">
+                            <i class="fas fa-bell"></i>
+                            <span>Notificaciones</span>
+                            <span class="notification-badge">7</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="settings.html" class="menu-link">
+                            <i class="fas fa-cog"></i>
+                            <span>Configuración</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">Admin Usuario</div>
+                        <div class="user-role">Administrador</div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">Reportes y Análisis</h1>
+                </div>
+                
+                <div class="header-right">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Buscar reportes...">
+                    </div>
+                    
+                    <div class="header-actions">
+                        <button class="action-btn notification-btn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-dot"></span>
+                        </button>
+                        
+                        <button class="action-btn">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        
+                        <div class="user-menu">
+                            <img src="https://via.placeholder.com/40x40/FF6B35/FFFFFF?text=AU" alt="Avatar" class="user-avatar-small">
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Reports Content -->
+            <div class="content-area">
+                <!-- Report Controls -->
+                <div class="report-controls">
+                    <div class="controls-left">
+                        <div class="date-range-selector">
+                            <label>Período:</label>
+                            <select id="date-range" class="form-select">
+                                <option value="today">Hoy</option>
+                                <option value="week" selected>Esta Semana</option>
+                                <option value="month">Este Mes</option>
+                                <option value="quarter">Trimestre</option>
+                                <option value="year">Año</option>
+                                <option value="custom">Personalizado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="report-type-selector">
+                            <label>Tipo de Reporte:</label>
+                            <select id="report-type" class="form-select">
+                                <option value="general" selected>General</option>
+                                <option value="security">Seguridad</option>
+                                <option value="visitors">Visitantes</option>
+                                <option value="access">Control de Acceso</option>
+                                <option value="performance">Rendimiento</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="controls-right">
+                        <button class="btn-secondary export-pdf">
+                            <i class="fas fa-file-pdf"></i>
+                            Exportar PDF
+                        </button>
+                        <button class="btn-secondary export-excel">
+                            <i class="fas fa-file-excel"></i>
+                            Exportar Excel
+                        </button>
+                        <button class="btn-primary generate-report">
+                            <i class="fas fa-chart-bar"></i>
+                            Generar Reporte
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Summary Stats -->
+                <div class="report-summary-grid">
+                    <div class="summary-card total-visitors">
+                        <div class="summary-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="summary-content">
+                            <div class="summary-number">1,247</div>
+                            <div class="summary-label">Total Visitantes</div>
+                            <div class="summary-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                +12.5% vs período anterior
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card avg-duration">
+                        <div class="summary-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="summary-content">
+                            <div class="summary-number">2h 34m</div>
+                            <div class="summary-label">Duración Promedio</div>
+                            <div class="summary-change negative">
+                                <i class="fas fa-arrow-down"></i>
+                                -5.2% vs período anterior
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card peak-hours">
+                        <div class="summary-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="summary-content">
+                            <div class="summary-number">10:00-12:00</div>
+                            <div class="summary-label">Horas Pico</div>
+                            <div class="summary-change neutral">
+                                <i class="fas fa-minus"></i>
+                                Sin cambios
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card security-incidents">
+                        <div class="summary-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="summary-content">
+                            <div class="summary-number">23</div>
+                            <div class="summary-label">Incidentes Seguridad</div>
+                            <div class="summary-change positive">
+                                <i class="fas fa-arrow-down"></i>
+                                -18.3% vs período anterior
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Grid -->
+                <div class="charts-grid">
+                    <!-- Traffic Analysis Chart -->
+                    <div class="chart-container large">
+                        <div class="chart-header">
+                            <h3>
+                                <i class="fas fa-chart-area"></i>
+                                Análisis de Flujo de Visitantes
+                            </h3>
+                            <div class="chart-controls">
+                                <button class="chart-toggle active" data-chart="traffic">Tráfico</button>
+                                <button class="chart-toggle" data-chart="comparison">Comparación</button>
+                                <button class="chart-toggle" data-chart="forecast">Pronóstico</button>
+                            </div>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="trafficAnalysisChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Access Patterns Chart -->
+                    <div class="chart-container medium">
+                        <div class="chart-header">
+                            <h3>
+                                <i class="fas fa-door-open"></i>
+                                Patrones de Acceso
+                            </h3>
+                            <div class="chart-legend">
+                                <span class="legend-item">
+                                    <span class="legend-color primary"></span>
+                                    Entrada Principal
+                                </span>
+                                <span class="legend-item">
+                                    <span class="legend-color secondary"></span>
+                                    Entrada Lateral
+                                </span>
+                            </div>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="accessPatternsChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Visitor Types Chart -->
+                    <div class="chart-container medium">
+                        <div class="chart-header">
+                            <h3>
+                                <i class="fas fa-pie-chart"></i>
+                                Tipos de Visitantes
+                            </h3>
+                            <div class="chart-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value">67%</span>
+                                    <span class="stat-label">Clientes</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">23%</span>
+                                    <span class="stat-label">Proveedores</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="visitorTypesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Analytics -->
+                <div class="analytics-grid">
+                    <!-- Performance Metrics -->
+                    <div class="analytics-card">
+                        <div class="analytics-header">
+                            <h3>
+                                <i class="fas fa-tachometer-alt"></i>
+                                Métricas de Rendimiento
+                            </h3>
+                            <button class="btn-icon">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="metrics-grid">
+                            <div class="metric-item">
+                                <div class="metric-icon">
+                                    <i class="fas fa-stopwatch"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <div class="metric-value">1.2s</div>
+                                    <div class="metric-label">Tiempo Promedio Check-in</div>
+                                    <div class="metric-trend positive">
+                                        <i class="fas fa-arrow-down"></i>
+                                        15% más rápido
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-item">
+                                <div class="metric-icon">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <div class="metric-value">98.7%</div>
+                                    <div class="metric-label">Tasa de Éxito Check-in</div>
+                                    <div class="metric-trend positive">
+                                        <i class="fas fa-arrow-up"></i>
+                                        +2.1%
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-item">
+                                <div class="metric-icon">
+                                    <i class="fas fa-door-closed"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <div class="metric-value">99.2%</div>
+                                    <div class="metric-label">Disponibilidad Sistema</div>
+                                    <div class="metric-trend neutral">
+                                        <i class="fas fa-minus"></i>
+                                        Estable
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-item">
+                                <div class="metric-icon">
+                                    <i class="fas fa-bell"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <div class="metric-value">0.8%</div>
+                                    <div class="metric-label">Tasa de Falsas Alarmas</div>
+                                    <div class="metric-trend positive">
+                                        <i class="fas fa-arrow-down"></i>
+                                        -45% vs mes anterior
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Top Visitors -->
+                    <div class="analytics-card">
+                        <div class="analytics-header">
+                            <h3>
+                                <i class="fas fa-crown"></i>
+                                Visitantes Frecuentes
+                            </h3>
+                            <div class="time-filter">
+                                <select class="form-select small">
+                                    <option>Este mes</option>
+                                    <option>Trimestre</option>
+                                    <option>Año</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="top-visitors-list">
+                            <div class="visitor-rank-item">
+                                <div class="rank-number">1</div>
+                                <div class="visitor-info">
+                                    <img src="https://via.placeholder.com/40x40/FF6B35/FFFFFF?text=AM" alt="Visitor" class="visitor-avatar">
+                                    <div class="visitor-details">
+                                        <div class="visitor-name">Ana Martínez</div>
+                                        <div class="visitor-company">Tech Solutions</div>
+                                    </div>
+                                </div>
+                                <div class="visit-stats">
+                                    <div class="visit-count">47 visitas</div>
+                                    <div class="visit-hours">156h total</div>
+                                </div>
+                            </div>
+                            
+                            <div class="visitor-rank-item">
+                                <div class="rank-number">2</div>
+                                <div class="visitor-info">
+                                    <img src="https://via.placeholder.com/40x40/28A745/FFFFFF?text=JR" alt="Visitor" class="visitor-avatar">
+                                    <div class="visitor-details">
+                                        <div class="visitor-name">José Rodríguez</div>
+                                        <div class="visitor-company">Consultoría ABC</div>
+                                    </div>
+                                </div>
+                                <div class="visit-stats">
+                                    <div class="visit-count">39 visitas</div>
+                                    <div class="visit-hours">98h total</div>
+                                </div>
+                            </div>
+                            
+                            <div class="visitor-rank-item">
+                                <div class="rank-number">3</div>
+                                <div class="visitor-info">
+                                    <img src="https://via.placeholder.com/40x40/17A2B8/FFFFFF?text=LC" alt="Visitor" class="visitor-avatar">
+                                    <div class="visitor-details">
+                                        <div class="visitor-name">Laura Castro</div>
+                                        <div class="visitor-company">Auditores S.A.</div>
+                                    </div>
+                                </div>
+                                <div class="visit-stats">
+                                    <div class="visit-count">32 visitas</div>
+                                    <div class="visit-hours">127h total</div>
+                                </div>
+                            </div>
+                            
+                            <div class="visitor-rank-item">
+                                <div class="rank-number">4</div>
+                                <div class="visitor-info">
+                                    <img src="https://via.placeholder.com/40x40/FFC107/FFFFFF?text=MG" alt="Visitor" class="visitor-avatar">
+                                    <div class="visitor-details">
+                                        <div class="visitor-name">Miguel García</div>
+                                        <div class="visitor-company">Servicios Pro</div>
+                                    </div>
+                                </div>
+                                <div class="visit-stats">
+                                    <div class="visit-count">28 visitas</div>
+                                    <div class="visit-hours">85h total</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Security Summary -->
+                    <div class="analytics-card">
+                        <div class="analytics-header">
+                            <h3>
+                                <i class="fas fa-shield-check"></i>
+                                Resumen de Seguridad
+                            </h3>
+                            <div class="security-status operational">
+                                <i class="fas fa-check-circle"></i>
+                                Operativo
+                            </div>
+                        </div>
+                        
+                        <div class="security-summary">
+                            <div class="security-metric">
+                                <div class="metric-header">
+                                    <span class="metric-title">Alertas Críticas</span>
+                                    <span class="metric-count critical">2</span>
+                                </div>
+                                <div class="metric-bar">
+                                    <div class="bar-fill critical" style="width: 15%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="security-metric">
+                                <div class="metric-header">
+                                    <span class="metric-title">Alertas de Advertencia</span>
+                                    <span class="metric-count warning">8</span>
+                                </div>
+                                <div class="metric-bar">
+                                    <div class="bar-fill warning" style="width: 35%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="security-metric">
+                                <div class="metric-header">
+                                    <span class="metric-title">Alertas Informativas</span>
+                                    <span class="metric-count info">15</span>
+                                </div>
+                                <div class="metric-bar">
+                                    <div class="bar-fill info" style="width: 60%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="security-actions">
+                                <button class="btn-small critical">Ver Críticas</button>
+                                <button class="btn-small secondary">Reporte Completo</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Reports Table -->
+                <div class="recent-reports-section">
+                    <div class="section-header">
+                        <h3>
+                            <i class="fas fa-history"></i>
+                            Reportes Recientes
+                        </h3>
+                        <div class="reports-actions">
+                            <button class="btn-icon" title="Actualizar">
+                                <i class="fas fa-sync"></i>
+                            </button>
+                            <button class="btn-icon" title="Configurar">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="reports-table-container">
+                        <table class="reports-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre del Reporte</th>
+                                    <th>Tipo</th>
+                                    <th>Generado</th>
+                                    <th>Período</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="report-row">
+                                    <td>
+                                        <div class="report-info">
+                                            <i class="fas fa-file-chart-line report-icon"></i>
+                                            <span class="report-name">Análisis Semanal de Visitantes</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="report-type visitors">Visitantes</span></td>
+                                    <td>2024-01-15 10:30</td>
+                                    <td>01/08 - 01/14</td>
+                                    <td><span class="status completed">Completado</span></td>
+                                    <td>
+                                        <div class="report-actions">
+                                            <button class="btn-icon small" title="Descargar">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="btn-icon small" title="Ver">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn-icon small" title="Compartir">
+                                                <i class="fas fa-share"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="report-row">
+                                    <td>
+                                        <div class="report-info">
+                                            <i class="fas fa-shield-alt report-icon"></i>
+                                            <span class="report-name">Reporte de Seguridad Mensual</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="report-type security">Seguridad</span></td>
+                                    <td>2024-01-14 16:45</td>
+                                    <td>Diciembre 2023</td>
+                                    <td><span class="status completed">Completado</span></td>
+                                    <td>
+                                        <div class="report-actions">
+                                            <button class="btn-icon small" title="Descargar">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="btn-icon small" title="Ver">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn-icon small" title="Compartir">
+                                                <i class="fas fa-share"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="report-row">
+                                    <td>
+                                        <div class="report-info">
+                                            <i class="fas fa-door-open report-icon"></i>
+                                            <span class="report-name">Control de Acceso - Trimestre Q4</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="report-type access">Acceso</span></td>
+                                    <td>2024-01-13 09:15</td>
+                                    <td>Q4 2023</td>
+                                    <td><span class="status processing">Procesando</span></td>
+                                    <td>
+                                        <div class="report-actions">
+                                            <button class="btn-icon small disabled" title="Procesando">
+                                                <i class="fas fa-spinner fa-spin"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/reports.js"></script>
+</body>
+</html>

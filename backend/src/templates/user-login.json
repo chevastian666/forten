@@ -1,0 +1,17 @@
+{
+  "name": "User Login",
+  "category": "user",
+  "description": "Notification for user login events",
+  "subject": "User Login Notification",
+  "variables": [
+    "timestamp",
+    "userName",
+    "ip",
+    "location",
+    "device"
+  ],
+  "priority": "low",
+  "channels": [
+    "websocket"
+  ]
+}

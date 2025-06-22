@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORTEN - Centro de Seguridad</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/security.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <span class="logo-text">FORTEN</span>
+                </div>
+                <div class="logo-subtitle">Sistema de Portería Digital</div>
+            </div>
+            
+            <div class="sidebar-menu">
+                <ul class="menu-list">
+                    <li class="menu-item">
+                        <a href="index.html" class="menu-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="access-control.html" class="menu-link">
+                            <i class="fas fa-door-open"></i>
+                            <span>Control de Acceso</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="visitors.html" class="menu-link">
+                            <i class="fas fa-users"></i>
+                            <span>Visitantes</span>
+                        </a>
+                    </li>
+                    <li class="menu-item active">
+                        <a href="security.html" class="menu-link">
+                            <i class="fas fa-shield-virus"></i>
+                            <span>Seguridad</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="reports.html" class="menu-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Reportes</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="notifications.html" class="menu-link">
+                            <i class="fas fa-bell"></i>
+                            <span>Notificaciones</span>
+                            <span class="notification-badge">7</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="settings.html" class="menu-link">
+                            <i class="fas fa-cog"></i>
+                            <span>Configuración</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">Admin Usuario</div>
+                        <div class="user-role">Administrador</div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">Centro de Seguridad</h1>
+                </div>
+                
+                <div class="header-right">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Buscar incidentes...">
+                    </div>
+                    
+                    <div class="header-actions">
+                        <button class="action-btn notification-btn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-dot"></span>
+                        </button>
+                        
+                        <button class="action-btn">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        
+                        <div class="user-menu">
+                            <img src="https://via.placeholder.com/40x40/FF6B35/FFFFFF?text=AU" alt="Avatar" class="user-avatar-small">
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Security Content -->
+            <div class="content-area">
+                <!-- Security Stats Row -->
+                <div class="security-stats-grid">
+                    <div class="stat-card system-status">
+                        <div class="stat-icon">
+                            <i class="fas fa-shield-check"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">ACTIVO</div>
+                            <div class="stat-label">Estado del Sistema</div>
+                            <div class="stat-detail">Todos los sistemas operativos</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card cameras-online">
+                        <div class="stat-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">18/20</div>
+                            <div class="stat-label">Cámaras En Línea</div>
+                            <div class="stat-detail">90% disponibilidad</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card active-alerts">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">3</div>
+                            <div class="stat-label">Alertas Activas</div>
+                            <div class="stat-detail">Requieren atención</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card incidents-today">
+                        <div class="stat-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">7</div>
+                            <div class="stat-label">Incidentes Hoy</div>
+                            <div class="stat-detail">2 resueltos</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Controls -->
+                <div class="emergency-panel">
+                    <div class="emergency-header">
+                        <h3>
+                            <i class="fas fa-exclamation-circle"></i>
+                            Controles de Emergencia
+                        </h3>
+                        <div class="emergency-status">
+                            <span class="status-indicator normal"></span>
+                            <span>Estado Normal</span>
+                        </div>
+                    </div>
+                    
+                    <div class="emergency-controls">
+                        <button class="emergency-btn lockdown" data-action="lockdown">
+                            <i class="fas fa-lock"></i>
+                            <span>Bloqueo Total</span>
+                        </button>
+                        
+                        <button class="emergency-btn evacuation" data-action="evacuation">
+                            <i class="fas fa-running"></i>
+                            <span>Evacuación</span>
+                        </button>
+                        
+                        <button class="emergency-btn alert-security" data-action="security">
+                            <i class="fas fa-phone"></i>
+                            <span>Alertar Seguridad</span>
+                        </button>
+                        
+                        <button class="emergency-btn reset-system" data-action="reset">
+                            <i class="fas fa-undo"></i>
+                            <span>Restablecer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Security Grid -->
+                <div class="security-grid">
+                    <!-- Camera Grid -->
+                    <div class="camera-monitoring-section">
+                        <div class="section-header">
+                            <h3>
+                                <i class="fas fa-video"></i>
+                                Monitoreo de Cámaras
+                            </h3>
+                            <div class="camera-controls">
+                                <button class="btn-icon view-all">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                                <button class="btn-icon grid-toggle">
+                                    <i class="fas fa-th"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="camera-grid">
+                            <div class="camera-feed" data-camera="entrance-main">
+                                <div class="camera-header">
+                                    <span class="camera-name">Entrada Principal</span>
+                                    <span class="camera-status online">
+                                        <i class="fas fa-circle"></i>
+                                        EN LÍNEA
+                                    </span>
+                                </div>
+                                <div class="camera-viewport">
+                                    <div class="camera-placeholder">
+                                        <i class="fas fa-video"></i>
+                                        <div class="recording-indicator">
+                                            <i class="fas fa-record-vinyl"></i>
+                                            REC
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="camera-controls">
+                                    <button class="camera-btn" title="Zoom">
+                                        <i class="fas fa-search-plus"></i>
+                                    </button>
+                                    <button class="camera-btn" title="Captura">
+                                        <i class="fas fa-camera"></i>
+                                    </button>
+                                    <button class="camera-btn" title="PTZ">
+                                        <i class="fas fa-arrows-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="camera-feed" data-camera="lobby">
+                                <div class="camera-header">
+                                    <span class="camera-name">Lobby Principal</span>
+                                    <span class="camera-status online">
+                                        <i class="fas fa-circle"></i>
+                                        EN LÍNEA
+                                    </span>
+                                </div>
+                                <div class="camera-viewport">
+                                    <div class="camera-placeholder">
+                                        <i class="fas fa-video"></i>
+                                        <div class="recording-indicator">
+                                            <i class="fas fa-record-vinyl"></i>
+                                            REC
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="camera-controls">
+                                    <button class="camera-btn" title="Zoom">
+                                        <i class="fas fa-search-plus"></i>
+                                    </button>
+                                    <button class="camera-btn" title="Captura">
+                                        <i class="fas fa-camera"></i>
+                                    </button>
+                                    <button class="camera-btn" title="PTZ">
+                                        <i class="fas fa-arrows-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="camera-feed" data-camera="parking">
+                                <div class="camera-header">
+                                    <span class="camera-name">Estacionamiento</span>
+                                    <span class="camera-status offline">
+                                        <i class="fas fa-circle"></i>
+                                        DESCONECTADA
+                                    </span>
+                                </div>
+                                <div class="camera-viewport offline">
+                                    <div class="camera-placeholder">
+                                        <i class="fas fa-video-slash"></i>
+                                        <div class="offline-message">Sin señal</div>
+                                    </div>
+                                </div>
+                                <div class="camera-controls">
+                                    <button class="camera-btn disabled" title="Reconectar">
+                                        <i class="fas fa-sync"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="camera-feed" data-camera="emergency-exit">
+                                <div class="camera-header">
+                                    <span class="camera-name">Salida de Emergencia</span>
+                                    <span class="camera-status online">
+                                        <i class="fas fa-circle"></i>
+                                        EN LÍNEA
+                                    </span>
+                                </div>
+                                <div class="camera-viewport">
+                                    <div class="camera-placeholder">
+                                        <i class="fas fa-video"></i>
+                                        <div class="recording-indicator">
+                                            <i class="fas fa-record-vinyl"></i>
+                                            REC
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="camera-controls">
+                                    <button class="camera-btn" title="Zoom">
+                                        <i class="fas fa-search-plus"></i>
+                                    </button>
+                                    <button class="camera-btn" title="Captura">
+                                        <i class="fas fa-camera"></i>
+                                    </button>
+                                    <button class="camera-btn" title="PTZ">
+                                        <i class="fas fa-arrows-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alerts and Incidents -->
+                    <div class="alerts-incidents-section">
+                        <!-- Active Alerts -->
+                        <div class="alerts-panel">
+                            <div class="panel-header critical">
+                                <h3>
+                                    <i class="fas fa-bell"></i>
+                                    Alertas Activas
+                                </h3>
+                                <span class="alert-count">3</span>
+                            </div>
+                            
+                            <div class="alerts-list">
+                                <div class="alert-item critical">
+                                    <div class="alert-icon">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <div class="alert-content">
+                                        <div class="alert-title">Acceso No Autorizado</div>
+                                        <div class="alert-description">Intento de acceso en Puerta B-2</div>
+                                        <div class="alert-time">Hace 3 minutos</div>
+                                    </div>
+                                    <div class="alert-actions">
+                                        <button class="btn-small critical">Verificar</button>
+                                        <button class="btn-small">Descartar</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert-item warning">
+                                    <div class="alert-icon">
+                                        <i class="fas fa-video-slash"></i>
+                                    </div>
+                                    <div class="alert-content">
+                                        <div class="alert-title">Cámara Desconectada</div>
+                                        <div class="alert-description">Cám. Estacionamiento sin señal</div>
+                                        <div class="alert-time">Hace 15 minutos</div>
+                                    </div>
+                                    <div class="alert-actions">
+                                        <button class="btn-small warning">Reconectar</button>
+                                        <button class="btn-small">Ignorar</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert-item info">
+                                    <div class="alert-icon">
+                                        <i class="fas fa-door-open"></i>
+                                    </div>
+                                    <div class="alert-content">
+                                        <div class="alert-title">Puerta Abierta</div>
+                                        <div class="alert-description">Salida de emergencia - Tiempo excedido</div>
+                                        <div class="alert-time">Hace 8 minutos</div>
+                                    </div>
+                                    <div class="alert-actions">
+                                        <button class="btn-small info">Revisar</button>
+                                        <button class="btn-small">OK</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Recent Incidents -->
+                        <div class="incidents-panel">
+                            <div class="panel-header">
+                                <h3>
+                                    <i class="fas fa-clipboard-list"></i>
+                                    Incidentes Recientes
+                                </h3>
+                                <div class="incident-filters">
+                                    <select class="filter-select">
+                                        <option value="today">Hoy</option>
+                                        <option value="week">Esta semana</option>
+                                        <option value="month">Este mes</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="incidents-timeline">
+                                <div class="incident-item resolved">
+                                    <div class="incident-time">10:30 AM</div>
+                                    <div class="incident-content">
+                                        <div class="incident-title">Falsa Alarma - Sensor de Humo</div>
+                                        <div class="incident-description">Área de cocina - Resuelto por mantenimiento</div>
+                                        <div class="incident-status resolved">Resuelto</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="incident-item pending">
+                                    <div class="incident-time">09:45 AM</div>
+                                    <div class="incident-content">
+                                        <div class="incident-title">Visitante Sin Autorización</div>
+                                        <div class="incident-description">Persona no registrada en área restringida</div>
+                                        <div class="incident-status pending">En proceso</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="incident-item resolved">
+                                    <div class="incident-time">08:15 AM</div>
+                                    <div class="incident-content">
+                                        <div class="incident-title">Mantenimiento Preventivo</div>
+                                        <div class="incident-description">Revisión de sistemas de seguridad</div>
+                                        <div class="incident-status resolved">Completado</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="incident-item resolved">
+                                    <div class="incident-time">07:30 AM</div>
+                                    <div class="incident-content">
+                                        <div class="incident-title">Actualización de Sistema</div>
+                                        <div class="incident-description">Firmware de cámaras actualizado</div>
+                                        <div class="incident-status resolved">Completado</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Monitor -->
+                <div class="system-monitor-section">
+                    <div class="section-header">
+                        <h3>
+                            <i class="fas fa-desktop"></i>
+                            Monitor del Sistema
+                        </h3>
+                        <div class="monitor-controls">
+                            <div class="refresh-indicator">
+                                <i class="fas fa-sync fa-spin"></i>
+                                <span>Actualización automática</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="system-components">
+                        <div class="component-card operational">
+                            <div class="component-header">
+                                <i class="fas fa-server"></i>
+                                <span class="component-name">Servidor Principal</span>
+                                <span class="component-status">Operativo</span>
+                            </div>
+                            <div class="component-metrics">
+                                <div class="metric">
+                                    <span class="metric-label">CPU:</span>
+                                    <span class="metric-value">45%</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">RAM:</span>
+                                    <span class="metric-value">68%</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">Disco:</span>
+                                    <span class="metric-value">34%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="component-card operational">
+                            <div class="component-header">
+                                <i class="fas fa-database"></i>
+                                <span class="component-name">Base de Datos</span>
+                                <span class="component-status">Operativo</span>
+                            </div>
+                            <div class="component-metrics">
+                                <div class="metric">
+                                    <span class="metric-label">Conexiones:</span>
+                                    <span class="metric-value">127/200</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">Consultas/seg:</span>
+                                    <span class="metric-value">45</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="component-card warning">
+                            <div class="component-header">
+                                <i class="fas fa-wifi"></i>
+                                <span class="component-name">Red Principal</span>
+                                <span class="component-status">Advertencia</span>
+                            </div>
+                            <div class="component-metrics">
+                                <div class="metric">
+                                    <span class="metric-label">Latencia:</span>
+                                    <span class="metric-value">125ms</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">Pérdida:</span>
+                                    <span class="metric-value">2.1%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="component-card operational">
+                            <div class="component-header">
+                                <i class="fas fa-hdd"></i>
+                                <span class="component-name">Almacenamiento</span>
+                                <span class="component-status">Operativo</span>
+                            </div>
+                            <div class="component-metrics">
+                                <div class="metric">
+                                    <span class="metric-label">Usado:</span>
+                                    <span class="metric-value">2.1TB/5TB</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">Escritura:</span>
+                                    <span class="metric-value">45MB/s</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/security.js"></script>
+</body>
+</html>

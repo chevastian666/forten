@@ -1,0 +1,906 @@
+/* FORTEN CRM - Security Center Styles */
+
+/* Security Stats Grid */
+.security-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card.system-status {
+    border-left-color: var(--success);
+}
+
+.stat-card.cameras-online {
+    border-left-color: var(--primary-orange);
+}
+
+.stat-card.active-alerts {
+    border-left-color: var(--danger);
+}
+
+.stat-card.incidents-today {
+    border-left-color: var(--info);
+}
+
+.stat-card.system-status .stat-icon {
+    background: linear-gradient(135deg, var(--success), #34CE57);
+}
+
+.stat-card.cameras-online .stat-icon {
+    background: linear-gradient(135deg, var(--primary-orange), var(--light-orange));
+}
+
+.stat-card.active-alerts .stat-icon {
+    background: linear-gradient(135deg, var(--danger), #E74C3C);
+}
+
+.stat-card.incidents-today .stat-icon {
+    background: linear-gradient(135deg, var(--info), #20C997);
+}
+
+/* Emergency Panel */
+.emergency-panel {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    border-left: 4px solid var(--danger);
+}
+
+.emergency-header {
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #FFF5F5 0%, #FED7D7 100%);
+    border-bottom: 1px solid var(--medium-gray);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.emergency-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--danger);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.emergency-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-indicator.normal {
+    background: var(--success);
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
+}
+
+.status-indicator.alert {
+    background: var(--danger);
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.emergency-controls {
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.emergency-btn {
+    padding: 1.5rem;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.emergency-btn i {
+    font-size: 2rem;
+}
+
+.emergency-btn.lockdown {
+    background: linear-gradient(135deg, var(--danger), #C82333);
+    color: var(--white);
+}
+
+.emergency-btn.lockdown:hover {
+    background: linear-gradient(135deg, #C82333, #A71E2A);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+}
+
+.emergency-btn.evacuation {
+    background: linear-gradient(135deg, var(--warning), #E0A800);
+    color: var(--primary-black);
+}
+
+.emergency-btn.evacuation:hover {
+    background: linear-gradient(135deg, #E0A800, #C69500);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+}
+
+.emergency-btn.alert-security {
+    background: linear-gradient(135deg, var(--primary-orange), var(--orange-hover));
+    color: var(--white);
+}
+
+.emergency-btn.alert-security:hover {
+    background: linear-gradient(135deg, var(--orange-hover), #D14A20);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-orange);
+}
+
+.emergency-btn.reset-system {
+    background: linear-gradient(135deg, var(--info), #138496);
+    color: var(--white);
+}
+
+.emergency-btn.reset-system:hover {
+    background: linear-gradient(135deg, #138496, #117A8B);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(23, 162, 184, 0.3);
+}
+
+/* Security Grid */
+.security-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Camera Monitoring */
+.camera-monitoring-section {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.section-header {
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #FAFAFA 0%, #F5F5F5 100%);
+    border-bottom: 1px solid var(--medium-gray);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.section-header h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--primary-black);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-header h3 i {
+    color: var(--primary-orange);
+}
+
+.camera-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.camera-grid {
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Camera Feed */
+.camera-feed {
+    background: var(--primary-black);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 2px solid var(--medium-gray);
+    transition: all var(--transition-fast);
+}
+
+.camera-feed:hover {
+    border-color: var(--primary-orange);
+    box-shadow: var(--shadow-orange);
+}
+
+.camera-header {
+    padding: 0.75rem 1rem;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.camera-name {
+    color: var(--white);
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.camera-status {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.camera-status.online {
+    color: var(--success);
+}
+
+.camera-status.offline {
+    color: var(--danger);
+}
+
+.camera-status i {
+    font-size: 0.5rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.camera-viewport {
+    height: 180px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #2C3E50, #34495E);
+}
+
+.camera-viewport.offline {
+    background: linear-gradient(135deg, #4A4A4A, #2C2C2C);
+}
+
+.camera-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.camera-placeholder i {
+    font-size: 3rem;
+}
+
+.recording-indicator {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--danger);
+    color: var(--white);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.recording-indicator i {
+    font-size: 0.75rem;
+}
+
+.offline-message {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.camera-controls {
+    padding: 0.75rem 1rem;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.camera-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+}
+
+.camera-btn:hover {
+    background: var(--primary-orange);
+    transform: translateY(-1px);
+}
+
+.camera-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.camera-btn.disabled:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: none;
+}
+
+/* Alerts and Incidents */
+.alerts-incidents-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Alerts Panel */
+.alerts-panel {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    border-left: 4px solid var(--danger);
+}
+
+.panel-header {
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #FAFAFA 0%, #F5F5F5 100%);
+    border-bottom: 1px solid var(--medium-gray);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.panel-header.critical {
+    background: linear-gradient(135deg, #FFF5F5 0%, #FED7D7 100%);
+}
+
+.panel-header h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--primary-black);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.panel-header.critical h3 {
+    color: var(--danger);
+}
+
+.panel-header h3 i {
+    color: var(--primary-orange);
+}
+
+.panel-header.critical h3 i {
+    color: var(--danger);
+}
+
+.alert-count {
+    background: var(--danger);
+    color: var(--white);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.alerts-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.alert-item {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--medium-gray);
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    transition: all var(--transition-fast);
+}
+
+.alert-item:hover {
+    background: var(--light-gray);
+}
+
+.alert-item:last-child {
+    border-bottom: none;
+}
+
+.alert-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.alert-item.critical .alert-icon {
+    background: rgba(220, 53, 69, 0.1);
+    color: var(--danger);
+}
+
+.alert-item.warning .alert-icon {
+    background: rgba(255, 193, 7, 0.1);
+    color: var(--warning);
+}
+
+.alert-item.info .alert-icon {
+    background: rgba(23, 162, 184, 0.1);
+    color: var(--info);
+}
+
+.alert-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.alert-title {
+    font-weight: 600;
+    color: var(--primary-black);
+    font-size: 0.875rem;
+}
+
+.alert-description {
+    color: var(--dark-gray);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+}
+
+.alert-time {
+    color: var(--dark-gray);
+    font-size: 0.75rem;
+    font-style: italic;
+}
+
+.alert-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.btn-small {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-small.critical {
+    background: var(--danger);
+    color: var(--white);
+}
+
+.btn-small.critical:hover {
+    background: #C82333;
+    transform: translateY(-1px);
+}
+
+.btn-small.warning {
+    background: var(--warning);
+    color: var(--primary-black);
+}
+
+.btn-small.warning:hover {
+    background: #E0A800;
+    transform: translateY(-1px);
+}
+
+.btn-small.info {
+    background: var(--info);
+    color: var(--white);
+}
+
+.btn-small.info:hover {
+    background: #138496;
+    transform: translateY(-1px);
+}
+
+.btn-small:not(.critical):not(.warning):not(.info) {
+    background: var(--medium-gray);
+    color: var(--dark-gray);
+}
+
+.btn-small:not(.critical):not(.warning):not(.info):hover {
+    background: var(--dark-gray);
+    color: var(--white);
+    transform: translateY(-1px);
+}
+
+/* Incidents Panel */
+.incidents-panel {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    border-left: 4px solid var(--info);
+}
+
+.incident-filters {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.filter-select {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--medium-gray);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    background: var(--white);
+    cursor: pointer;
+}
+
+.incidents-timeline {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.incident-item {
+    padding: 1.25rem 2rem;
+    border-bottom: 1px solid var(--medium-gray);
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    transition: all var(--transition-fast);
+}
+
+.incident-item:hover {
+    background: var(--light-gray);
+}
+
+.incident-item:last-child {
+    border-bottom: none;
+}
+
+.incident-time {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary-orange);
+    min-width: 70px;
+    text-align: center;
+}
+
+.incident-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.incident-title {
+    font-weight: 600;
+    color: var(--primary-black);
+    font-size: 0.875rem;
+}
+
+.incident-description {
+    color: var(--dark-gray);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+}
+
+.incident-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+    width: fit-content;
+    margin-top: 0.5rem;
+}
+
+.incident-status.resolved {
+    background: rgba(40, 167, 69, 0.1);
+    color: var(--success);
+}
+
+.incident-status.pending {
+    background: rgba(255, 193, 7, 0.1);
+    color: var(--warning);
+}
+
+/* System Monitor */
+.system-monitor-section {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 2rem;
+}
+
+.monitor-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.refresh-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--dark-gray);
+}
+
+.refresh-indicator i {
+    color: var(--primary-orange);
+}
+
+.system-components {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.component-card {
+    background: var(--light-gray);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    border-left: 4px solid var(--medium-gray);
+    transition: all var(--transition-fast);
+}
+
+.component-card.operational {
+    border-left-color: var(--success);
+}
+
+.component-card.warning {
+    border-left-color: var(--warning);
+    background: rgba(255, 193, 7, 0.05);
+}
+
+.component-card.critical {
+    border-left-color: var(--danger);
+    background: rgba(220, 53, 69, 0.05);
+}
+
+.component-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.component-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.component-header i {
+    font-size: 1.25rem;
+    color: var(--primary-orange);
+}
+
+.component-name {
+    font-weight: 600;
+    color: var(--primary-black);
+    flex: 1;
+}
+
+.component-status {
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+}
+
+.component-card.operational .component-status {
+    background: rgba(40, 167, 69, 0.1);
+    color: var(--success);
+}
+
+.component-card.warning .component-status {
+    background: rgba(255, 193, 7, 0.1);
+    color: var(--warning);
+}
+
+.component-card.critical .component-status {
+    background: rgba(220, 53, 69, 0.1);
+    color: var(--danger);
+}
+
+.component-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+}
+
+.metric-label {
+    color: var(--dark-gray);
+}
+
+.metric-value {
+    font-weight: 600;
+    color: var(--primary-black);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .security-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .camera-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    
+    .emergency-controls {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .security-stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    
+    .emergency-controls {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        padding: 1rem;
+    }
+    
+    .emergency-btn {
+        padding: 1rem;
+        font-size: 0.875rem;
+    }
+    
+    .emergency-btn i {
+        font-size: 1.5rem;
+    }
+    
+    .camera-grid {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+    
+    .camera-viewport {
+        height: 160px;
+    }
+    
+    .alert-item,
+    .incident-item {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .alert-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .system-components {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .content-area {
+        padding: 1rem;
+    }
+    
+    .emergency-header {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .section-header {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .component-card {
+        padding: 1rem;
+    }
+    
+    .component-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+
+/* Animation Effects */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes cameraAlert {
+    0% {
+        border-color: var(--medium-gray);
+    }
+    50% {
+        border-color: var(--danger);
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+    }
+    100% {
+        border-color: var(--medium-gray);
+    }
+}
+
+.camera-feed.alert {
+    animation: cameraAlert 2s ease-in-out infinite;
+}
+
+/* Print Styles */
+@media print {
+    .emergency-panel,
+    .camera-controls,
+    .alert-actions,
+    .monitor-controls {
+        display: none;
+    }
+    
+    .camera-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .camera-viewport {
+        height: 120px;
+    }
+    
+    .system-components {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

@@ -15,6 +15,11 @@
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!--
       Notice the use of %PUBLIC_URL% in the tags above.
       It will be replaced with the URL of the `public` folder during the build.
@@ -24,7 +29,57 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>React App</title>
+    <title>FORTEN CRM - Sistema de Portería Digital</title>
+    
+    <style>
+      /* Loading screen styles */
+      #root:empty::before {
+        content: "LOADING FORTEN SYSTEM...";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-family: 'Orbitron', monospace;
+        font-size: 24px;
+        font-weight: 900;
+        color: #FF6B35;
+        letter-spacing: 0.2em;
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+      
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #0A0A0A;
+        overflow-x: hidden;
+      }
+      
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+      }
+      
+      ::-webkit-scrollbar-track {
+        background: rgba(255, 107, 53, 0.1);
+        border-radius: 6px;
+      }
+      
+      ::-webkit-scrollbar-thumb {
+        background: #FF6B35;
+        border-radius: 6px;
+        border: 2px solid #0A0A0A;
+      }
+      
+      ::-webkit-scrollbar-thumb:hover {
+        background: #FF8F65;
+      }
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

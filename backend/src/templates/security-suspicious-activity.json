@@ -1,0 +1,19 @@
+{
+  "name": "Suspicious Activity Detected",
+  "category": "security",
+  "description": "Alert for suspicious user activity",
+  "subject": "Security Alert: Suspicious Activity",
+  "variables": [
+    "timestamp",
+    "userId",
+    "activity",
+    "risk_level",
+    "details"
+  ],
+  "priority": "high",
+  "channels": [
+    "email",
+    "whatsapp",
+    "websocket"
+  ]
+}

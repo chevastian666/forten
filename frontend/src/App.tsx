@@ -13,6 +13,8 @@ import { Buildings } from './pages/Buildings';
 import { Events } from './pages/Events';
 import { AccessControl } from './pages/AccessControl';
 import { Monitoring } from './pages/Monitoring';
+import { ExecutiveDashboard } from './pages/Dashboard/ExecutiveDashboard';
+import { Building3DMap } from './components/Map';
 import { useAppSelector } from './hooks/useAppSelector';
 import { useAppDispatch } from './hooks/useAppDispatch';
 import { fetchProfile } from './store/authSlice';
@@ -30,6 +32,17 @@ const AppContent: React.FC = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      
+      {/* Executive Dashboard - Fullscreen route */}
+      <Route 
+        path="/executive" 
+        element={
+          <PrivateRoute roles={['admin', 'manager']}>
+            <ExecutiveDashboard />
+          </PrivateRoute>
+        } 
+      />
+      
       <Route
         path="/"
         element={
@@ -43,6 +56,14 @@ const AppContent: React.FC = () => {
         <Route path="monitoring" element={<Monitoring />} />
         <Route path="events" element={<Events />} />
         <Route path="access" element={<AccessControl />} />
+        <Route 
+          path="map3d" 
+          element={
+            <PrivateRoute roles={['admin', 'manager']}>
+              <Building3DMap />
+            </PrivateRoute>
+          } 
+        />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

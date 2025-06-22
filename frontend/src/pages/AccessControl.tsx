@@ -39,19 +39,7 @@ import { useAppDispatch } from '../hooks/useAppDispatch';
 import { fetchAccesses, createAccess, deleteAccess } from '../store/accessSlice';
 import { Access } from '../types';
 
-const typeLabels: Record<string, string> = {
-  visitor: 'Visitante',
-  temporary: 'Temporal',
-  service: 'Servicio',
-  emergency: 'Emergencia',
-};
-
-const typeColors: Record<string, 'default' | 'primary' | 'secondary' | 'warning' | 'error'> = {
-  visitor: 'default',
-  temporary: 'primary',
-  service: 'secondary',
-  emergency: 'error',
-};
+// No longer using type labels since we removed the type field
 
 export const AccessControl: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -60,13 +48,11 @@ export const AccessControl: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pinCopied, setPinCopied] = useState<string | null>(null);
   const [newAccess, setNewAccess] = useState<Partial<Access>>({
-    name: '',
-    phone: '',
-    type: 'visitor',
+    visitorName: '',
+    visitorDocument: '',
+    unitNumber: '',
     buildingId: '',
     validUntil: format(new Date(Date.now() + 24 * 60 * 60 * 1000), "yyyy-MM-dd'T'HH:mm"),
-    maxUses: 1,
-    notes: '',
   });
 
   useEffect(() => {
@@ -74,17 +60,15 @@ export const AccessControl: React.FC = () => {
   }, [dispatch]);
 
   const handleCreate = async () => {
-    if (newAccess.name && newAccess.buildingId && newAccess.validUntil) {
+    if (newAccess.visitorName && newAccess.buildingId && newAccess.validUntil) {
       await dispatch(createAccess(newAccess));
       setDialogOpen(false);
       setNewAccess({
-        name: '',
-        phone: '',
-        type: 'visitor',
+        visitorName: '',
+        visitorDocument: '',
+        unitNumber: '',
         buildingId: '',
         validUntil: format(new Date(Date.now() + 24 * 60 * 60 * 1000), "yyyy-MM-dd'T'HH:mm"),
-        maxUses: 1,
-        notes: '',
       });
     }
   };
@@ -107,10 +91,9 @@ export const AccessControl: React.FC = () => {
 
   const isAccessActive = (access: Access) => {
     const now = new Date();
-    return access.isActive && 
+    return !access.used && 
            new Date(access.validFrom) <= now && 
-           new Date(access.validUntil) >= now &&
-           access.currentUses < access.maxUses;
+           new Date(access.validUntil) >= now;
   };
 
   return (
@@ -148,7 +131,7 @@ export const AccessControl: React.FC = () => {
                 Usos Hoy
               </Typography>
               <Typography variant="h4">
-                {accesses.reduce((sum, a) => sum + a.currentUses, 0)}
+                {accesses?.filter(a => a.used).length || 0}
               </Typography>
             </CardContent>
           </Card>
@@ -157,10 +140,10 @@ export const AccessControl: React.FC = () => {
           <Card>
             <CardContent>
               <Typography color="text.secondary" gutterBottom>
-                Visitantes
+                Total Accesos
               </Typography>
               <Typography variant="h4">
-                {accesses.filter(a => a.type === 'visitor').length}
+                {accesses?.length || 0}
               </Typography>
             </CardContent>
           </Card>
@@ -169,10 +152,10 @@ export const AccessControl: React.FC = () => {
           <Card>
             <CardContent>
               <Typography color="text.secondary" gutterBottom>
-                Servicios
+                Vencidos
               </Typography>
               <Typography variant="h4">
-                {accesses.filter(a => a.type === 'service').length}
+                {accesses?.filter(a => new Date(a.validUntil) < new Date()).length || 0}
               </Typography>
             </CardContent>
           </Card>
@@ -184,17 +167,16 @@ export const AccessControl: React.FC = () => {
           <TableHead>
             <TableRow>
               <TableCell>PIN</TableCell>
-              <TableCell>Nombre</TableCell>
+              <TableCell>Visitante</TableCell>
+              <TableCell>Unidad</TableCell>
               <TableCell>Edificio</TableCell>
-              <TableCell>Tipo</TableCell>
               <TableCell>Válido Hasta</TableCell>
-              <TableCell align="center">Usos</TableCell>
               <TableCell align="center">Estado</TableCell>
               <TableCell align="right">Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {accesses.map((access) => (
+            {accesses?.map((access) => (
               <TableRow key={access.id} hover>
                 <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -218,34 +200,29 @@ export const AccessControl: React.FC = () => {
                 <TableCell>
                   <Box>
                     <Typography variant="body2" fontWeight="medium">
-                      {access.name}
+                      {access.visitorName}
                     </Typography>
-                    {access.phone && (
+                    {access.visitorDocument && (
                       <Typography variant="caption" color="text.secondary">
-                        {access.phone}
+                        Doc: {access.visitorDocument}
                       </Typography>
                     )}
                   </Box>
                 </TableCell>
-                <TableCell>{access.Building?.name}</TableCell>
                 <TableCell>
-                  <Chip
-                    label={typeLabels[access.type]}
-                    color={typeColors[access.type]}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell>{formatDate(access.validUntil)}</TableCell>
-                <TableCell align="center">
-                  <Typography variant="body2">
-                    {access.currentUses} / {access.maxUses}
+                  <Typography variant="body2" fontWeight="medium">
+                    {access.unitNumber}
                   </Typography>
                 </TableCell>
+                <TableCell>{access.Building?.name}</TableCell>
+                <TableCell>{formatDate(access.validUntil)}</TableCell>
                 <TableCell align="center">
-                  {isAccessActive(access) ? (
+                  {access.used ? (
+                    <Chip label="Usado" color="default" size="small" />
+                  ) : isAccessActive(access) ? (
                     <Chip label="Activo" color="success" size="small" />
                   ) : (
-                    <Chip label="Inactivo" size="small" />
+                    <Chip label="Vencido" color="warning" size="small" />
                   )}
                 </TableCell>
                 <TableCell align="right">
@@ -253,7 +230,7 @@ export const AccessControl: React.FC = () => {
                     size="small"
                     color="error"
                     onClick={() => handleDelete(access.id)}
-                    disabled={!access.isActive}
+                    disabled={access.used}
                   >
                     <Delete />
                   </IconButton>
@@ -271,24 +248,33 @@ export const AccessControl: React.FC = () => {
             <Grid size={12}>
               <TextField
                 fullWidth
-                label="Nombre"
-                value={newAccess.name}
-                onChange={(e) => setNewAccess({ ...newAccess, name: e.target.value })}
+                label="Nombre del Visitante"
+                value={newAccess.visitorName}
+                onChange={(e) => setNewAccess({ ...newAccess, visitorName: e.target.value })}
                 required
                 InputProps={{
                   startAdornment: <Person sx={{ mr: 1, color: 'text.secondary' }} />,
                 }}
               />
             </Grid>
-            <Grid size={12}>
+            <Grid size={6}>
               <TextField
                 fullWidth
-                label="Teléfono"
-                value={newAccess.phone}
-                onChange={(e) => setNewAccess({ ...newAccess, phone: e.target.value })}
+                label="Documento"
+                value={newAccess.visitorDocument}
+                onChange={(e) => setNewAccess({ ...newAccess, visitorDocument: e.target.value })}
                 InputProps={{
                   startAdornment: <Phone sx={{ mr: 1, color: 'text.secondary' }} />,
                 }}
+              />
+            </Grid>
+            <Grid size={6}>
+              <TextField
+                fullWidth
+                label="Número de Unidad"
+                value={newAccess.unitNumber}
+                onChange={(e) => setNewAccess({ ...newAccess, unitNumber: e.target.value })}
+                required
               />
             </Grid>
             <Grid size={12}>
@@ -300,7 +286,7 @@ export const AccessControl: React.FC = () => {
                 onChange={(e) => setNewAccess({ ...newAccess, buildingId: e.target.value })}
                 required
               >
-                {buildings.map((building) => (
+                {buildings?.map((building) => (
                   <MenuItem key={building.id} value={building.id}>
                     {building.name}
                   </MenuItem>
@@ -310,29 +296,14 @@ export const AccessControl: React.FC = () => {
             <Grid size={6}>
               <TextField
                 fullWidth
-                label="Tipo de Acceso"
-                select
-                value={newAccess.type}
-                onChange={(e) => setNewAccess({ ...newAccess, type: e.target.value as any })}
-              >
-                {Object.entries(typeLabels).map(([value, label]) => (
-                  <MenuItem key={value} value={value}>
-                    {label}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-            <Grid size={6}>
-              <TextField
-                fullWidth
-                label="Máximo de Usos"
-                type="number"
-                value={newAccess.maxUses}
-                onChange={(e) => setNewAccess({ ...newAccess, maxUses: parseInt(e.target.value) })}
-                inputProps={{ min: 1 }}
+                label="Válido Desde"
+                type="datetime-local"
+                value={newAccess.validFrom || format(new Date(), "yyyy-MM-dd'T'HH:mm")}
+                onChange={(e) => setNewAccess({ ...newAccess, validFrom: e.target.value })}
+                InputLabelProps={{ shrink: true }}
               />
             </Grid>
-            <Grid size={12}>
+            <Grid size={6}>
               <TextField
                 fullWidth
                 label="Válido Hasta"
@@ -341,16 +312,6 @@ export const AccessControl: React.FC = () => {
                 onChange={(e) => setNewAccess({ ...newAccess, validUntil: e.target.value })}
                 InputLabelProps={{ shrink: true }}
                 required
-              />
-            </Grid>
-            <Grid size={12}>
-              <TextField
-                fullWidth
-                label="Notas"
-                multiline
-                rows={2}
-                value={newAccess.notes}
-                onChange={(e) => setNewAccess({ ...newAccess, notes: e.target.value })}
               />
             </Grid>
           </Grid>

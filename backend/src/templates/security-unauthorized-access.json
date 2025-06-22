@@ -1,0 +1,10 @@
+{
+  "name": "Unauthorized Access Attempt",
+  "category": "security",
+  "description": "Alert for unauthorized access attempts",
+  "subject": "Security Alert: Unauthorized Access Attempt",
+  "variables": ["timestamp", "userAgent", "ip", "location", "attemptedAction"],
+  "priority": "high",
+  "channels": ["email", "whatsapp", "websocket"],
+  "lastModified": "2024-01-15T10:00:00Z"
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Backup Completed",
+  "category": "system",
+  "description": "Notification when backup is completed",
+  "subject": "System Backup Completed Successfully",
+  "variables": [
+    "timestamp",
+    "backupType",
+    "duration",
+    "size",
+    "location"
+  ],
+  "priority": "low",
+  "channels": [
+    "email"
+  ]
+}

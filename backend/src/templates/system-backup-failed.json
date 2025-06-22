@@ -1,0 +1,17 @@
+{
+  "name": "Backup Failed",
+  "category": "system",
+  "description": "Alert when backup fails",
+  "subject": "System Backup Failed",
+  "variables": [
+    "timestamp",
+    "backupType",
+    "error",
+    "duration"
+  ],
+  "priority": "high",
+  "channels": [
+    "email",
+    "websocket"
+  ]
+}

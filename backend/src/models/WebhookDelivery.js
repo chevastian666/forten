@@ -3,7 +3,7 @@
  * Database model for tracking webhook delivery attempts
  */
 
-const { DataTypes } = require('sequelize');
+const { DataTypes, Op } = require('sequelize');
 const sequelize = require('../config/database');
 
 const WebhookDelivery = sequelize.define('WebhookDelivery', {
@@ -188,7 +188,7 @@ WebhookDelivery.getPendingRetries = async function() {
     where: {
       status: 'retrying',
       next_retry_at: {
-        [sequelize.Op.lte]: new Date()
+        [Op.lte]: new Date()
       }
     },
     include: [{
@@ -207,10 +207,10 @@ WebhookDelivery.cleanOldDeliveries = async function(daysToKeep = 30) {
   return WebhookDelivery.destroy({
     where: {
       created_at: {
-        [sequelize.Op.lt]: cutoffDate
+        [Op.lt]: cutoffDate
       },
       status: {
-        [sequelize.Op.in]: ['success', 'failed']
+        [Op.in]: ['success', 'failed']
       }
     }
   });
@@ -224,7 +224,7 @@ WebhookDelivery.addScope('withDeleted', {
 WebhookDelivery.addScope('onlyDeleted', {
   where: {
     deleted_at: {
-      [sequelize.Op.ne]: null
+      [Op.ne]: null
     }
   },
   paranoid: false
