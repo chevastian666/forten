@@ -445,7 +445,7 @@ const AlertPreview: React.FC<{
               backgroundColor: '#f5f5f5',
               borderRadius: 2,
               overflow: 'hidden',
-              background: 'linear-gradient(135deg, #2A2A2A 0%, #1A1A1A 50%, #000000 100%)',
+              background: 'linear-gradient(135deg, #1E2328 0%, #0F1419 50%, #000000 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -529,8 +529,9 @@ const AlertPreview: React.FC<{
             elevation={0}
             sx={{
               p: 2,
-              backgroundColor: 'rgba(255, 107, 53, 0.05)',
-              border: '1px solid rgba(255, 107, 53, 0.2)',
+              backgroundColor: 'rgba(255, 107, 53, 0.08)',
+              border: '1px solid rgba(255, 107, 53, 0.3)',
+              borderRadius: 2,
             }}
           >
             <Stack spacing={1}>
@@ -622,9 +623,10 @@ const AlertCard: React.FC<{
       <Card
         sx={{
           mb: 2,
-          border: `2px solid ${severityConfig.color}30`,
+          border: `1px solid ${severityConfig.color}40`,
           borderLeft: `4px solid ${severityConfig.color}`,
-          backgroundColor: config.bgColor,
+          backgroundColor: 'background.paper',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
           '&:hover': {
             boxShadow: `0 4px 20px ${config.color}20`,
           },
@@ -741,9 +743,10 @@ const AlertGroupCard: React.FC<{
       <Card
         sx={{
           mb: 3,
-          border: `2px solid ${severityConfig.color}`,
-          backgroundColor: `${config.color}10`,
+          border: `1px solid ${severityConfig.color}40`,
+          backgroundColor: 'background.paper',
           overflow: 'hidden',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
         }}
       >
         <CardContent>
@@ -891,12 +894,30 @@ export const AIAlertSystem: React.FC = () => {
       {/* Header */}
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
         <Box>
-          <Typography variant="h4" fontWeight="bold" gutterBottom>
-            Sistema de Alertas Inteligentes
-          </Typography>
-          <Typography variant="subtitle1" color="text.secondary">
-            Detección automática con IA • {alerts.length} alertas procesadas
-          </Typography>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <Box 
+              sx={{ 
+                width: 48, 
+                height: 48, 
+                backgroundColor: 'primary.main',
+                borderRadius: 2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(255, 107, 53, 0.3)'
+              }}
+            >
+              <SmartToy sx={{ color: 'white', fontSize: 24 }} />
+            </Box>
+            <Box>
+              <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ mb: 0.5 }}>
+                Sistema de Alertas Inteligentes
+              </Typography>
+              <Typography variant="subtitle1" color="text.secondary">
+                Detección automática con IA • {alerts.length} alertas procesadas
+              </Typography>
+            </Box>
+          </Stack>
         </Box>
         
         <Stack direction="row" spacing={2}>

@@ -83,10 +83,31 @@ export const MainLayout: React.FC = () => {
 
   const drawer = (
     <Box>
-      <Toolbar>
-        <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-          FORTEN CRM
-        </Typography>
+      <Toolbar sx={{ borderBottom: '1px solid rgba(154, 160, 166, 0.24)' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box 
+            sx={{ 
+              width: 32, 
+              height: 32, 
+              backgroundColor: 'primary.main',
+              borderRadius: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 8px rgba(255, 107, 53, 0.3)'
+            }}
+          >
+            <Security sx={{ color: 'white', fontSize: 20 }} />
+          </Box>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary', lineHeight: 1 }}>
+              FORTEN
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1, fontWeight: 500 }}>
+              CONTROL CENTER
+            </Typography>
+          </Box>
+        </Box>
       </Toolbar>
       <Divider />
       <List>
@@ -122,7 +143,8 @@ export const MainLayout: React.FC = () => {
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
           backgroundColor: 'background.paper',
-          borderBottom: '1px solid rgba(0, 172, 193, 0.2)',
+          borderBottom: '1px solid rgba(154, 160, 166, 0.24)',
+          backdropFilter: 'blur(8px)',
         }}
       >
         <Toolbar>
@@ -135,9 +157,14 @@ export const MainLayout: React.FC = () => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Centro de Control
-          </Typography>
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 600, color: 'text.primary' }}>
+              Centro de Control
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+              Sistema de Monitoreo en Tiempo Real
+            </Typography>
+          </Box>
           
           <IconButton color="inherit">
             <Badge badgeContent={4} color="error">
@@ -202,7 +229,7 @@ export const MainLayout: React.FC = () => {
               boxSizing: 'border-box',
               width: drawerWidth,
               backgroundColor: 'background.paper',
-              borderRight: '1px solid rgba(0, 172, 193, 0.2)',
+              borderRight: '1px solid rgba(154, 160, 166, 0.24)',
             },
           }}
           open
