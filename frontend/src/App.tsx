@@ -97,11 +97,11 @@ function App() {
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <ToastProvider>
-          <Router>
+        <Router>
+          <ToastProvider>
             <AppContent />
-          </Router>
-        </ToastProvider>
+          </ToastProvider>
+        </Router>
       </ThemeProvider>
     </Provider>
   );
