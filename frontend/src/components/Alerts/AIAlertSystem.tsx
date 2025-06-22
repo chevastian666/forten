@@ -34,6 +34,7 @@ import {
 } from '@mui/icons-material';
 import { useSpring, animated, useTransition } from '@react-spring/web';
 import { format, subMinutes, differenceInMinutes, isSameHour } from 'date-fns';
+import NotificationService from '../../services/notificationService';
 
 // Types for AI Alert System
 interface BoundingBox {
@@ -826,12 +827,81 @@ const AlertGroupCard: React.FC<{
 
 // Main AI Alert System Component
 export const AIAlertSystem: React.FC = () => {
-  const [alerts] = useState<AIAlert[]>(generateMockAlerts(30));
+  const [alerts, setAlerts] = useState<AIAlert[]>(generateMockAlerts(30));
   const [alertGroups] = useState<AlertGroup[]>(groupAlerts(generateMockAlerts(30)));
   const [viewMode, setViewMode] = useState<'individual' | 'grouped'>('grouped');
-  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Simulate real-time alerts
+  useEffect(() => {
+    const simulateRealTimeAlerts = () => {
+      const alertTypes: AIAlert['type'][] = [
+        'person', 'vehicle', 'unauthorized_access', 'suspicious_behavior', 'object', 'animal'
+      ];
+      
+      const locations = [
+        'Entrada Principal', 'Estacionamiento Norte', 'Pasillo Sector A', 
+        'Área de Recepción', 'Salida de Emergencia', 'Perímetro Exterior'
+      ];
+
+      const randomType = alertTypes[Math.floor(Math.random() * alertTypes.length)];
+      const randomLocation = locations[Math.floor(Math.random() * locations.length)];
+      const confidence = 0.75 + Math.random() * 0.25;
+      
+      let severity: AIAlert['severity'] = 'low';
+      if (randomType === 'unauthorized_access' || confidence > 0.95) severity = 'critical';
+      else if (randomType === 'suspicious_behavior' || confidence > 0.85) severity = 'high';
+      else if (confidence > 0.75) severity = 'medium';
+
+      const newAlert: AIAlert = {
+        id: `alert-${Date.now()}`,
+        type: randomType,
+        title: generateAlertTitle(randomType),
+        description: generateAlertDescription(randomType),
+        confidence,
+        severity,
+        timestamp: new Date(),
+        location: randomLocation,
+        cameraId: `CAM-${String(Math.floor(Math.random() * 5) + 1).padStart(3, '0')}`,
+        boundingBoxes: generateBoundingBoxes(randomType, Math.random() > 0.7 ? 2 : 1),
+        mlClassification: classifyAlert(randomType, confidence),
+        status: 'new',
+      };
+
+      // Add to alerts list
+      setAlerts(prev => [newAlert, ...prev.slice(0, 49)]); // Keep max 50 alerts
+
+      // Show toast notification
+      NotificationService.aiAlert({
+        type: randomType,
+        title: newAlert.title,
+        location: randomLocation,
+        confidence,
+        severity,
+      });
+
+      // Play sound if enabled
+      if (soundEnabled) {
+        handlePlaySound(randomType);
+      }
+    };
+
+    // Initial notifications
+    setTimeout(() => {
+      NotificationService.systemAlert('Sistema de IA iniciado correctamente', 'system');
+    }, 1000);
+
+    // Simulate new alerts every 15-30 seconds
+    const interval = setInterval(() => {
+      if (Math.random() > 0.3) { // 70% chance of new alert
+        simulateRealTimeAlerts();
+      }
+    }, 15000 + Math.random() * 15000); // 15-30 seconds
+
+    return () => clearInterval(interval);
+  }, [soundEnabled]);
   
   const filteredAlerts = useMemo(() => {
     return alerts.filter(alert => alert.status === 'new').slice(0, 10);

@@ -17,6 +17,8 @@ import { ExecutiveDashboard } from './pages/Dashboard/ExecutiveDashboard';
 import { Building3DMap } from './components/Map';
 import { CommandCenter } from './pages/CommandCenter';
 import { AIAlertSystem } from './components/Alerts';
+import { PageTransition } from './components/Animations';
+import { ToastProvider } from './components/Notifications';
 import { useAppSelector } from './hooks/useAppSelector';
 import { useAppDispatch } from './hooks/useAppDispatch';
 import { fetchProfile } from './store/authSlice';
@@ -32,59 +34,61 @@ const AppContent: React.FC = () => {
   }, [dispatch, accessToken, isAuthenticated]);
 
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      
-      {/* Executive Dashboard - Fullscreen route */}
-      <Route 
-        path="/executive" 
-        element={
-          <PrivateRoute roles={['admin', 'manager']}>
-            <ExecutiveDashboard />
-          </PrivateRoute>
-        } 
-      />
-      
-      <Route
-        path="/"
-        element={
-          <PrivateRoute>
-            <MainLayout />
-          </PrivateRoute>
-        }
-      >
-        <Route index element={<Dashboard />} />
-        <Route path="buildings" element={<Buildings />} />
-        <Route path="monitoring" element={<Monitoring />} />
-        <Route path="events" element={<Events />} />
-        <Route path="access" element={<AccessControl />} />
+    <PageTransition>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        
+        {/* Executive Dashboard - Fullscreen route */}
         <Route 
-          path="map3d" 
+          path="/executive" 
           element={
             <PrivateRoute roles={['admin', 'manager']}>
-              <Building3DMap />
+              <ExecutiveDashboard />
             </PrivateRoute>
           } 
         />
-        <Route 
-          path="command-center" 
+        
+        <Route
+          path="/"
           element={
-            <PrivateRoute roles={['admin', 'manager']}>
-              <CommandCenter />
+            <PrivateRoute>
+              <MainLayout />
             </PrivateRoute>
-          } 
-        />
-        <Route 
-          path="ai-alerts" 
-          element={
-            <PrivateRoute roles={['admin', 'manager', 'supervisor']}>
-              <AIAlertSystem />
-            </PrivateRoute>
-          } 
-        />
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+          }
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="buildings" element={<Buildings />} />
+          <Route path="monitoring" element={<Monitoring />} />
+          <Route path="events" element={<Events />} />
+          <Route path="access" element={<AccessControl />} />
+          <Route 
+            path="map3d" 
+            element={
+              <PrivateRoute roles={['admin', 'manager']}>
+                <Building3DMap />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="command-center" 
+            element={
+              <PrivateRoute roles={['admin', 'manager']}>
+                <CommandCenter />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="ai-alerts" 
+            element={
+              <PrivateRoute roles={['admin', 'manager', 'supervisor']}>
+                <AIAlertSystem />
+              </PrivateRoute>
+            } 
+          />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </PageTransition>
   );
 };
 
@@ -93,9 +97,11 @@ function App() {
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Router>
-          <AppContent />
-        </Router>
+        <ToastProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </ToastProvider>
       </ThemeProvider>
     </Provider>
   );
