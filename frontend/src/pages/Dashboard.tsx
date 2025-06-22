@@ -7,6 +7,8 @@ import {
   Paper,
   LinearProgress,
   Stack,
+  Button,
+  Fab,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import {
@@ -16,6 +18,7 @@ import {
   Videocam,
   VpnKey,
   TrendingUp,
+  Dashboard as DashboardIcon,
 } from '@mui/icons-material';
 import { useAppSelector } from '../hooks/useAppSelector';
 import { useAppDispatch } from '../hooks/useAppDispatch';
@@ -23,6 +26,7 @@ import { fetchEventStats } from '../store/eventSlice';
 import { fetchBuildings } from '../store/buildingSlice';
 import { ActivityChart } from '../components/ActivityChart';
 import { WeeklyActivityChart } from '../components/WeeklyActivityChart';
+import { useNavigate } from 'react-router-dom';
 
 const StatCard: React.FC<{
   title: string;
@@ -64,6 +68,7 @@ const StatCard: React.FC<{
 
 export const Dashboard: React.FC = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { stats } = useAppSelector((state) => state.events);
   const { buildings } = useAppSelector((state) => state.buildings);
   const user = useAppSelector((state) => state.auth.user);
@@ -75,11 +80,38 @@ export const Dashboard: React.FC = () => {
 
   const activeBuildings = buildings?.filter(b => b.status === 'active').length || 0;
 
+  const canAccessExecutive = user?.role === 'admin' || user?.role === 'manager';
+
   return (
-    <Box>
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold' }}>
-        Bienvenido, {user?.firstName}
-      </Typography>
+    <Box sx={{ position: 'relative' }}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ mb: 3 }}
+      >
+        <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+          Bienvenido, {user?.firstName}
+        </Typography>
+
+        {canAccessExecutive && (
+          <Button
+            variant="contained"
+            startIcon={<DashboardIcon />}
+            onClick={() => navigate('/executive')}
+            sx={{
+              background: 'linear-gradient(45deg, #FF6B35 30%, #FF8F65 90%)',
+              boxShadow: '0 4px 16px rgba(255, 107, 53, 0.3)',
+              '&:hover': {
+                background: 'linear-gradient(45deg, #E85D25 30%, #FF6B35 90%)',
+                boxShadow: '0 6px 20px rgba(255, 107, 53, 0.4)',
+              },
+            }}
+          >
+            Dashboard Ejecutivo
+          </Button>
+        )}
+      </Stack>
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
