@@ -16,6 +16,7 @@ import { Monitoring } from './pages/Monitoring';
 import { ExecutiveDashboard } from './pages/Dashboard/ExecutiveDashboard';
 import { Building3DMap } from './components/Map';
 import { CommandCenter } from './pages/CommandCenter';
+import { AIAlertSystem } from './components/Alerts';
 import { useAppSelector } from './hooks/useAppSelector';
 import { useAppDispatch } from './hooks/useAppDispatch';
 import { fetchProfile } from './store/authSlice';
@@ -70,6 +71,14 @@ const AppContent: React.FC = () => {
           element={
             <PrivateRoute roles={['admin', 'manager']}>
               <CommandCenter />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="ai-alerts" 
+          element={
+            <PrivateRoute roles={['admin', 'manager', 'supervisor']}>
+              <AIAlertSystem />
             </PrivateRoute>
           } 
         />
