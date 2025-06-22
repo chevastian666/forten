@@ -5,10 +5,8 @@ import {
   Typography,
   Box,
   Paper,
-  LinearProgress,
   Stack,
   Button,
-  Fab,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import {

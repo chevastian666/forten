@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -901,13 +901,13 @@ export const AIAlertSystem: React.FC = () => {
     }, 15000 + Math.random() * 15000); // 15-30 seconds
 
     return () => clearInterval(interval);
-  }, [soundEnabled]);
+  }, [soundEnabled, handlePlaySound]);
   
   const filteredAlerts = useMemo(() => {
     return alerts.filter(alert => alert.status === 'new').slice(0, 10);
   }, [alerts]);
   
-  const handlePlaySound = (type: AIAlert['type']) => {
+  const handlePlaySound = useCallback((type: AIAlert['type']) => {
     if (!soundEnabled) return;
     
     // Simulate different sounds for different alert types
@@ -935,7 +935,7 @@ export const AIAlertSystem: React.FC = () => {
     
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.5);
-  };
+  }, [soundEnabled]);
   
   const alertTransitions = useTransition(
     viewMode === 'individual' ? filteredAlerts : [],

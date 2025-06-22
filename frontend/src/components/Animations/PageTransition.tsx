@@ -65,8 +65,8 @@ const getTransitionType = (pathname: string) => {
 };
 
 const pageTransition = {
-  type: 'tween',
-  ease: [0.25, 0.46, 0.45, 0.94], // Custom cubic-bezier for smooth motion
+  type: 'tween' as const,
+  ease: 'easeOut' as const, // Using predefined easing
   duration: 0.4,
 };
 
@@ -238,7 +238,7 @@ export const SlideUpModal: React.FC<{
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
             transition={{ 
-              type: 'spring',
+              type: 'spring' as const,
               damping: 30,
               stiffness: 300,
             }}
