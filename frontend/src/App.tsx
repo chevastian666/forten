@@ -15,6 +15,7 @@ import { AccessControl } from './pages/AccessControl';
 import { Monitoring } from './pages/Monitoring';
 import { ExecutiveDashboard } from './pages/Dashboard/ExecutiveDashboard';
 import { Building3DMap } from './components/Map';
+import { CommandCenter } from './pages/CommandCenter';
 import { useAppSelector } from './hooks/useAppSelector';
 import { useAppDispatch } from './hooks/useAppDispatch';
 import { fetchProfile } from './store/authSlice';
@@ -61,6 +62,14 @@ const AppContent: React.FC = () => {
           element={
             <PrivateRoute roles={['admin', 'manager']}>
               <Building3DMap />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="command-center" 
+          element={
+            <PrivateRoute roles={['admin', 'manager']}>
+              <CommandCenter />
             </PrivateRoute>
           } 
         />

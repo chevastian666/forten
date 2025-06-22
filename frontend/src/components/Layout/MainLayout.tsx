@@ -28,6 +28,7 @@ import {
   ExitToApp,
   Person,
   Map,
+  Security,
 } from '@mui/icons-material';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAppSelector } from '../../hooks/useAppSelector';
@@ -49,6 +50,7 @@ const menuItems: MenuItemType[] = [
   { text: 'Monitoreo', icon: <Videocam />, path: '/monitoring' },
   { text: 'Eventos', icon: <EventNote />, path: '/events' },
   { text: 'Accesos', icon: <VpnKey />, path: '/access' },
+  { text: 'Centro de Comando', icon: <Security />, path: '/command-center', roles: ['admin', 'manager'] },
   { text: 'Mapa 3D', icon: <Map />, path: '/map3d', roles: ['admin', 'manager'] },
 ];
 
