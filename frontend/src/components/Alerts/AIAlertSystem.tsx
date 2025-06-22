@@ -834,6 +834,37 @@ export const AIAlertSystem: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
+  // Audio playback function
+  const handlePlaySound = useCallback((type: AIAlert['type']) => {
+    if (!soundEnabled) return;
+    
+    // Simulate different sounds for different alert types
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Different frequencies for different alert types
+    const frequencies = {
+      person: 800,
+      vehicle: 600,
+      unauthorized_access: 1000,
+      suspicious_behavior: 750,
+      object: 500,
+      animal: 400,
+    };
+    
+    oscillator.frequency.setValueAtTime(frequencies[type], audioContext.currentTime);
+    oscillator.type = 'sine';
+    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  }, [soundEnabled]);
+
   // Simulate real-time alerts
   useEffect(() => {
     const simulateRealTimeAlerts = () => {
@@ -906,36 +937,6 @@ export const AIAlertSystem: React.FC = () => {
   const filteredAlerts = useMemo(() => {
     return alerts.filter(alert => alert.status === 'new').slice(0, 10);
   }, [alerts]);
-  
-  const handlePlaySound = useCallback((type: AIAlert['type']) => {
-    if (!soundEnabled) return;
-    
-    // Simulate different sounds for different alert types
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    // Different frequencies for different alert types
-    const frequencies = {
-      person: 800,
-      vehicle: 600,
-      unauthorized_access: 1000,
-      suspicious_behavior: 750,
-      object: 500,
-      animal: 400,
-    };
-    
-    oscillator.frequency.setValueAtTime(frequencies[type], audioContext.currentTime);
-    oscillator.type = 'sine';
-    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.5);
-  }, [soundEnabled]);
   
   const alertTransitions = useTransition(
     viewMode === 'individual' ? filteredAlerts : [],
