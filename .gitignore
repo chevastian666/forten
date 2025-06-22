@@ -11,11 +11,37 @@ env/
 dist/
 build/
 
+# Backend (Node.js)
+backend/node_modules/
+backend/.env
+backend/.env.local
+backend/logs/
+backend/*.log
+backend/database.sqlite
+backend/database.sqlite-journal
+backend/npm-debug.log*
+backend/yarn-debug.log*
+backend/yarn-error.log*
+
+# Frontend (React)
+frontend/node_modules/
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/build/
+frontend/.eslintcache
+
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
 # OS
 .DS_Store
@@ -26,6 +52,10 @@ mcp_debug.log
 tool_registry.json
 forten-crm/
 *.log
+nohup.out
+backend.log
+frontend.log
+frontend2.log
 
 # Test artifacts
 .pytest_cache/
@@ -33,6 +63,8 @@ forten-crm/
 htmlcov/
 .tox/
 .hypothesis/
+coverage/
+.nyc_output
 
 # Documentation
 docs/_build/
@@ -41,7 +73,8 @@ site/
 # Temporary files
 *.tmp
 *.bak
-*~
 temp_*
+tmp/
+temp/
 sample_api_docs.md
 sample_api_docs_improved.md

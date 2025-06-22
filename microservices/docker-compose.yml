@@ -1,0 +1,164 @@
+version: '3.8'
+
+services:
+  # Infrastructure Services
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: forten
+      POSTGRES_PASSWORD: forten123
+      POSTGRES_DB: forten_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - forten-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - forten-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: forten
+      RABBITMQ_DEFAULT_PASS: forten123
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - forten-network
+
+  # API Gateway
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      AUTH_SERVICE_URL: http://auth-service:3001
+      MONITORING_SERVICE_URL: http://monitoring-service:3002
+      ACCESS_SERVICE_URL: http://access-service:3003
+      COMMUNICATION_SERVICE_URL: http://communication-service:3004
+      ANALYTICS_SERVICE_URL: http://analytics-service:3005
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
+      - auth-service
+      - monitoring-service
+      - access-service
+      - communication-service
+      - analytics-service
+    networks:
+      - forten-network
+
+  # Auth Service
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgresql://forten:forten123@postgres:5432/forten_auth
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://forten:forten123@rabbitmq:5672
+      JWT_SECRET: your-secret-key-here
+      JWT_REFRESH_SECRET: your-refresh-secret-key-here
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - forten-network
+
+  # Monitoring Service
+  monitoring-service:
+    build: ./monitoring-service
+    ports:
+      - "3002:3002"
+    environment:
+      NODE_ENV: development
+      PORT: 3002
+      DATABASE_URL: postgresql://forten:forten123@postgres:5432/forten_monitoring
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://forten:forten123@rabbitmq:5672
+      HIKCENTRAL_API_URL: ${HIKCENTRAL_API_URL}
+      HIKCENTRAL_API_KEY: ${HIKCENTRAL_API_KEY}
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - forten-network
+
+  # Access Service
+  access-service:
+    build: ./access-service
+    ports:
+      - "3003:3003"
+    environment:
+      NODE_ENV: development
+      PORT: 3003
+      DATABASE_URL: postgresql://forten:forten123@postgres:5432/forten_access
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://forten:forten123@rabbitmq:5672
+      QBOX_API_URL: ${QBOX_API_URL}
+      QBOX_API_KEY: ${QBOX_API_KEY}
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - forten-network
+
+  # Communication Service
+  communication-service:
+    build: ./communication-service
+    ports:
+      - "3004:3004"
+    environment:
+      NODE_ENV: development
+      PORT: 3004
+      DATABASE_URL: postgresql://forten:forten123@postgres:5432/forten_communication
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://forten:forten123@rabbitmq:5672
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      TWILIO_WHATSAPP_NUMBER: ${TWILIO_WHATSAPP_NUMBER}
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - forten-network
+
+  # Analytics Service
+  analytics-service:
+    build: ./analytics-service
+    ports:
+      - "3005:3005"
+    environment:
+      NODE_ENV: development
+      PORT: 3005
+      DATABASE_URL: postgresql://forten:forten123@postgres:5432/forten_analytics
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://forten:forten123@rabbitmq:5672
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - forten-network
+
+networks:
+  forten-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

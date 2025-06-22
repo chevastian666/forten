@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORTEN PIN Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .pin-section {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #495057;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .pin-display {
+            background-color: #e9ecef;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .pin-code {
+            font-size: 36px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 10px;
+            color: #007bff;
+            margin: 10px 0;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .pin-list {
+            margin: 20px 0;
+        }
+        .pin-item {
+            background-color: #f8f9fa;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 4px 4px 0 0;
+        }
+        .tab.active {
+            background-color: white;
+            border-color: #dee2e6;
+            border-bottom: 2px solid white;
+            margin-bottom: -2px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 FORTEN Secure PIN System</h1>
+        <p>Test interface for secure PIN generation and validation</p>
+
+        <div id="status"></div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('generate')">Generate PIN</div>
+            <div class="tab" onclick="switchTab('validate')">Validate PIN</div>
+            <div class="tab" onclick="switchTab('bulk')">Bulk Generate</div>
+            <div class="tab" onclick="switchTab('stats')">Statistics</div>
+        </div>
+
+        <!-- Generate PIN Tab -->
+        <div id="generate-tab" class="tab-content active">
+            <div class="pin-section">
+                <h2>Generate New PIN</h2>
+                <div class="form-group">
+                    <label for="buildingId">Building ID:</label>
+                    <select id="buildingId">
+                        <option value="building-1">Building A</option>
+                        <option value="building-2">Building B</option>
+                        <option value="building-3">Building C</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="purpose">Purpose:</label>
+                    <select id="purpose">
+                        <option value="access">General Access</option>
+                        <option value="temporary_access">Temporary Access</option>
+                        <option value="delivery">Delivery</option>
+                        <option value="emergency">Emergency</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="visitor">Visitor</option>
+                        <option value="contractor">Contractor</option>
+                        <option value="special_event">Special Event</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="length">PIN Length:</label>
+                    <input type="number" id="length" min="4" max="10" value="6">
+                </div>
+                <div class="form-group">
+                    <label for="expirationHours">Expiration (hours):</label>
+                    <input type="number" id="expirationHours" min="0.5" max="720" value="24" step="0.5">
+                </div>
+                <button onclick="generatePin()">Generate PIN</button>
+                
+                <div id="pinDisplay" class="pin-display" style="display: none;">
+                    <h3>Your Secure PIN:</h3>
+                    <div class="pin-code" id="pinCode"></div>
+                    <p>Expires: <span id="pinExpires"></span></p>
+                    <p>ID: <span id="pinId"></span></p>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="pin-section">
+                <h3>Quick Actions</h3>
+                <button onclick="generateVisitorPin()">Generate Visitor PIN</button>
+                <button onclick="generateDeliveryPin()">Generate Delivery PIN</button>
+                <button onclick="generateEmergencyPin()" style="background-color: #dc3545;">Generate Emergency PIN</button>
+            </div>
+        </div>
+
+        <!-- Validate PIN Tab -->
+        <div id="validate-tab" class="tab-content">
+            <div class="pin-section">
+                <h2>Validate PIN</h2>
+                <div class="form-group">
+                    <label for="validatePin">PIN Code:</label>
+                    <input type="text" id="validatePin" maxlength="10" placeholder="Enter PIN">
+                </div>
+                <div class="form-group">
+                    <label for="validateBuildingId">Building ID:</label>
+                    <select id="validateBuildingId">
+                        <option value="building-1">Building A</option>
+                        <option value="building-2">Building B</option>
+                        <option value="building-3">Building C</option>
+                    </select>
+                </div>
+                <button onclick="validatePin()">Validate</button>
+                
+                <div id="validationResult"></div>
+            </div>
+        </div>
+
+        <!-- Bulk Generate Tab -->
+        <div id="bulk-tab" class="tab-content">
+            <div class="pin-section">
+                <h2>Bulk Generate PINs</h2>
+                <div class="form-group">
+                    <label for="bulkCount">Number of PINs:</label>
+                    <input type="number" id="bulkCount" min="1" max="100" value="10">
+                </div>
+                <div class="form-group">
+                    <label for="bulkBuildingId">Building ID:</label>
+                    <select id="bulkBuildingId">
+                        <option value="building-1">Building A</option>
+                        <option value="building-2">Building B</option>
+                        <option value="building-3">Building C</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="bulkPurpose">Purpose:</label>
+                    <select id="bulkPurpose">
+                        <option value="visitor">Visitor</option>
+                        <option value="temporary_access">Temporary Access</option>
+                        <option value="special_event">Special Event</option>
+                    </select>
+                </div>
+                <button onclick="bulkGeneratePins()">Generate PINs</button>
+                
+                <div id="bulkResults" class="pin-list"></div>
+            </div>
+        </div>
+
+        <!-- Statistics Tab -->
+        <div id="stats-tab" class="tab-content">
+            <div class="pin-section">
+                <h2>PIN Statistics</h2>
+                <div class="form-group">
+                    <label for="statsBuildingId">Building:</label>
+                    <select id="statsBuildingId" onchange="loadStats()">
+                        <option value="building-1">Building A</option>
+                        <option value="building-2">Building B</option>
+                        <option value="building-3">Building C</option>
+                    </select>
+                </div>
+                
+                <div class="stats" id="statsDisplay">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalPins">-</div>
+                        <div class="stat-label">Total PINs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="activePins">-</div>
+                        <div class="stat-label">Active PINs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="createdToday">-</div>
+                        <div class="stat-label">Created Today</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="usedThisWeek">-</div>
+                        <div class="stat-label">Used This Week</div>
+                    </div>
+                </div>
+                
+                <button onclick="cleanupExpiredPins()">Cleanup Expired PINs</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API base URL
+        const API_BASE = '/api/pins';
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Load stats if switching to stats tab
+            if (tabName === 'stats') {
+                loadStats();
+            }
+        }
+
+        // Show status message
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Generate PIN
+        async function generatePin() {
+            try {
+                const data = {
+                    buildingId: document.getElementById('buildingId').value,
+                    purpose: document.getElementById('purpose').value,
+                    length: parseInt(document.getElementById('length').value),
+                    expirationHours: parseFloat(document.getElementById('expirationHours').value)
+                };
+
+                const response = await fetch(`${API_BASE}/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayPin(result.data);
+                    showStatus('PIN generated successfully!', 'success');
+                } else {
+                    showStatus(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Display generated PIN
+        function displayPin(pinData) {
+            document.getElementById('pinDisplay').style.display = 'block';
+            document.getElementById('pinCode').textContent = pinData.pin;
+            document.getElementById('pinExpires').textContent = new Date(pinData.expiresAt).toLocaleString('es-UY');
+            document.getElementById('pinId').textContent = pinData.id;
+        }
+
+        // Validate PIN
+        async function validatePin() {
+            try {
+                const pin = document.getElementById('validatePin').value;
+                const buildingId = document.getElementById('validateBuildingId').value;
+
+                if (!pin) {
+                    showStatus('Please enter a PIN', 'error');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE}/validate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ pin, buildingId })
+                });
+
+                const result = await response.json();
+                const resultDiv = document.getElementById('validationResult');
+
+                if (result.success && result.data.valid) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ PIN is valid!<br>
+                            Purpose: ${result.data.purpose}<br>
+                            User ID: ${result.data.userId || 'N/A'}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<div class="error">❌ Invalid PIN</div>';
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Generate visitor PIN
+        async function generateVisitorPin() {
+            const visitorName = prompt('Visitor name:');
+            const visitorDocument = prompt('Visitor document:');
+            
+            if (!visitorName || !visitorDocument) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/temporary-access`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        buildingId: document.getElementById('buildingId').value,
+                        visitorName,
+                        visitorDocument,
+                        validHours: 4
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayPin(result.data);
+                    showStatus('Visitor PIN generated successfully!', 'success');
+                } else {
+                    showStatus(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Generate delivery PIN
+        async function generateDeliveryPin() {
+            const company = prompt('Delivery company:');
+            const unit = prompt('Recipient unit:');
+            
+            if (!company || !unit) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/delivery`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        buildingId: document.getElementById('buildingId').value,
+                        company,
+                        unit,
+                        validHours: 2
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayPin(result.data);
+                    showStatus('Delivery PIN generated successfully!', 'success');
+                } else {
+                    showStatus(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Generate emergency PIN
+        async function generateEmergencyPin() {
+            if (!confirm('Generate emergency access PIN? This will be valid for 24 hours.')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/emergency`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        buildingId: document.getElementById('buildingId').value
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayPin(result.data);
+                    showStatus('⚠️ Emergency PIN generated!', 'success');
+                } else {
+                    showStatus(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Bulk generate PINs
+        async function bulkGeneratePins() {
+            try {
+                const data = {
+                    count: parseInt(document.getElementById('bulkCount').value),
+                    buildingId: document.getElementById('bulkBuildingId').value,
+                    purpose: document.getElementById('bulkPurpose').value,
+                    expirationHours: 24
+                };
+
+                showStatus('Generating PINs...', 'info');
+
+                const response = await fetch(`${API_BASE}/bulk-generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayBulkResults(result.data);
+                    showStatus(`Generated ${result.data.pins.length} PINs successfully!`, 'success');
+                } else {
+                    showStatus(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Display bulk generation results
+        function displayBulkResults(data) {
+            const resultsDiv = document.getElementById('bulkResults');
+            let html = '<h3>Generated PINs:</h3>';
+            
+            data.pins.forEach((pinData, index) => {
+                html += `
+                    <div class="pin-item">
+                        <span>${index + 1}. PIN: <strong>${pinData.pin}</strong></span>
+                        <span>Expires: ${new Date(pinData.expiresAt).toLocaleString('es-UY')}</span>
+                    </div>
+                `;
+            });
+            
+            if (data.errors.length > 0) {
+                html += '<h4>Errors:</h4>';
+                data.errors.forEach(error => {
+                    html += `<div class="error">Index ${error.index}: ${error.error}</div>`;
+                });
+            }
+            
+            resultsDiv.innerHTML = html;
+        }
+
+        // Load statistics
+        async function loadStats() {
+            try {
+                const buildingId = document.getElementById('statsBuildingId').value;
+
+                const response = await fetch(`${API_BASE}/stats/${buildingId}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('totalPins').textContent = result.data.total || 0;
+                    document.getElementById('activePins').textContent = result.data.active || 0;
+                    document.getElementById('createdToday').textContent = result.data.createdToday || 0;
+                    document.getElementById('usedThisWeek').textContent = result.data.usedThisWeek || 0;
+                } else {
+                    showStatus(`Error loading stats: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Cleanup expired PINs
+        async function cleanupExpiredPins() {
+            if (!confirm('Clean up all expired PINs?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/cleanup`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus(`Cleaned ${result.data.cleaned} expired PINs`, 'success');
+                    loadStats(); // Reload stats
+                } else {
+                    showStatus(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

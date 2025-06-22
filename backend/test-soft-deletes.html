@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORTEN Soft Delete Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        select, input, button {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button.danger {
+            background-color: #dc3545;
+        }
+        button.danger:hover {
+            background-color: #c82333;
+        }
+        button.success {
+            background-color: #28a745;
+        }
+        button.success:hover {
+            background-color: #218838;
+        }
+        button.warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        button.warning:hover {
+            background-color: #e0a800;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .records-table th,
+        .records-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .records-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .records-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        .checkbox-column {
+            width: 40px;
+            text-align: center;
+        }
+        .actions-column {
+            width: 150px;
+        }
+        .model-section {
+            margin: 20px 0;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+        .model-header {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .model-content {
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .search-box {
+            width: 300px;
+        }
+        .bulk-actions {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+        .bulk-actions.show {
+            display: block;
+        }
+        .record-details {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        .deleted-date {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            background-color: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .page-btn:hover {
+            background-color: #e9ecef;
+        }
+        .page-btn.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗑️ FORTEN Soft Delete Management</h1>
+        <p>Manage and restore soft deleted records across all models</p>
+
+        <div id="status"></div>
+
+        <!-- Statistics Section -->
+        <div class="section">
+            <h2>Statistics</h2>
+            <div class="controls">
+                <button onclick="loadStatistics()">Refresh Statistics</button>
+                <button onclick="loadSupportedModels()">Load Models</button>
+            </div>
+            <div class="stats-grid" id="statisticsGrid">
+                <div class="loading">Loading statistics...</div>
+            </div>
+        </div>
+
+        <!-- Search Section -->
+        <div class="section">
+            <h2>Search Deleted Records</h2>
+            <div class="controls">
+                <input type="text" id="searchQuery" class="search-box" placeholder="Search deleted records...">
+                <select id="searchModels" multiple>
+                    <option value="">All Models</option>
+                </select>
+                <button onclick="searchDeletedRecords()">Search</button>
+                <button onclick="clearSearch()">Clear</button>
+            </div>
+            <div id="searchResults"></div>
+        </div>
+
+        <!-- Models Section -->
+        <div class="section">
+            <h2>Deleted Records by Model</h2>
+            <div class="controls">
+                <select id="modelFilter">
+                    <option value="">All Models</option>
+                </select>
+                <input type="number" id="limitInput" value="50" min="1" max="500" placeholder="Limit">
+                <button onclick="loadDeletedRecords()">Load Records</button>
+                <button onclick="showBulkActions()" id="bulkToggle" style="display: none;">Bulk Actions</button>
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="bulk-actions" id="bulkActions">
+                <h3>Bulk Actions</h3>
+                <div class="controls">
+                    <span id="selectedCount">0 selected</span>
+                    <button onclick="bulkRestore()" class="success">Restore Selected</button>
+                    <button onclick="bulkPermanentDelete()" class="danger">Permanently Delete Selected</button>
+                    <button onclick="selectAll()">Select All</button>
+                    <button onclick="selectNone()">Select None</button>
+                </div>
+            </div>
+
+            <div id="deletedRecords">
+                <div class="loading">Click "Load Records" to view deleted records</div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination"></div>
+        </div>
+
+        <!-- Cleanup Section -->
+        <div class="section">
+            <h2>Cleanup Old Records</h2>
+            <div class="controls">
+                <label for="cleanupDays">Delete records older than:</label>
+                <input type="number" id="cleanupDays" value="30" min="1" max="365"> days
+                <select id="cleanupModel">
+                    <option value="">All Models</option>
+                </select>
+                <button onclick="cleanupOldRecords()" class="warning">Cleanup</button>
+            </div>
+            <div class="info">
+                <strong>Warning:</strong> This will permanently delete soft deleted records older than the specified number of days.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 0;
+        let currentLimit = 50;
+        let selectedRecords = new Set();
+        let allRecords = {};
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStatistics();
+            loadSupportedModels();
+        });
+
+        // Load statistics
+        async function loadStatistics() {
+            try {
+                showStatus('Loading statistics...', 'info');
+                
+                const response = await fetch('/api/soft-deletes/statistics');
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayStatistics(result.data);
+                    showStatus('Statistics loaded successfully', 'success');
+                } else {
+                    showError(result.message);
+                }
+            } catch (error) {
+                showError('Error loading statistics: ' + error.message);
+            }
+        }
+
+        // Display statistics
+        function displayStatistics(stats) {
+            const container = document.getElementById('statisticsGrid');
+            
+            let html = `
+                <div class="stat-card">
+                    <div class="stat-value">${stats.summary.totalDeleted}</div>
+                    <div class="stat-label">Total Deleted Records</div>
+                </div>
+            `;
+            
+            if (stats.summary.oldestDeletion) {
+                html += `
+                    <div class="stat-card">
+                        <div class="stat-value">${new Date(stats.summary.oldestDeletion).toLocaleDateString('es-UY')}</div>
+                        <div class="stat-label">Oldest Deletion</div>
+                    </div>
+                `;
+            }
+            
+            if (stats.summary.newestDeletion) {
+                html += `
+                    <div class="stat-card">
+                        <div class="stat-value">${new Date(stats.summary.newestDeletion).toLocaleDateString('es-UY')}</div>
+                        <div class="stat-label">Newest Deletion</div>
+                    </div>
+                `;
+            }
+
+            // Add model-specific stats
+            Object.entries(stats.models).forEach(([model, data]) => {
+                if (data.deletedCount > 0) {
+                    html += `
+                        <div class="stat-card">
+                            <div class="stat-value">${data.deletedCount}</div>
+                            <div class="stat-label">${model}</div>
+                        </div>
+                    `;
+                }
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Load supported models
+        async function loadSupportedModels() {
+            try {
+                const response = await fetch('/api/soft-deletes/models');
+                const result = await response.json();
+                
+                if (result.success) {
+                    populateModelSelectors(result.data);
+                }
+            } catch (error) {
+                console.error('Error loading models:', error);
+            }
+        }
+
+        // Populate model selectors
+        function populateModelSelectors(models) {
+            const selectors = ['modelFilter', 'cleanupModel', 'searchModels'];
+            
+            selectors.forEach(selectorId => {
+                const selector = document.getElementById(selectorId);
+                
+                // Keep the first option (All Models)
+                const firstOption = selector.options[0];
+                selector.innerHTML = '';
+                selector.appendChild(firstOption);
+                
+                models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.name;
+                    option.textContent = model.name;
+                    selector.appendChild(option);
+                });
+            });
+        }
+
+        // Load deleted records
+        async function loadDeletedRecords() {
+            try {
+                showStatus('Loading deleted records...', 'info');
+                
+                const model = document.getElementById('modelFilter').value;
+                const limit = parseInt(document.getElementById('limitInput').value) || 50;
+                const offset = currentPage * limit;
+                
+                const params = new URLSearchParams();
+                if (model) params.append('model', model);
+                params.append('limit', limit);
+                params.append('offset', offset);
+                
+                const response = await fetch(`/api/soft-deletes?${params}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    allRecords = result.data;
+                    displayDeletedRecords(result.data);
+                    showStatus('Records loaded successfully', 'success');
+                    
+                    // Show bulk actions if records exist
+                    const hasRecords = Object.values(result.data).some(modelData => 
+                        modelData.rows && modelData.rows.length > 0
+                    );
+                    document.getElementById('bulkToggle').style.display = hasRecords ? 'inline-block' : 'none';
+                } else {
+                    showError(result.message);
+                }
+            } catch (error) {
+                showError('Error loading records: ' + error.message);
+            }
+        }
+
+        // Display deleted records
+        function displayDeletedRecords(records) {
+            const container = document.getElementById('deletedRecords');
+            
+            if (Object.keys(records).length === 0) {
+                container.innerHTML = '<p>No deleted records found.</p>';
+                return;
+            }
+            
+            let html = '';
+            
+            Object.entries(records).forEach(([model, data]) => {
+                if (data.rows && data.rows.length > 0) {
+                    html += `
+                        <div class="model-section">
+                            <div class="model-header">
+                                <h3>${model} (${data.count} total)</h3>
+                                <div>
+                                    <button onclick="restoreAllInModel('${model}')" class="success">Restore All</button>
+                                </div>
+                            </div>
+                            <div class="model-content">
+                                <table class="records-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="checkbox-column">
+                                                <input type="checkbox" onchange="toggleModelSelection('${model}', this.checked)">
+                                            </th>
+                                            <th>ID</th>
+                                            <th>Deleted At</th>
+                                            <th>Details</th>
+                                            <th class="actions-column">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                    `;
+                    
+                    data.rows.forEach(record => {
+                        const recordKey = `${model}:${record.id}`;
+                        html += `
+                            <tr>
+                                <td class="checkbox-column">
+                                    <input type="checkbox" 
+                                           value="${recordKey}" 
+                                           onchange="toggleRecordSelection('${recordKey}', this.checked)">
+                                </td>
+                                <td><code>${record.id}</code></td>
+                                <td class="deleted-date">${new Date(record.deleted_at).toLocaleString('es-UY')}</td>
+                                <td>
+                                    <div class="record-details">
+                                        ${JSON.stringify(record, null, 2)}
+                                    </div>
+                                </td>
+                                <td class="actions-column">
+                                    <button onclick="restoreRecord('${model}', '${record.id}')" class="success">
+                                        Restore
+                                    </button>
+                                    <button onclick="permanentlyDelete('${model}', '${record.id}')" class="danger">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Search deleted records
+        async function searchDeletedRecords() {
+            try {
+                const query = document.getElementById('searchQuery').value.trim();
+                if (!query) {
+                    showError('Please enter a search query');
+                    return;
+                }
+                
+                showStatus('Searching...', 'info');
+                
+                const models = Array.from(document.getElementById('searchModels').selectedOptions)
+                    .map(option => option.value)
+                    .filter(value => value);
+                
+                const params = new URLSearchParams();
+                params.append('q', query);
+                if (models.length > 0) {
+                    params.append('models', models.join(','));
+                }
+                
+                const response = await fetch(`/api/soft-deletes/search?${params}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    displaySearchResults(result.data, result.meta);
+                    showStatus(`Search completed: ${query}`, 'success');
+                } else {
+                    showError(result.message);
+                }
+            } catch (error) {
+                showError('Search error: ' + error.message);
+            }
+        }
+
+        // Display search results
+        function displaySearchResults(results, meta) {
+            const container = document.getElementById('searchResults');
+            
+            let html = `<h3>Search Results for: "${meta.searchTerm}"</h3>`;
+            
+            const hasResults = Object.values(results).some(records => records.length > 0);
+            
+            if (!hasResults) {
+                html += '<p>No matching deleted records found.</p>';
+            } else {
+                Object.entries(results).forEach(([model, records]) => {
+                    if (records.length > 0) {
+                        html += `
+                            <div class="model-section">
+                                <div class="model-header">
+                                    <h4>${model} (${records.length} matches)</h4>
+                                </div>
+                                <div class="model-content">
+                        `;
+                        
+                        records.forEach(record => {
+                            html += `
+                                <div style="margin: 10px 0; padding: 10px; border: 1px solid #dee2e6; border-radius: 4px;">
+                                    <div><strong>ID:</strong> ${record.id}</div>
+                                    <div><strong>Deleted:</strong> ${new Date(record.deleted_at).toLocaleString('es-UY')}</div>
+                                    <div style="margin: 10px 0;">
+                                        <button onclick="restoreRecord('${model}', '${record.id}')" class="success">Restore</button>
+                                        <button onclick="permanentlyDelete('${model}', '${record.id}')" class="danger">Delete</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        html += `
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Restore record
+        async function restoreRecord(model, id) {
+            if (!confirm(`Restore this ${model} record?`)) return;
+            
+            try {
+                showStatus('Restoring record...', 'info');
+                
+                const response = await fetch(`/api/soft-deletes/${model}/${id}/restore`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('Record restored successfully', 'success');
+                    loadDeletedRecords();
+                    loadStatistics();
+                } else {
+                    showError(result.message);
+                }
+            } catch (error) {
+                showError('Restore error: ' + error.message);
+            }
+        }
+
+        // Permanently delete record
+        async function permanentlyDelete(model, id) {
+            if (!confirm(`PERMANENTLY DELETE this ${model} record? This cannot be undone!`)) return;
+            
+            try {
+                showStatus('Permanently deleting record...', 'info');
+                
+                const response = await fetch(`/api/soft-deletes/${model}/${id}/permanent`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('Record permanently deleted', 'success');
+                    loadDeletedRecords();
+                    loadStatistics();
+                } else {
+                    showError(result.message);
+                }
+            } catch (error) {
+                showError('Delete error: ' + error.message);
+            }
+        }
+
+        // Bulk restore
+        async function bulkRestore() {
+            if (selectedRecords.size === 0) {
+                showError('No records selected');
+                return;
+            }
+            
+            if (!confirm(`Restore ${selectedRecords.size} selected records?`)) return;
+            
+            try {
+                showStatus('Bulk restoring...', 'info');
+                
+                // Group by model
+                const byModel = {};
+                selectedRecords.forEach(recordKey => {
+                    const [model, id] = recordKey.split(':');
+                    if (!byModel[model]) byModel[model] = [];
+                    byModel[model].push(id);
+                });
+                
+                let totalRestored = 0;
+                let totalErrors = 0;
+                
+                for (const [model, ids] of Object.entries(byModel)) {
+                    const response = await fetch(`/api/soft-deletes/${model}/bulk-restore`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ids })
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        totalRestored += result.data.summary.restored;
+                        totalErrors += result.data.summary.failed;
+                    }
+                }
+                
+                showStatus(`Bulk restore completed: ${totalRestored} restored, ${totalErrors} errors`, 'success');
+                selectedRecords.clear();
+                updateSelectedCount();
+                loadDeletedRecords();
+                loadStatistics();
+            } catch (error) {
+                showError('Bulk restore error: ' + error.message);
+            }
+        }
+
+        // Cleanup old records
+        async function cleanupOldRecords() {
+            const days = parseInt(document.getElementById('cleanupDays').value);
+            const model = document.getElementById('cleanupModel').value;
+            
+            if (!confirm(`Permanently delete all soft deleted records older than ${days} days? This cannot be undone!`)) return;
+            
+            try {
+                showStatus('Cleaning up old records...', 'info');
+                
+                const response = await fetch('/api/soft-deletes/cleanup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ daysOld: days, model: model || undefined })
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    let totalCleaned = 0;
+                    Object.values(result.data).forEach(modelData => {
+                        totalCleaned += modelData.cleaned || 0;
+                    });
+                    showStatus(`Cleanup completed: ${totalCleaned} records permanently deleted`, 'success');
+                    loadDeletedRecords();
+                    loadStatistics();
+                } else {
+                    showError(result.message);
+                }
+            } catch (error) {
+                showError('Cleanup error: ' + error.message);
+            }
+        }
+
+        // Selection management
+        function toggleRecordSelection(recordKey, selected) {
+            if (selected) {
+                selectedRecords.add(recordKey);
+            } else {
+                selectedRecords.delete(recordKey);
+            }
+            updateSelectedCount();
+        }
+
+        function toggleModelSelection(model, selected) {
+            const checkboxes = document.querySelectorAll(`input[value^="${model}:"]`);
+            checkboxes.forEach(cb => {
+                cb.checked = selected;
+                toggleRecordSelection(cb.value, selected);
+            });
+        }
+
+        function selectAll() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"][value*=":"]');
+            checkboxes.forEach(cb => {
+                cb.checked = true;
+                selectedRecords.add(cb.value);
+            });
+            updateSelectedCount();
+        }
+
+        function selectNone() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = false);
+            selectedRecords.clear();
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            document.getElementById('selectedCount').textContent = `${selectedRecords.size} selected`;
+        }
+
+        // Show/hide bulk actions
+        function showBulkActions() {
+            const bulkActions = document.getElementById('bulkActions');
+            bulkActions.classList.toggle('show');
+        }
+
+        // Clear search
+        function clearSearch() {
+            document.getElementById('searchQuery').value = '';
+            document.getElementById('searchResults').innerHTML = '';
+        }
+
+        // Status helpers
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = type;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function showError(message) {
+            showStatus(message, 'error');
+        }
+    </script>
+</body>
+</html>

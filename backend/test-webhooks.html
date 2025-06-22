@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORTEN Webhook Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .webhook-section {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #495057;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        textarea {
+            min-height: 100px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        button.danger {
+            background-color: #dc3545;
+        }
+        button.danger:hover {
+            background-color: #c82333;
+        }
+        button.success {
+            background-color: #28a745;
+        }
+        button.success:hover {
+            background-color: #218838;
+        }
+        .webhook-list {
+            display: grid;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .webhook-card {
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+        }
+        .webhook-card.inactive {
+            opacity: 0.6;
+        }
+        .webhook-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+        .webhook-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .webhook-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .webhook-status.active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .webhook-status.inactive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .webhook-url {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #666;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        .webhook-events {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        .event-badge {
+            background-color: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .webhook-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .webhook-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .delivery-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .delivery-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .delivery-status {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .delivery-status.success {
+            background-color: #28a745;
+            color: white;
+        }
+        .delivery-status.failed {
+            background-color: #dc3545;
+            color: white;
+        }
+        .delivery-status.pending {
+            background-color: #ffc107;
+            color: black;
+        }
+        .delivery-status.retrying {
+            background-color: #17a2b8;
+            color: white;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+        .event-selector {
+            display: grid;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .event-category {
+            margin-bottom: 15px;
+        }
+        .event-category h4 {
+            margin-bottom: 5px;
+            color: #495057;
+        }
+        .event-options {
+            display: grid;
+            gap: 5px;
+        }
+        .event-option {
+            display: flex;
+            align-items: center;
+            padding: 5px;
+        }
+        .event-option input {
+            width: auto;
+            margin-right: 10px;
+        }
+        .signature-example {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 FORTEN Webhook Management</h1>
+        <p>Manage webhook subscriptions for external event notifications</p>
+
+        <div id="status"></div>
+
+        <!-- Create Webhook Section -->
+        <div class="webhook-section">
+            <h2>Create New Webhook</h2>
+            <div class="form-group">
+                <label for="webhookName">Name:</label>
+                <input type="text" id="webhookName" placeholder="My Webhook">
+            </div>
+            <div class="form-group">
+                <label for="webhookUrl">URL:</label>
+                <input type="url" id="webhookUrl" placeholder="https://example.com/webhook">
+            </div>
+            <div class="form-group">
+                <label>Events:</label>
+                <div id="eventSelector" class="event-selector"></div>
+            </div>
+            <div class="form-group">
+                <label for="webhookHeaders">Custom Headers (JSON):</label>
+                <textarea id="webhookHeaders" placeholder='{"X-Custom-Header": "value"}'>{}</textarea>
+            </div>
+            <button onclick="createWebhook()">Create Webhook</button>
+        </div>
+
+        <!-- Webhook List -->
+        <div class="webhook-section">
+            <h2>Active Webhooks</h2>
+            <div id="webhookList" class="webhook-list"></div>
+        </div>
+
+        <!-- Test Section -->
+        <div class="webhook-section">
+            <h2>Test Event Trigger</h2>
+            <div class="form-group">
+                <label for="testEventType">Event Type:</label>
+                <select id="testEventType">
+                    <option value="building.access_granted">Building Access Granted</option>
+                    <option value="building.access_denied">Building Access Denied</option>
+                    <option value="device.offline">Device Offline</option>
+                    <option value="alert.security">Security Alert</option>
+                    <option value="visitor.checkin">Visitor Check-in</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="testEventData">Event Data (JSON):</label>
+                <textarea id="testEventData">{
+  "building_id": "building-1",
+  "user_id": "user-123",
+  "timestamp": "2024-01-15T10:30:00Z"
+}</textarea>
+            </div>
+            <button onclick="triggerTestEvent()">Trigger Event</button>
+        </div>
+
+        <!-- Signature Verification -->
+        <div class="webhook-section">
+            <h2>Signature Verification</h2>
+            <p>Example of HMAC-SHA256 signature format:</p>
+            <div class="signature-example">
+                X-Webhook-Signature: t=1642435200000,v1=5257a869e7ecb3c2d0e7c8f4d0e7c8f4d0e7c8f4d0e7c8f4d0e7c8f4d0e7c8f4
+            </div>
+            <button onclick="showVerificationExample()">Show Verification Code</button>
+        </div>
+    </div>
+
+    <!-- Webhook Details Modal -->
+    <div id="webhookModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">Webhook Details</h2>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let webhooks = [];
+        let availableEvents = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAvailableEvents();
+            loadWebhooks();
+            setInterval(loadWebhooks, 30000); // Refresh every 30 seconds
+        });
+
+        // Show status
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Load available events
+        async function loadAvailableEvents() {
+            try {
+                const response = await fetch('/api/webhooks/events');
+                const result = await response.json();
+                
+                if (result.success) {
+                    availableEvents = result.data;
+                    renderEventSelector();
+                }
+            } catch (error) {
+                console.error('Error loading events:', error);
+            }
+        }
+
+        // Render event selector
+        function renderEventSelector() {
+            const selector = document.getElementById('eventSelector');
+            let html = '';
+            
+            availableEvents.forEach(category => {
+                html += `<div class="event-category">`;
+                html += `<h4>${category.category}</h4>`;
+                html += `<div class="event-options">`;
+                
+                category.events.forEach(event => {
+                    html += `
+                        <div class="event-option">
+                            <input type="checkbox" id="event_${event.name}" value="${event.name}">
+                            <label for="event_${event.name}">
+                                <strong>${event.name}</strong> - ${event.description}
+                            </label>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+            });
+            
+            selector.innerHTML = html;
+        }
+
+        // Create webhook
+        async function createWebhook() {
+            try {
+                const name = document.getElementById('webhookName').value;
+                const url = document.getElementById('webhookUrl').value;
+                
+                // Get selected events
+                const events = [];
+                document.querySelectorAll('#eventSelector input[type="checkbox"]:checked').forEach(cb => {
+                    events.push(cb.value);
+                });
+                
+                // Parse headers
+                let headers = {};
+                try {
+                    headers = JSON.parse(document.getElementById('webhookHeaders').value || '{}');
+                } catch (e) {
+                    showStatus('Invalid headers JSON', 'error');
+                    return;
+                }
+                
+                if (!name || !url || events.length === 0) {
+                    showStatus('Please fill all required fields', 'error');
+                    return;
+                }
+                
+                showStatus('Creating webhook...', 'info');
+                
+                const response = await fetch('/api/webhooks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name,
+                        url,
+                        events,
+                        headers
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('Webhook created successfully!', 'success');
+                    document.getElementById('webhookName').value = '';
+                    document.getElementById('webhookUrl').value = '';
+                    document.getElementById('webhookHeaders').value = '{}';
+                    document.querySelectorAll('#eventSelector input[type="checkbox"]').forEach(cb => {
+                        cb.checked = false;
+                    });
+                    loadWebhooks();
+                    
+                    // Show secret
+                    alert(`Webhook created!\n\nSecret: ${result.data.secret}\n\nPlease save this secret, it won't be shown again.`);
+                } else {
+                    showStatus(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Load webhooks
+        async function loadWebhooks() {
+            try {
+                const response = await fetch('/api/webhooks');
+                const result = await response.json();
+                
+                if (result.success) {
+                    webhooks = result.data;
+                    renderWebhooks();
+                }
+            } catch (error) {
+                console.error('Error loading webhooks:', error);
+            }
+        }
+
+        // Render webhooks
+        function renderWebhooks() {
+            const list = document.getElementById('webhookList');
+            
+            if (webhooks.length === 0) {
+                list.innerHTML = '<p>No webhooks configured</p>';
+                return;
+            }
+            
+            let html = '';
+            webhooks.forEach(webhook => {
+                html += `
+                    <div class="webhook-card ${webhook.is_active ? '' : 'inactive'}">
+                        <div class="webhook-header">
+                            <div>
+                                <div class="webhook-title">${webhook.name}</div>
+                                <div class="webhook-url">${webhook.url}</div>
+                            </div>
+                            <div class="webhook-status ${webhook.is_active ? 'active' : 'inactive'}">
+                                ${webhook.is_active ? 'Active' : 'Inactive'}
+                            </div>
+                        </div>
+                        
+                        <div class="webhook-events">
+                            ${webhook.events.map(event => `<span class="event-badge">${event}</span>`).join('')}
+                        </div>
+                        
+                        <div class="webhook-stats">
+                            <div class="stat">
+                                <div class="stat-value">${webhook.total_deliveries || 0}</div>
+                                <div class="stat-label">Total</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">${webhook.successful_deliveries || 0}</div>
+                                <div class="stat-label">Success</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">${webhook.failed_deliveries || 0}</div>
+                                <div class="stat-label">Failed</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">${webhook.consecutive_failures || 0}</div>
+                                <div class="stat-label">Consecutive Fails</div>
+                            </div>
+                        </div>
+                        
+                        ${webhook.last_error ? `<div class="error" style="margin: 10px 0;">Last error: ${webhook.last_error}</div>` : ''}
+                        
+                        <div class="webhook-actions">
+                            <button onclick="testWebhook('${webhook.id}')">Test</button>
+                            <button onclick="viewDeliveries('${webhook.id}')">View Deliveries</button>
+                            <button onclick="viewStats('${webhook.id}')">Statistics</button>
+                            <button onclick="toggleWebhook('${webhook.id}', ${!webhook.is_active})" class="${webhook.is_active ? 'danger' : 'success'}">
+                                ${webhook.is_active ? 'Disable' : 'Enable'}
+                            </button>
+                            <button onclick="deleteWebhook('${webhook.id}')" class="danger">Delete</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            list.innerHTML = html;
+        }
+
+        // Test webhook
+        async function testWebhook(webhookId) {
+            try {
+                showStatus('Sending test event...', 'info');
+                
+                const response = await fetch(`/api/webhooks/${webhookId}/test`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('Test event sent successfully!', 'success');
+                } else {
+                    showStatus(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // View deliveries
+        async function viewDeliveries(webhookId) {
+            try {
+                const response = await fetch(`/api/webhooks/${webhookId}/deliveries`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    showDeliveriesModal(webhookId, result.data);
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Show deliveries modal
+        function showDeliveriesModal(webhookId, deliveries) {
+            const webhook = webhooks.find(w => w.id === webhookId);
+            
+            let html = `<h3>Recent Deliveries - ${webhook.name}</h3>`;
+            html += '<div class="delivery-list">';
+            
+            if (deliveries.length === 0) {
+                html += '<p>No deliveries yet</p>';
+            } else {
+                deliveries.forEach(delivery => {
+                    html += `
+                        <div class="delivery-item">
+                            <div>
+                                <strong>${delivery.event_type}</strong><br>
+                                <small>${new Date(delivery.created_at).toLocaleString('es-UY')}</small>
+                                ${delivery.http_status ? `<br>HTTP ${delivery.http_status}` : ''}
+                                ${delivery.duration_ms ? ` (${delivery.duration_ms}ms)` : ''}
+                            </div>
+                            <div>
+                                <span class="delivery-status ${delivery.status}">${delivery.status}</span>
+                                ${delivery.status === 'failed' ? `<button onclick="retryDelivery('${delivery.id}')" style="margin-left: 10px;">Retry</button>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            html += '</div>';
+            
+            showModal('Webhook Deliveries', html);
+        }
+
+        // View statistics
+        async function viewStats(webhookId) {
+            try {
+                const response = await fetch(`/api/webhooks/${webhookId}/stats`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatsModal(webhookId, result.data);
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Show stats modal
+        function showStatsModal(webhookId, stats) {
+            const webhook = webhooks.find(w => w.id === webhookId);
+            
+            let html = `<h3>Statistics - ${webhook.name}</h3>`;
+            html += `
+                <div class="webhook-stats" style="background: white;">
+                    <div class="stat">
+                        <div class="stat-value">${stats.total_deliveries}</div>
+                        <div class="stat-label">Total Deliveries</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">${stats.success_rate}%</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">${stats.consecutive_failures}</div>
+                        <div class="stat-label">Consecutive Failures</div>
+                    </div>
+                </div>
+                
+                <h4>Last 24 Hours</h4>
+                <div class="webhook-stats" style="background: white;">
+            `;
+            
+            Object.entries(stats.recent_24h || {}).forEach(([status, data]) => {
+                html += `
+                    <div class="stat">
+                        <div class="stat-value">${data.count}</div>
+                        <div class="stat-label">${status}</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            
+            if (stats.last_delivery_at) {
+                html += `<p><strong>Last Delivery:</strong> ${new Date(stats.last_delivery_at).toLocaleString('es-UY')}</p>`;
+            }
+            if (stats.last_success_at) {
+                html += `<p><strong>Last Success:</strong> ${new Date(stats.last_success_at).toLocaleString('es-UY')}</p>`;
+            }
+            if (stats.last_error) {
+                html += `<p><strong>Last Error:</strong> ${stats.last_error}</p>`;
+            }
+            
+            showModal('Webhook Statistics', html);
+        }
+
+        // Toggle webhook
+        async function toggleWebhook(webhookId, enable) {
+            try {
+                const response = await fetch(`/api/webhooks/${webhookId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        is_active: enable
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus(`Webhook ${enable ? 'enabled' : 'disabled'} successfully`, 'success');
+                    loadWebhooks();
+                } else {
+                    showStatus(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Delete webhook
+        async function deleteWebhook(webhookId) {
+            if (!confirm('Are you sure you want to delete this webhook?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/webhooks/${webhookId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('Webhook deleted successfully', 'success');
+                    loadWebhooks();
+                } else {
+                    showStatus(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Retry delivery
+        async function retryDelivery(deliveryId) {
+            try {
+                const response = await fetch(`/api/webhooks/deliveries/${deliveryId}/retry`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('Delivery queued for retry', 'success');
+                    closeModal();
+                } else {
+                    showStatus(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Trigger test event
+        async function triggerTestEvent() {
+            try {
+                const eventType = document.getElementById('testEventType').value;
+                let eventData = {};
+                
+                try {
+                    eventData = JSON.parse(document.getElementById('testEventData').value);
+                } catch (e) {
+                    showStatus('Invalid event data JSON', 'error');
+                    return;
+                }
+                
+                showStatus('Triggering event...', 'info');
+                
+                const response = await fetch('/api/webhooks/trigger', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        eventType,
+                        eventData
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus(`Event triggered for ${result.data.triggered} webhooks`, 'success');
+                } else {
+                    showStatus(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Show verification example
+        function showVerificationExample() {
+            const code = `
+// Node.js verification example
+const crypto = require('crypto');
+
+function verifyWebhookSignature(secret, payload, signature) {
+    const parts = signature.split(',');
+    const timestamp = parts[0].split('=')[1];
+    const receivedSignature = parts[1].split('=')[1];
+    
+    // Check timestamp (5 minute tolerance)
+    const age = Date.now() - parseInt(timestamp);
+    if (age > 300000) {
+        return false;
+    }
+    
+    // Calculate expected signature
+    const message = \`\${timestamp}.\${JSON.stringify(payload)}\`;
+    const expectedSignature = crypto
+        .createHmac('sha256', secret)
+        .update(message)
+        .digest('hex');
+    
+    // Constant time comparison
+    return crypto.timingSafeEqual(
+        Buffer.from(receivedSignature),
+        Buffer.from(expectedSignature)
+    );
+}
+
+// Usage
+app.post('/webhook-endpoint', (req, res) => {
+    const signature = req.headers['x-webhook-signature'];
+    const isValid = verifyWebhookSignature(webhookSecret, req.body, signature);
+    
+    if (!isValid) {
+        return res.status(401).send('Invalid signature');
+    }
+    
+    // Process webhook...
+    res.status(200).send('OK');
+});`;
+            
+            showModal('Signature Verification Code', `<pre style="background: #f8f9fa; padding: 15px; overflow-x: auto;">${code}</pre>`);
+        }
+
+        // Modal functions
+        function showModal(title, content) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('webhookModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('webhookModal').style.display = 'none';
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('webhookModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

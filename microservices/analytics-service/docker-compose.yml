@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  analytics-db:
+    image: timescale/timescaledb:latest-pg15
+    container_name: analytics-db
+    environment:
+      POSTGRES_DB: forten_analytics
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5438:5432"
+    volumes:
+      - analytics-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  analytics-redis:
+    image: redis:7-alpine
+    container_name: analytics-redis
+    ports:
+      - "6388:6379"
+    volumes:
+      - analytics-redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  analytics-rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: analytics-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    ports:
+      - "5678:5672"
+      - "15678:15672"
+    volumes:
+      - analytics-rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  analytics-service:
+    build: .
+    container_name: analytics-service
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres@analytics-db:5432/forten_analytics
+      REDIS_URL: redis://analytics-redis:6379
+      RABBITMQ_URL: amqp://admin:admin@analytics-rabbitmq:5672
+    ports:
+      - "3008:3008"
+    volumes:
+      - ./src:/app/src
+      - ./reports:/app/reports
+      - ./logs:/app/logs
+    depends_on:
+      analytics-db:
+        condition: service_healthy
+      analytics-redis:
+        condition: service_healthy
+      analytics-rabbitmq:
+        condition: service_healthy
+    command: npm run dev
+
+  analytics-worker:
+    build: .
+    container_name: analytics-worker
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres@analytics-db:5432/forten_analytics
+      REDIS_URL: redis://analytics-redis:6379
+      RABBITMQ_URL: amqp://admin:admin@analytics-rabbitmq:5672
+    volumes:
+      - ./src:/app/src
+      - ./reports:/app/reports
+    depends_on:
+      analytics-db:
+        condition: service_healthy
+      analytics-redis:
+        condition: service_healthy
+      analytics-rabbitmq:
+        condition: service_healthy
+    command: npm run worker
+
+volumes:
+  analytics-db-data:
+  analytics-redis-data:
+  analytics-rabbitmq-data:

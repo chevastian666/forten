@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORTEN Cursor Pagination Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #495057;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .results {
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        tr:hover {
+            background-color: #f1f3f5;
+        }
+        .metadata {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .cursor-info {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            word-break: break-all;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 4px 4px 0 0;
+        }
+        .tab.active {
+            background-color: white;
+            border-color: #dee2e6;
+            border-bottom: 2px solid white;
+            margin-bottom: -2px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .performance {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .perf-metric {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            text-align: center;
+        }
+        .perf-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .perf-label {
+            font-size: 14px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 FORTEN Cursor-Based Pagination Test</h1>
+        <p>Test interface for efficient pagination of millions of records</p>
+
+        <div id="status"></div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('events')">Events</div>
+            <div class="tab" onclick="switchTab('access')">Access Logs</div>
+            <div class="tab" onclick="switchTab('performance')">Performance Test</div>
+        </div>
+
+        <!-- Events Tab -->
+        <div id="events-tab" class="tab-content active">
+            <h2>Event Logs</h2>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label for="eventBuildingId">Building:</label>
+                    <select id="eventBuildingId">
+                        <option value="">All Buildings</option>
+                        <option value="building-1">Building A</option>
+                        <option value="building-2">Building B</option>
+                        <option value="building-3">Building C</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="eventSeverity">Severity:</label>
+                    <select id="eventSeverity">
+                        <option value="">All</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="eventLimit">Items per page:</label>
+                    <select id="eventLimit">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="eventSearch">Search:</label>
+                    <input type="text" id="eventSearch" placeholder="Search events...">
+                </div>
+            </div>
+
+            <button onclick="loadEvents()">Load Events</button>
+            <button onclick="exportEvents()">Export All (Stream)</button>
+
+            <div class="navigation">
+                <div>
+                    Page: <span id="eventPageInfo">-</span>
+                </div>
+                <div class="nav-buttons">
+                    <button id="eventPrevBtn" onclick="loadEvents('prev')" disabled>← Previous</button>
+                    <button id="eventNextBtn" onclick="loadEvents('next')" disabled>Next →</button>
+                </div>
+            </div>
+
+            <div id="eventResults" class="results"></div>
+            <div id="eventMetadata" class="metadata"></div>
+        </div>
+
+        <!-- Access Logs Tab -->
+        <div id="access-tab" class="tab-content">
+            <h2>Access Logs</h2>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label for="accessBuildingId">Building:</label>
+                    <select id="accessBuildingId">
+                        <option value="">All Buildings</option>
+                        <option value="building-1">Building A</option>
+                        <option value="building-2">Building B</option>
+                        <option value="building-3">Building C</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="accessResult">Result:</label>
+                    <select id="accessResult">
+                        <option value="">All</option>
+                        <option value="granted">Granted</option>
+                        <option value="denied">Denied</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="accessLimit">Items per page:</label>
+                    <select id="accessLimit">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="accessSearch">Search:</label>
+                    <input type="text" id="accessSearch" placeholder="Name or document...">
+                </div>
+            </div>
+
+            <button onclick="loadAccess()">Load Access Logs</button>
+            <button onclick="loadTopVisitors()">Top Visitors</button>
+            <button onclick="loadAccessFrequency()">Access Frequency</button>
+
+            <div class="navigation">
+                <div>
+                    Page: <span id="accessPageInfo">-</span>
+                </div>
+                <div class="nav-buttons">
+                    <button id="accessPrevBtn" onclick="loadAccess('prev')" disabled>← Previous</button>
+                    <button id="accessNextBtn" onclick="loadAccess('next')" disabled>Next →</button>
+                </div>
+            </div>
+
+            <div id="accessResults" class="results"></div>
+            <div id="accessMetadata" class="metadata"></div>
+        </div>
+
+        <!-- Performance Test Tab -->
+        <div id="performance-tab" class="tab-content">
+            <h2>Performance Test</h2>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label for="perfPages">Pages to navigate:</label>
+                    <input type="number" id="perfPages" value="10" min="1" max="100">
+                </div>
+                <div class="control-group">
+                    <label for="perfLimit">Items per page:</label>
+                    <select id="perfLimit">
+                        <option value="20">20</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+
+            <button onclick="runPerformanceTest()">Run Performance Test</button>
+            <button onclick="testCursorExpiration()">Test Cursor Expiration</button>
+
+            <div class="performance" id="perfMetrics">
+                <div class="perf-metric">
+                    <div class="perf-value" id="avgLoadTime">-</div>
+                    <div class="perf-label">Avg Load Time (ms)</div>
+                </div>
+                <div class="perf-metric">
+                    <div class="perf-value" id="totalRecords">-</div>
+                    <div class="perf-label">Total Records</div>
+                </div>
+                <div class="perf-metric">
+                    <div class="perf-value" id="pagesNavigated">-</div>
+                    <div class="perf-label">Pages Navigated</div>
+                </div>
+                <div class="perf-metric">
+                    <div class="perf-value" id="recordsPerSecond">-</div>
+                    <div class="perf-label">Records/Second</div>
+                </div>
+            </div>
+
+            <div id="perfResults" class="results"></div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        const state = {
+            events: {
+                cursor: null,
+                prevCursor: null,
+                data: []
+            },
+            access: {
+                cursor: null,
+                prevCursor: null,
+                data: []
+            }
+        };
+
+        // Switch tabs
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Show status
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Load events
+        async function loadEvents(direction = 'next') {
+            try {
+                showStatus('Loading events...', 'info');
+                
+                const params = new URLSearchParams({
+                    limit: document.getElementById('eventLimit').value,
+                    direction
+                });
+
+                // Add cursor for pagination
+                if (direction === 'next' && state.events.cursor) {
+                    params.append('cursor', state.events.cursor);
+                } else if (direction === 'prev' && state.events.prevCursor) {
+                    params.append('cursor', state.events.prevCursor);
+                }
+
+                // Add filters
+                const buildingId = document.getElementById('eventBuildingId').value;
+                const severity = document.getElementById('eventSeverity').value;
+                const search = document.getElementById('eventSearch').value;
+
+                if (buildingId) params.append('buildingId', buildingId);
+                if (severity) params.append('severity', severity);
+                if (search) params.append('search', search);
+
+                const response = await fetch(`/api/events?${params}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    displayEvents(result.data);
+                    updateEventMetadata(result.metadata);
+                    
+                    // Update state
+                    state.events.cursor = result.metadata.nextCursor;
+                    state.events.prevCursor = result.metadata.prevCursor;
+                    state.events.data = result.data;
+
+                    // Update navigation buttons
+                    document.getElementById('eventPrevBtn').disabled = !result.metadata.hasPrevPage;
+                    document.getElementById('eventNextBtn').disabled = !result.metadata.hasNextPage;
+                    
+                    showStatus(`Loaded ${result.data.length} events`, 'success');
+                } else {
+                    showStatus(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Display events
+        function displayEvents(events) {
+            const resultsDiv = document.getElementById('eventResults');
+            
+            if (events.length === 0) {
+                resultsDiv.innerHTML = '<p>No events found</p>';
+                return;
+            }
+
+            let html = '<table><thead><tr>';
+            html += '<th>Time</th><th>Type</th><th>Severity</th><th>Description</th><th>Building</th><th>User</th>';
+            html += '</tr></thead><tbody>';
+
+            events.forEach(event => {
+                html += '<tr>';
+                html += `<td>${new Date(event.createdAt).toLocaleString('es-UY')}</td>`;
+                html += `<td>${event.eventType}</td>`;
+                html += `<td><span class="badge ${event.severity}">${event.severity}</span></td>`;
+                html += `<td>${event.description}</td>`;
+                html += `<td>${event.building?.name || event.buildingId}</td>`;
+                html += `<td>${event.user?.name || '-'}</td>`;
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            resultsDiv.innerHTML = html;
+        }
+
+        // Update event metadata
+        function updateEventMetadata(metadata) {
+            const metadataDiv = document.getElementById('eventMetadata');
+            let html = '<h4>Pagination Metadata:</h4>';
+            html += `<p>Items on page: ${metadata.count} | Limit: ${metadata.limit}</p>`;
+            html += `<p>Has next page: ${metadata.hasNextPage} | Has previous page: ${metadata.hasPrevPage}</p>`;
+            
+            if (metadata.nextCursor) {
+                html += '<p>Next cursor:</p>';
+                html += `<div class="cursor-info">${metadata.nextCursor}</div>`;
+            }
+            
+            if (metadata.prevCursor) {
+                html += '<p>Previous cursor:</p>';
+                html += `<div class="cursor-info">${metadata.prevCursor}</div>`;
+            }
+            
+            metadataDiv.innerHTML = html;
+            
+            // Update page info
+            document.getElementById('eventPageInfo').textContent = 
+                `${metadata.count} items (${metadata.hasNextPage ? 'more available' : 'last page'})`;
+        }
+
+        // Load access logs
+        async function loadAccess(direction = 'next') {
+            try {
+                showStatus('Loading access logs...', 'info');
+                
+                const params = new URLSearchParams({
+                    limit: document.getElementById('accessLimit').value,
+                    direction
+                });
+
+                // Add cursor for pagination
+                if (direction === 'next' && state.access.cursor) {
+                    params.append('cursor', state.access.cursor);
+                } else if (direction === 'prev' && state.access.prevCursor) {
+                    params.append('cursor', state.access.prevCursor);
+                }
+
+                // Add filters
+                const buildingId = document.getElementById('accessBuildingId').value;
+                const accessResult = document.getElementById('accessResult').value;
+                const search = document.getElementById('accessSearch').value;
+
+                if (buildingId) params.append('buildingId', buildingId);
+                if (accessResult) params.append('accessResult', accessResult);
+                if (search) params.append('search', search);
+
+                const response = await fetch(`/api/access?${params}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    displayAccess(result.data);
+                    updateAccessMetadata(result.metadata);
+                    
+                    // Update state
+                    state.access.cursor = result.metadata.nextCursor;
+                    state.access.prevCursor = result.metadata.prevCursor;
+                    state.access.data = result.data;
+
+                    // Update navigation buttons
+                    document.getElementById('accessPrevBtn').disabled = !result.metadata.hasPrevPage;
+                    document.getElementById('accessNextBtn').disabled = !result.metadata.hasNextPage;
+                    
+                    showStatus(`Loaded ${result.data.length} access logs`, 'success');
+                } else {
+                    showStatus(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Display access logs
+        function displayAccess(logs) {
+            const resultsDiv = document.getElementById('accessResults');
+            
+            if (logs.length === 0) {
+                resultsDiv.innerHTML = '<p>No access logs found</p>';
+                return;
+            }
+
+            let html = '<table><thead><tr>';
+            html += '<th>Time</th><th>Person</th><th>Document</th><th>Type</th><th>Result</th><th>Method</th><th>Building</th>';
+            html += '</tr></thead><tbody>';
+
+            logs.forEach(log => {
+                html += '<tr>';
+                html += `<td>${new Date(log.accessTime).toLocaleString('es-UY')}</td>`;
+                html += `<td>${log.personName || '-'}</td>`;
+                html += `<td>${log.personDocument || '-'}</td>`;
+                html += `<td>${log.accessType}</td>`;
+                html += `<td><span class="badge ${log.accessResult}">${log.accessResult}</span></td>`;
+                html += `<td>${log.accessMethod}</td>`;
+                html += `<td>${log.building?.name || log.buildingId}</td>`;
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            resultsDiv.innerHTML = html;
+        }
+
+        // Update access metadata
+        function updateAccessMetadata(metadata) {
+            const metadataDiv = document.getElementById('accessMetadata');
+            let html = '<h4>Pagination Metadata:</h4>';
+            html += `<p>Items on page: ${metadata.count} | Limit: ${metadata.limit}</p>`;
+            html += `<p>Has next page: ${metadata.hasNextPage} | Has previous page: ${metadata.hasPrevPage}</p>`;
+            
+            metadataDiv.innerHTML = html;
+            
+            // Update page info
+            document.getElementById('accessPageInfo').textContent = 
+                `${metadata.count} items (${metadata.hasNextPage ? 'more available' : 'last page'})`;
+        }
+
+        // Export events (streaming)
+        async function exportEvents() {
+            try {
+                showStatus('Starting export...', 'info');
+                
+                const buildingId = document.getElementById('eventBuildingId').value;
+                const params = new URLSearchParams();
+                if (buildingId) params.append('buildingId', buildingId);
+
+                const response = await fetch(`/api/events/export?${params}`);
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                
+                let buffer = '';
+                let recordCount = 0;
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    
+                    // Count records as they stream
+                    const matches = buffer.match(/\{[^}]+\}/g);
+                    if (matches) {
+                        recordCount += matches.length;
+                        showStatus(`Exported ${recordCount} records...`, 'info');
+                    }
+                }
+
+                showStatus(`Export completed: ${recordCount} records`, 'success');
+            } catch (error) {
+                showStatus(`Export error: ${error.message}`, 'error');
+            }
+        }
+
+        // Load top visitors
+        async function loadTopVisitors() {
+            try {
+                const buildingId = document.getElementById('accessBuildingId').value || 'building-1';
+                const response = await fetch(`/api/access/visitors/${buildingId}?limit=20`);
+                const result = await response.json();
+
+                if (result.success) {
+                    displayTopVisitors(result.data);
+                    showStatus('Top visitors loaded', 'success');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Display top visitors
+        function displayTopVisitors(visitors) {
+            const resultsDiv = document.getElementById('accessResults');
+            
+            let html = '<h3>Top Visitors</h3>';
+            html += '<table><thead><tr>';
+            html += '<th>Name</th><th>Document</th><th>Visits</th><th>Unique Days</th><th>Last Visit</th>';
+            html += '</tr></thead><tbody>';
+
+            visitors.forEach(visitor => {
+                html += '<tr>';
+                html += `<td>${visitor.person_name}</td>`;
+                html += `<td>${visitor.person_document}</td>`;
+                html += `<td>${visitor.visit_count}</td>`;
+                html += `<td>${visitor.unique_days}</td>`;
+                html += `<td>${new Date(visitor.last_access).toLocaleString('es-UY')}</td>`;
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            resultsDiv.innerHTML = html;
+        }
+
+        // Load access frequency
+        async function loadAccessFrequency() {
+            try {
+                const buildingId = document.getElementById('accessBuildingId').value || 'building-1';
+                const response = await fetch(`/api/access/frequency/${buildingId}?groupBy=hour&limit=24`);
+                const result = await response.json();
+
+                if (result.success) {
+                    displayAccessFrequency(result.data);
+                    showStatus('Access frequency loaded', 'success');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Display access frequency
+        function displayAccessFrequency(data) {
+            const resultsDiv = document.getElementById('accessResults');
+            
+            let html = '<h3>Access Frequency (Hourly)</h3>';
+            html += '<table><thead><tr>';
+            html += '<th>Time</th><th>Total Access</th><th>Unique Persons</th><th>Granted</th><th>Denied</th><th>Avg Processing (ms)</th>';
+            html += '</tr></thead><tbody>';
+
+            data.forEach(item => {
+                html += '<tr>';
+                html += `<td>${new Date(item.time_bucket).toLocaleString('es-UY')}</td>`;
+                html += `<td>${item.access_count}</td>`;
+                html += `<td>${item.unique_persons}</td>`;
+                html += `<td>${item.granted_count}</td>`;
+                html += `<td>${item.denied_count}</td>`;
+                html += `<td>${item.avg_processing_time ? Math.round(item.avg_processing_time) : '-'}</td>`;
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            resultsDiv.innerHTML = html;
+        }
+
+        // Run performance test
+        async function runPerformanceTest() {
+            try {
+                showStatus('Running performance test...', 'info');
+                
+                const pagesToNavigate = parseInt(document.getElementById('perfPages').value);
+                const limit = parseInt(document.getElementById('perfLimit').value);
+                
+                let totalTime = 0;
+                let totalRecords = 0;
+                let cursor = null;
+                
+                const startTime = Date.now();
+                
+                for (let i = 0; i < pagesToNavigate; i++) {
+                    const pageStart = Date.now();
+                    
+                    const params = new URLSearchParams({ limit });
+                    if (cursor) params.append('cursor', cursor);
+                    
+                    const response = await fetch(`/api/events?${params}`);
+                    const result = await response.json();
+                    
+                    const pageTime = Date.now() - pageStart;
+                    totalTime += pageTime;
+                    totalRecords += result.data.length;
+                    
+                    cursor = result.metadata.nextCursor;
+                    
+                    showStatus(`Page ${i + 1}/${pagesToNavigate} loaded in ${pageTime}ms`, 'info');
+                    
+                    if (!cursor) break; // No more pages
+                }
+                
+                const totalElapsed = Date.now() - startTime;
+                const avgLoadTime = Math.round(totalTime / pagesToNavigate);
+                const recordsPerSecond = Math.round((totalRecords / totalElapsed) * 1000);
+                
+                // Update metrics
+                document.getElementById('avgLoadTime').textContent = avgLoadTime;
+                document.getElementById('totalRecords').textContent = totalRecords;
+                document.getElementById('pagesNavigated').textContent = pagesToNavigate;
+                document.getElementById('recordsPerSecond').textContent = recordsPerSecond;
+                
+                showStatus('Performance test completed!', 'success');
+                
+                // Show results
+                const resultsDiv = document.getElementById('perfResults');
+                resultsDiv.innerHTML = `
+                    <h3>Performance Test Results</h3>
+                    <p>Successfully navigated ${pagesToNavigate} pages with ${limit} items per page.</p>
+                    <p>Total time: ${totalElapsed}ms | Average page load: ${avgLoadTime}ms</p>
+                    <p>Processed ${totalRecords} records at ${recordsPerSecond} records/second</p>
+                `;
+                
+            } catch (error) {
+                showStatus(`Performance test error: ${error.message}`, 'error');
+            }
+        }
+
+        // Test cursor expiration
+        async function testCursorExpiration() {
+            try {
+                showStatus('Testing cursor expiration...', 'info');
+                
+                // Create an old cursor (this would normally be expired)
+                const expiredCursor = 'invalid-or-expired-cursor-string';
+                
+                const response = await fetch(`/api/events?cursor=${expiredCursor}`);
+                const result = await response.json();
+                
+                if (!result.success) {
+                    showStatus(`Cursor validation working: ${result.message}`, 'success');
+                } else {
+                    showStatus('Cursor validation may not be working properly', 'error');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Add some CSS for badges
+        const style = document.createElement('style');
+        style.textContent = `
+            .badge {
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            .badge.low { background-color: #28a745; color: white; }
+            .badge.medium { background-color: #ffc107; color: black; }
+            .badge.high { background-color: #fd7e14; color: white; }
+            .badge.critical { background-color: #dc3545; color: white; }
+            .badge.granted { background-color: #28a745; color: white; }
+            .badge.denied { background-color: #dc3545; color: white; }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

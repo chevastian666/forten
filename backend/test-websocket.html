@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORTEN WebSocket Test Client</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .connected { background-color: #d4edda; color: #155724; }
+        .disconnected { background-color: #f8d7da; color: #721c24; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f8f9fa;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #007bff;
+            background-color: white;
+        }
+        .notification { border-left-color: #28a745; }
+        .error { border-left-color: #dc3545; }
+        .heartbeat { border-left-color: #ffc107; }
+        input, select {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .token-list {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .token-item {
+            margin: 5px 0;
+            padding: 5px;
+            background-color: white;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 11px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏢 FORTEN WebSocket Test Client</h1>
+        <div id="status" class="status disconnected">Desconectado</div>
+        
+        <div class="grid">
+            <div>
+                <h3>🔐 Autenticación</h3>
+                <select id="userRole">
+                    <option value="admin">Admin (Todos los edificios)</option>
+                    <option value="operator" selected>Operador (Edificios 1,2)</option>
+                    <option value="security">Seguridad (Edificios 1,3)</option>
+                    <option value="viewer">Visualizador (Edificio 2)</option>
+                </select>
+                <br>
+                <button onclick="connect()">Conectar</button>
+                <button onclick="disconnect()">Desconectar</button>
+                <button onclick="getTestTokens()">Obtener Tokens</button>
+            </div>
+            
+            <div>
+                <h3>🏢 Gestión de Edificios</h3>
+                <input type="text" id="buildingId" placeholder="ID del Edificio (ej: building-1)">
+                <br>
+                <button onclick="joinBuilding()">Unirse al Edificio</button>
+                <button onclick="leaveBuilding()">Salir del Edificio</button>
+                <button onclick="getRooms()">Ver Mis Rooms</button>
+                <button onclick="getBuildingOccupancy()">Ver Ocupación</button>
+            </div>
+        </div>
+        
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="connectionCount">-</div>
+                <div class="stat-label">Conexiones Activas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="roomCount">-</div>
+                <div class="stat-label">Rooms Activos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="userRooms">-</div>
+                <div class="stat-label">Mis Rooms</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="heartbeatStatus">-</div>
+                <div class="stat-label">Heartbeat</div>
+            </div>
+        </div>
+        
+        <div>
+            <h3>📢 Pruebas de Notificación</h3>
+            <input type="text" id="testMessage" placeholder="Mensaje de prueba" value="Prueba desde cliente WebSocket">
+            <input type="text" id="targetBuilding" placeholder="ID Edificio (vacío = todos)">
+            <button onclick="sendTestNotification()">Enviar Notificación</button>
+            <button onclick="sendBuildingMessage()">Mensaje al Edificio</button>
+        </div>
+        
+        <div>
+            <h3>💬 Mensajes y Notificaciones</h3>
+            <button onclick="clearMessages()">Limpiar</button>
+            <button onclick="testConnection()">Test Conexión</button>
+            <div id="messages" class="messages"></div>
+        </div>
+        
+        <div id="tokenInfo" class="token-list" style="display: none;">
+            <h3>🔑 Tokens de Prueba</h3>
+            <div id="tokens"></div>
+        </div>
+    </div>
+
+    <script>
+        let socket = null;
+        let currentToken = null;
+        let heartbeatCount = 0;
+
+        // Test tokens (estos se obtendrán del servidor)
+        const testTokens = {
+            admin: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhZG1pbi0xMjMiLCJyb2xlIjoiYWRtaW4iLCJidWlsZGluZ3MiOltdLCJpYXQiOjE3MzQ3NDM4NzIsImV4cCI6MTczNDgzMDI3Mn0.1OYr-mVrm_J-2fy8q5t4MAmn5dUVJbVWbKjNxaYdXWE',
+            operator: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJvcGVyYXRvci00NTYiLCJyb2xlIjoib3BlcmF0b3IiLCJidWlsZGluZ3MiOlsiYnVpbGRpbmctMSIsImJ1aWxkaW5nLTIiXSwiaWF0IjoxNzM0NzQzODcyLCJleHAiOjE3MzQ4MzAyNzJ9.DcJOefXBhPMhm_IKOAr6kNsNQhbzojsEP8_t6yH5x0w',
+            security: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJzZWN1cml0eS03ODkiLCJyb2xlIjoic2VjdXJpdHkiLCJidWlsZGluZ3MiOlsiYnVpbGRpbmctMSIsImJ1aWxkaW5nLTMiXSwiaWF0IjoxNzM0NzQzODcyLCJleHAiOjE3MzQ4MzAyNzJ9.HqPeq1pY6D-l5Tx1Hp8j8NODr5VGQLsEkFp7Wj_Zm-8',
+            viewer: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ2aWV3ZXItMTAxIiwicm9sZSI6InZpZXdlciIsImJ1aWxkaW5ncyI6WyJidWlsZGluZy0yIl0sImlhdCI6MTczNDc0Mzg3MiwiZXhwIjoxNzM0ODMwMjcyfQ.QH8wGu4Zt8QNL2I5c6PxgUJz9A8Y0Vv3RxTdBjLnKsM'
+        };
+
+        function log(message, type = 'info') {
+            const messages = document.getElementById('messages');
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong> - ${message}`;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function updateStatus(status, className) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = status;
+            statusEl.className = `status ${className}`;
+        }
+
+        function updateStats() {
+            if (socket && socket.connected) {
+                // Solicitar estadísticas del servidor
+                socket.emit('get_rooms', (response) => {
+                    if (response.success) {
+                        document.getElementById('userRooms').textContent = response.data.totalRooms;
+                    }
+                });
+            }
+        }
+
+        function connect() {
+            const role = document.getElementById('userRole').value;
+            currentToken = testTokens[role];
+            
+            if (!currentToken) {
+                log('Token no disponible para el rol seleccionado', 'error');
+                return;
+            }
+
+            log(`Conectando como ${role}...`);
+            
+            socket = io('ws://localhost:3005', {
+                auth: {
+                    token: currentToken
+                },
+                transports: ['websocket', 'polling']
+            });
+
+            // Eventos de conexión
+            socket.on('connect', () => {
+                updateStatus(`Conectado como ${role}`, 'connected');
+                log(`✅ Conectado como ${role}`, 'notification');
+                updateStats();
+            });
+
+            socket.on('disconnect', (reason) => {
+                updateStatus('Desconectado', 'disconnected');
+                log(`❌ Desconectado: ${reason}`, 'error');
+                document.getElementById('heartbeatStatus').textContent = 'Inactivo';
+            });
+
+            socket.on('connect_error', (error) => {
+                updateStatus('Error de conexión', 'disconnected');
+                log(`❌ Error de conexión: ${error.message}`, 'error');
+            });
+
+            // Eventos específicos de FORTEN
+            socket.on('connection_established', (data) => {
+                log(`🏢 Conexión establecida. Edificios: ${data.buildings.join(', ')}`, 'notification');
+                log(`📍 Rooms unidos: ${data.rooms.join(', ')}`, 'notification');
+                document.getElementById('connectionCount').textContent = 'Conectado';
+                document.getElementById('roomCount').textContent = data.rooms.length;
+            });
+
+            socket.on('heartbeat', (data) => {
+                heartbeatCount++;
+                document.getElementById('heartbeatStatus').textContent = heartbeatCount;
+                socket.emit('heartbeat_response', {
+                    clientTime: Date.now()
+                });
+                log(`💓 Heartbeat ${heartbeatCount}`, 'heartbeat');
+            });
+
+            socket.on('notification', (notification) => {
+                log(`📢 ${notification.title}: ${notification.message}`, 'notification');
+            });
+
+            socket.on('building_notification', (data) => {
+                log(`🏢 Notificación edificio ${data.buildingId}: ${data.notification.message}`, 'notification');
+            });
+
+            socket.on('user_joined_building', (data) => {
+                log(`👤 ${data.userName} se unió al edificio ${data.buildingId}`, 'info');
+            });
+
+            socket.on('user_left_building', (data) => {
+                log(`👤 ${data.userName} salió del edificio ${data.buildingId}`, 'info');
+            });
+
+            socket.on('building_message', (data) => {
+                log(`💬 ${data.from.userName}: ${data.message} (${data.buildingId})`, 'notification');
+            });
+
+            socket.on('admin_broadcast', (data) => {
+                log(`📢 Admin: ${data.message}`, 'notification');
+            });
+        }
+
+        function disconnect() {
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+                currentToken = null;
+                heartbeatCount = 0;
+            }
+        }
+
+        function joinBuilding() {
+            if (!socket || !socket.connected) {
+                log('No conectado', 'error');
+                return;
+            }
+
+            const buildingId = document.getElementById('buildingId').value;
+            if (!buildingId) {
+                log('Ingrese ID del edificio', 'warning');
+                return;
+            }
+
+            socket.emit('join_building', { buildingId }, (response) => {
+                if (response.success) {
+                    log(`✅ Unido al edificio ${buildingId}`, 'notification');
+                } else {
+                    log(`❌ Error: ${response.error}`, 'error');
+                }
+            });
+        }
+
+        function leaveBuilding() {
+            if (!socket || !socket.connected) {
+                log('No conectado', 'error');
+                return;
+            }
+
+            const buildingId = document.getElementById('buildingId').value;
+            if (!buildingId) {
+                log('Ingrese ID del edificio', 'warning');
+                return;
+            }
+
+            socket.emit('leave_building', { buildingId }, (response) => {
+                if (response.success) {
+                    log(`✅ Salió del edificio ${buildingId}`, 'notification');
+                } else {
+                    log(`❌ Error: ${response.error}`, 'error');
+                }
+            });
+        }
+
+        function getRooms() {
+            if (!socket || !socket.connected) {
+                log('No conectado', 'error');
+                return;
+            }
+
+            socket.emit('get_rooms', (response) => {
+                if (response.success) {
+                    log(`📍 Rooms activos: ${response.data.allRooms.join(', ')}`, 'info');
+                    log(`🏢 Edificios: ${response.data.buildingRooms.join(', ')}`, 'info');
+                    log(`👤 Roles: ${response.data.roleRooms.join(', ')}`, 'info');
+                } else {
+                    log(`❌ Error: ${response.error}`, 'error');
+                }
+            });
+        }
+
+        function getBuildingOccupancy() {
+            if (!socket || !socket.connected) {
+                log('No conectado', 'error');
+                return;
+            }
+
+            const buildingId = document.getElementById('buildingId').value;
+            if (!buildingId) {
+                log('Ingrese ID del edificio', 'warning');
+                return;
+            }
+
+            socket.emit('get_building_occupancy', { buildingId }, (response) => {
+                if (response.success) {
+                    const users = response.data.occupancy.map(u => `${u.userName} (${u.role})`);
+                    log(`👥 Ocupación edificio ${buildingId}: ${users.join(', ')} (${users.length} usuarios)`, 'info');
+                } else {
+                    log(`❌ Error: ${response.error}`, 'error');
+                }
+            });
+        }
+
+        function sendTestNotification() {
+            const message = document.getElementById('testMessage').value;
+            const buildingId = document.getElementById('targetBuilding').value;
+            
+            // Simular envío de notificación
+            log(`📤 Enviando notificación de prueba${buildingId ? ` al edificio ${buildingId}` : ' (broadcast)'}`, 'info');
+        }
+
+        function sendBuildingMessage() {
+            if (!socket || !socket.connected) {
+                log('No conectado', 'error');
+                return;
+            }
+
+            const message = document.getElementById('testMessage').value;
+            const buildingId = document.getElementById('targetBuilding').value;
+
+            if (!buildingId) {
+                log('Ingrese ID del edificio para enviar mensaje', 'warning');
+                return;
+            }
+
+            socket.emit('message_to_building', {
+                buildingId,
+                message,
+                type: 'info'
+            }, (response) => {
+                if (response.success) {
+                    log(`✅ Mensaje enviado al edificio ${buildingId}`, 'notification');
+                } else {
+                    log(`❌ Error: ${response.error}`, 'error');
+                }
+            });
+        }
+
+        function testConnection() {
+            if (!socket || !socket.connected) {
+                log('No conectado', 'error');
+                return;
+            }
+
+            socket.emit('test_connection', (response) => {
+                if (response.success) {
+                    log(`✅ Test de conexión exitoso: ${response.message}`, 'notification');
+                } else {
+                    log(`❌ Test de conexión falló`, 'error');
+                }
+            });
+        }
+
+        function clearMessages() {
+            document.getElementById('messages').innerHTML = '';
+        }
+
+        function getTestTokens() {
+            // Mostrar tokens disponibles
+            const tokenInfo = document.getElementById('tokenInfo');
+            const tokensDiv = document.getElementById('tokens');
+            
+            tokensDiv.innerHTML = '';
+            Object.entries(testTokens).forEach(([role, token]) => {
+                const div = document.createElement('div');
+                div.className = 'token-item';
+                div.innerHTML = `<strong>${role}:</strong><br>${token.substring(0, 50)}...`;
+                tokensDiv.appendChild(div);
+            });
+            
+            tokenInfo.style.display = 'block';
+            log('Tokens de prueba mostrados abajo', 'info');
+        }
+
+        // Inicializar
+        log('Cliente WebSocket FORTEN iniciado. Seleccione un rol y haga clic en Conectar.', 'info');
+        log('Roles disponibles: admin (todos), operator (1,2), security (1,3), viewer (2)', 'info');
+    </script>
+</body>
+</html>
