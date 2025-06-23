@@ -118,7 +118,7 @@ const CameraFeed: React.FC<{ cameraId: number; isMaximized: boolean }> = ({ came
         position: 'relative',
         width: '100%',
         height: '100%',
-        backgroundColor: '#1A1A1A',
+        backgroundColor: '#0A0A0A',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -133,7 +133,7 @@ const CameraFeed: React.FC<{ cameraId: number; isMaximized: boolean }> = ({ came
               position: 'relative',
               width: '100%',
               height: '100%',
-              background: 'linear-gradient(135deg, #2A2A2A 0%, #1A1A1A 50%, #000000 100%)',
+              background: 'linear-gradient(135deg, #1A1A1A 0%, #0F1419 50%, #000000 100%)',
             }}
           >
             {/* Moving objects simulation */}
@@ -183,10 +183,10 @@ const CameraFeed: React.FC<{ cameraId: number; isMaximized: boolean }> = ({ came
               position: 'absolute',
               top: 8,
               left: 8,
-              color: '#1A1A1A',
-              fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+              color: '#00ff00',
+              fontFamily: 'monospace',
               fontSize: isMaximized ? 16 : 12,
-              textShadow: 'none',
+              textShadow: '0 0 5px #00ff00',
             }}
           >
             CAM-{String(cameraId).padStart(2, '0')}
@@ -213,10 +213,10 @@ const CameraFeed: React.FC<{ cameraId: number; isMaximized: boolean }> = ({ came
               position: 'absolute',
               bottom: 8,
               right: 8,
-              color: '#1A1A1A',
-              fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+              color: '#00ff00',
+              fontFamily: 'monospace',
               fontSize: isMaximized ? 14 : 10,
-              textShadow: 'none',
+              textShadow: '0 0 5px #00ff00',
             }}
           >
             {format(new Date(), 'HH:mm:ss')}
@@ -261,8 +261,8 @@ const RealtimeChart: React.FC<{ type: 'line' | 'area' | 'bar'; title: string }> 
       case 'line':
         return (
           <LineChart {...commonProps}>
-            <XAxis dataKey="time" tick={{ fill: '#666', fontSize: 10 }} />
-            <YAxis tick={{ fill: '#666', fontSize: 10 }} />
+            <XAxis dataKey="time" tick={{ fill: '#00ff00', fontSize: 10 }} />
+            <YAxis tick={{ fill: '#00ff00', fontSize: 10 }} />
             <Line type="monotone" dataKey="value" stroke="#FF6B35" strokeWidth={2} dot={false} />
           </LineChart>
         );
@@ -275,16 +275,16 @@ const RealtimeChart: React.FC<{ type: 'line' | 'area' | 'bar'; title: string }> 
                 <stop offset="95%" stopColor="#FF6B35" stopOpacity={0.1} />
               </linearGradient>
             </defs>
-            <XAxis dataKey="time" tick={{ fill: '#666', fontSize: 10 }} />
-            <YAxis tick={{ fill: '#666', fontSize: 10 }} />
+            <XAxis dataKey="time" tick={{ fill: '#00ff00', fontSize: 10 }} />
+            <YAxis tick={{ fill: '#00ff00', fontSize: 10 }} />
             <Area type="monotone" dataKey="events" stroke="#FF6B35" fillOpacity={1} fill="url(#colorGradient)" />
           </AreaChart>
         );
       case 'bar':
         return (
           <BarChart {...commonProps}>
-            <XAxis dataKey="time" tick={{ fill: '#666', fontSize: 10 }} />
-            <YAxis tick={{ fill: '#666', fontSize: 10 }} />
+            <XAxis dataKey="time" tick={{ fill: '#00ff00', fontSize: 10 }} />
+            <YAxis tick={{ fill: '#00ff00', fontSize: 10 }} />
             <Bar dataKey="network" fill="#FF6B35" opacity={0.8} />
           </BarChart>
         );
@@ -299,7 +299,7 @@ const RealtimeChart: React.FC<{ type: 'line' | 'area' | 'bar'; title: string }> 
         position: 'relative',
         width: '100%',
         height: '100%',
-        backgroundColor: '#1A1A1A',
+        backgroundColor: '#0A0A0A',
         border: '1px solid rgba(255, 107, 53, 0.3)',
         p: 1,
       }}
@@ -309,7 +309,7 @@ const RealtimeChart: React.FC<{ type: 'line' | 'area' | 'bar'; title: string }> 
         sx={{
           color: '#FF6B35',
           fontFamily: 'monospace',
-          textShadow: '0 0 5px #00ff00',
+          textShadow: '0 0 5px rgba(255, 107, 53, 0.5)',
           mb: 1,
           display: 'block',
         }}
@@ -360,7 +360,7 @@ const ScrollingAlerts: React.FC = () => {
         position: 'relative',
         width: '100%',
         height: '100%',
-        backgroundColor: '#1A1A1A',
+        backgroundColor: '#0A0A0A',
         border: '1px solid rgba(255, 107, 53, 0.3)',
         overflow: 'hidden',
       }}
@@ -370,9 +370,9 @@ const ScrollingAlerts: React.FC = () => {
         sx={{
           color: '#FF6B35',
           fontFamily: 'monospace',
-          textShadow: '0 0 5px #00ff00',
+          textShadow: '0 0 5px rgba(255, 107, 53, 0.5)',
           p: 1,
-          borderBottom: '1px solid #00ff00',
+          borderBottom: '1px solid rgba(255, 107, 53, 0.3)',
           display: 'block',
         }}
       >
@@ -404,7 +404,7 @@ const ScrollingAlerts: React.FC = () => {
               key={`${alert.id}-${index}`}
               sx={{
                 p: 1,
-                borderBottom: '1px solid rgba(0,255,0,0.2)',
+                borderBottom: '1px solid rgba(255, 107, 53, 0.1)',
                 height: 25,
                 display: 'flex',
                 alignItems: 'center',
@@ -424,8 +424,8 @@ const ScrollingAlerts: React.FC = () => {
               <Typography
                 variant="caption"
                 sx={{
-                  color: '#1A1A1A',
-                  fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+                  color: '#00ff00',
+                  fontFamily: 'monospace',
                   fontSize: 10,
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
@@ -460,7 +460,7 @@ const ActivityHeatmap: React.FC = () => {
         position: 'relative',
         width: '100%',
         height: '100%',
-        backgroundColor: '#1A1A1A',
+        backgroundColor: '#0A0A0A',
         border: '1px solid rgba(255, 107, 53, 0.3)',
         p: 1,
       }}
@@ -470,7 +470,7 @@ const ActivityHeatmap: React.FC = () => {
         sx={{
           color: '#FF6B35',
           fontFamily: 'monospace',
-          textShadow: '0 0 5px #00ff00',
+          textShadow: '0 0 5px rgba(255, 107, 53, 0.5)',
           mb: 1,
           display: 'block',
         }}
@@ -491,11 +491,12 @@ const ActivityHeatmap: React.FC = () => {
           <motion.div
             key={index}
             style={{
-              backgroundColor: `rgba(0, 255, 0, ${cell.value})`,
+              backgroundColor: `rgba(255, 107, 53, ${cell.value})`,
               borderRadius: 2,
+              border: '1px solid rgba(255, 107, 53, 0.2)',
             }}
             animate={{
-              backgroundColor: `rgba(0, 255, 0, ${cell.value})`,
+              backgroundColor: `rgba(255, 107, 53, ${cell.value})`,
             }}
             transition={{ duration: 0.5 }}
           />
@@ -533,7 +534,7 @@ const SystemStats: React.FC = () => {
         position: 'relative',
         width: '100%',
         height: '100%',
-        backgroundColor: '#1A1A1A',
+        backgroundColor: '#0A0A0A',
         border: '1px solid rgba(255, 107, 53, 0.3)',
         p: 1,
       }}
@@ -543,7 +544,7 @@ const SystemStats: React.FC = () => {
         sx={{
           color: '#FF6B35',
           fontFamily: 'monospace',
-          textShadow: '0 0 5px #00ff00',
+          textShadow: '0 0 5px rgba(255, 107, 53, 0.5)',
           mb: 2,
           display: 'block',
         }}
@@ -557,8 +558,8 @@ const SystemStats: React.FC = () => {
             <Typography
               variant="caption"
               sx={{
-                color: '#1A1A1A',
-                fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+                color: '#00ff00',
+                fontFamily: 'monospace',
                 fontSize: 10,
                 textTransform: 'uppercase',
               }}
@@ -652,9 +653,9 @@ export const CommandCenter: React.FC = () => {
       sx={{
         position: 'relative',
         minHeight: 'calc(100vh - 120px)',
-        backgroundColor: '#F8F9FA',
+        backgroundColor: '#0F1419',
         p: 2,
-        fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+        fontFamily: 'monospace',
       }}
     >
       {/* Header */}
@@ -665,19 +666,19 @@ export const CommandCenter: React.FC = () => {
           alignItems: 'center',
           mb: 3,
           p: 2,
-          backgroundColor: '#FFFFFF',
+          backgroundColor: '#1E2328',
           border: '1px solid rgba(255, 107, 53, 0.2)',
           borderRadius: 2,
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
         }}
       >
         <Box>
           <Typography
             variant="h4"
             sx={{
-              color: '#1A1A1A',
-              fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-              textShadow: 'none',
+              color: '#FF6B35',
+              fontFamily: 'monospace',
+              textShadow: '0 0 10px rgba(255, 107, 53, 0.5)',
               fontWeight: 'bold',
             }}
           >
@@ -686,8 +687,8 @@ export const CommandCenter: React.FC = () => {
           <Typography
             variant="subtitle1"
             sx={{
-              color: '#666',
-              fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+              color: '#00ff00',
+              fontFamily: 'monospace',
               opacity: 0.8,
             }}
           >
@@ -700,17 +701,17 @@ export const CommandCenter: React.FC = () => {
             icon={<CheckCircle />}
             label="SISTEMAS OPERATIVOS"
             sx={{
-              backgroundColor: 'rgba(255, 107, 53, 0.1)',
-              color: '#1A1A1A',
-              border: '1px solid rgba(255, 107, 53, 0.3)',
-              fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+              backgroundColor: 'rgba(0, 255, 0, 0.1)',
+              color: '#00ff00',
+              border: '1px solid #00ff00',
+              fontFamily: 'monospace',
             }}
           />
           
           <IconButton
             onClick={() => setSoundEnabled(!soundEnabled)}
             sx={{
-              color: '#1A1A1A',
+              color: '#FF6B35',
               border: '1px solid rgba(255, 107, 53, 0.3)',
               '&:hover': {
                 backgroundColor: 'rgba(255, 107, 53, 0.1)',
@@ -746,11 +747,11 @@ export const CommandCenter: React.FC = () => {
                 transition={{ duration: 0.3 }}
                 style={{
                   position: 'relative',
-                  backgroundColor: '#FFFFFF',
+                  backgroundColor: '#1E2328',
                   border: `2px solid ${getStatusColor(monitor.status)}`,
                   borderRadius: 8,
                   overflow: 'hidden',
-                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+                  boxShadow: `0 4px 16px rgba(0, 0, 0, 0.4), 0 0 20px ${getStatusColor(monitor.status)}40`,
                 }}
               >
                 {/* Monitor Header */}
@@ -761,7 +762,7 @@ export const CommandCenter: React.FC = () => {
                     left: 0,
                     right: 0,
                     height: 30,
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    backgroundColor: 'rgba(30, 35, 40, 0.95)',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
@@ -774,7 +775,7 @@ export const CommandCenter: React.FC = () => {
                     variant="caption"
                     sx={{
                       color: getStatusColor(monitor.status),
-                      fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+                      fontFamily: 'monospace',
                       textShadow: `0 0 5px ${getStatusColor(monitor.status)}`,
                       fontWeight: 'bold',
                     }}

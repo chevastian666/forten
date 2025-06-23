@@ -24,6 +24,7 @@ export interface Building {
   installationDate?: string;
   totalUnits: number;
   totalCameras: number;
+  securityPersonnel?: number;
   qboxSerial?: string;
   hikCentralId?: string;
   notes?: string;
@@ -40,7 +41,9 @@ export interface Event {
   description: string;
   metadata?: Record<string, any>;
   priority: 'low' | 'medium' | 'high' | 'critical';
+  severity: 'low' | 'medium' | 'high';
   status: 'pending' | 'resolved';
+  timestamp: string;
   resolvedAt?: string;
   resolvedBy?: string;
   createdAt: string;

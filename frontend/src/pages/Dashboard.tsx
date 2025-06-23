@@ -113,6 +113,9 @@ export const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let timeoutIds: NodeJS.Timeout[] = [];
+    let isComponentMounted = true;
+
     const loadData = async () => {
       setLoading(true);
       
@@ -122,33 +125,54 @@ export const Dashboard: React.FC = () => {
           dispatch(fetchBuildings({ status: 'active', limit: 5 })).unwrap()
         ]);
         
+        if (!isComponentMounted) return;
+        
         // Show welcome notification
         NotificationService.success(`Bienvenido, ${user?.firstName}! Sistema operativo.`);
         
         // Simulate real-time event notification after 3 seconds
-        setTimeout(() => {
-          NotificationService.aiAlert({
-            type: 'person',
-            title: 'Nueva persona detectada',
-            location: 'Entrada Principal',
-            confidence: 0.94,
-            severity: 'medium',
-          });
+        const timeout1 = setTimeout(() => {
+          if (isComponentMounted) {
+            NotificationService.aiAlert({
+              type: 'person',
+              title: 'Nueva persona detectada',
+              location: 'Entrada Principal',
+              confidence: 0.94,
+              severity: 'medium',
+            });
+          }
         }, 3000);
+        timeoutIds.push(timeout1);
         
         // System status notification after 5 seconds
-        setTimeout(() => {
-          NotificationService.systemAlert('Sincronización de datos completada', 'system');
+        const timeout2 = setTimeout(() => {
+          if (isComponentMounted) {
+            NotificationService.systemAlert('Sincronización de datos completada', 'system');
+          }
         }, 5000);
+        timeoutIds.push(timeout2);
         
       } catch (error) {
-        NotificationService.error('Error al cargar datos del dashboard');
+        if (isComponentMounted) {
+          NotificationService.error('Error al cargar datos del dashboard');
+        }
       } finally {
-        setTimeout(() => setLoading(false), 800); // Minimum loading time for smooth animation
+        const timeout3 = setTimeout(() => {
+          if (isComponentMounted) {
+            setLoading(false);
+          }
+        }, 800); // Minimum loading time for smooth animation
+        timeoutIds.push(timeout3);
       }
     };
 
     loadData();
+
+    // Cleanup function
+    return () => {
+      isComponentMounted = false;
+      timeoutIds.forEach(id => clearTimeout(id));
+    };
   }, [dispatch, user?.firstName]);
 
   const activeBuildings = buildings?.filter(b => b.status === 'active').length || 0;
@@ -173,60 +197,34 @@ export const Dashboard: React.FC = () => {
               Bienvenido, {user?.firstName}
             </Typography>
 
-            <Stack direction="row" spacing={2}>
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  NotificationService.success('Notificación de éxito');
-                  setTimeout(() => {
-                    NotificationService.error('Notificación de error');
-                  }, 500);
-                  setTimeout(() => {
-                    NotificationService.warning('Notificación de advertencia');
-                  }, 1000);
-                  setTimeout(() => {
-                    NotificationService.aiAlert({
-                      type: 'person',
-                      title: 'Persona detectada',
-                      location: 'Entrada Principal',
-                      confidence: 0.95,
-                      severity: 'high',
-                    });
-                  }, 1500);
-                }}
+            {canAccessExecutive && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                Test Notificaciones
-              </Button>
-              
-              {canAccessExecutive && (
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                <Button
+                  variant="contained"
+                  startIcon={<DashboardIcon />}
+                  onClick={() => {
+                    NotificationService.info('Navegando al Dashboard Ejecutivo...');
+                    navigate('/executive');
+                  }}
+                  sx={{
+                    background: 'linear-gradient(45deg, #FF6B35 30%, #FF8F65 90%)',
+                    boxShadow: '0 4px 16px rgba(255, 107, 53, 0.3)',
+                    '&:hover': {
+                      background: 'linear-gradient(45deg, #E85D25 30%, #FF6B35 90%)',
+                      boxShadow: '0 6px 20px rgba(255, 107, 53, 0.4)',
+                    },
+                  }}
                 >
-                  <Button
-                    variant="contained"
-                    startIcon={<DashboardIcon />}
-                    onClick={() => {
-                      NotificationService.info('Navegando al Dashboard Ejecutivo...');
-                      navigate('/executive');
-                    }}
-                    sx={{
-                      background: 'linear-gradient(45deg, #FF6B35 30%, #FF8F65 90%)',
-                      boxShadow: '0 4px 16px rgba(255, 107, 53, 0.3)',
-                      '&:hover': {
-                        background: 'linear-gradient(45deg, #E85D25 30%, #FF6B35 90%)',
-                        boxShadow: '0 6px 20px rgba(255, 107, 53, 0.4)',
-                      },
-                    }}
-                  >
-                    Dashboard Ejecutivo
-                  </Button>
-                </motion.div>
-              )}
-            </Stack>
+                  Dashboard Ejecutivo
+                </Button>
+              </motion.div>
+            )}
           </Stack>
         </motion.div>
 

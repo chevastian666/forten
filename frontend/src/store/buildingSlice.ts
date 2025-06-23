@@ -38,6 +38,14 @@ export const fetchBuilding = createAsyncThunk(
   }
 );
 
+export const fetchBuildingById = createAsyncThunk(
+  'buildings/fetchById',
+  async (id: string) => {
+    const response = await api.get(`/buildings/${id}`);
+    return response.data;
+  }
+);
+
 export const createBuilding = createAsyncThunk(
   'buildings/create',
   async (data: Partial<Building>) => {
@@ -93,6 +101,19 @@ const buildingSlice = createSlice({
         state.currentBuilding = action.payload;
       })
       .addCase(fetchBuilding.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to fetch building';
+      })
+      // Fetch by ID
+      .addCase(fetchBuildingById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchBuildingById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentBuilding = action.payload;
+      })
+      .addCase(fetchBuildingById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch building';
       })

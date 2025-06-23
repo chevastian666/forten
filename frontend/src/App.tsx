@@ -10,6 +10,7 @@ import { PrivateRoute } from './components/PrivateRoute';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Buildings } from './pages/Buildings';
+import { BuildingDetail } from './pages/Buildings/BuildingDetail';
 import { Events } from './pages/Events';
 import { AccessControl } from './pages/AccessControl';
 import { Monitoring } from './pages/Monitoring';
@@ -58,6 +59,7 @@ const AppContent: React.FC = () => {
         >
           <Route index element={<Dashboard />} />
           <Route path="buildings" element={<Buildings />} />
+          <Route path="buildings/:id" element={<BuildingDetail />} />
           <Route path="monitoring" element={<Monitoring />} />
           <Route path="events" element={<Events />} />
           <Route path="access" element={<AccessControl />} />
