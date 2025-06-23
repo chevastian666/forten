@@ -28,6 +28,14 @@ import { WeeklyActivityChart } from '../components/WeeklyActivityChart';
 import { StaggerContainer, StaggerItem, LoadingTransition } from '../components/Animations';
 import NotificationService from '../services/notificationService';
 import { useNavigate } from 'react-router-dom';
+import { WhatsAppPanel } from '../components/WhatsApp';
+import presentationModeService from '../services/presentationModeService';
+import {
+  PlayArrow,
+  Stop,
+  Fullscreen,
+  Slideshow,
+} from '@mui/icons-material';
 
 const StatCard: React.FC<{
   title: string;
@@ -111,6 +119,7 @@ export const Dashboard: React.FC = () => {
   const { buildings } = useAppSelector((state) => state.buildings);
   const user = useAppSelector((state) => state.auth.user);
   const [loading, setLoading] = useState(true);
+  const [isPresentationMode, setIsPresentationMode] = useState(false);
 
   useEffect(() => {
     let timeoutIds: NodeJS.Timeout[] = [];
@@ -179,6 +188,24 @@ export const Dashboard: React.FC = () => {
 
   const canAccessExecutive = user?.role === 'admin' || user?.role === 'manager';
 
+  const handlePresentationMode = () => {
+    if (isPresentationMode) {
+      presentationModeService.stop();
+      setIsPresentationMode(false);
+    } else {
+      presentationModeService.start();
+      setIsPresentationMode(true);
+    }
+  };
+
+  const handleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
   return (
     <LoadingTransition loading={loading}>
       <Box sx={{ position: 'relative' }}>
@@ -197,34 +224,92 @@ export const Dashboard: React.FC = () => {
               Bienvenido, {user?.firstName}
             </Typography>
 
-            {canAccessExecutive && (
+            <Stack direction="row" spacing={2}>
               <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.15 }}
               >
                 <Button
                   variant="contained"
-                  startIcon={<DashboardIcon />}
-                  onClick={() => {
-                    NotificationService.info('Navegando al Dashboard Ejecutivo...');
-                    navigate('/executive');
-                  }}
+                  startIcon={<Slideshow />}
+                  onClick={() => navigate('/presentation')}
                   sx={{
-                    background: 'linear-gradient(45deg, #FF6B35 30%, #FF8F65 90%)',
-                    boxShadow: '0 4px 16px rgba(255, 107, 53, 0.3)',
+                    background: 'linear-gradient(45deg, #9C27B0 30%, #BA68C8 90%)',
+                    boxShadow: '0 4px 16px rgba(156, 39, 176, 0.3)',
                     '&:hover': {
-                      background: 'linear-gradient(45deg, #E85D25 30%, #FF6B35 90%)',
-                      boxShadow: '0 6px 20px rgba(255, 107, 53, 0.4)',
+                      background: 'linear-gradient(45deg, #7B1FA2 30%, #9C27B0 90%)',
+                      boxShadow: '0 6px 20px rgba(156, 39, 176, 0.4)',
                     },
                   }}
                 >
-                  Dashboard Ejecutivo
+                  Modo Presentación
                 </Button>
               </motion.div>
-            )}
+
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <Button
+                  variant={isPresentationMode ? "outlined" : "contained"}
+                  startIcon={isPresentationMode ? <Stop /> : <PlayArrow />}
+                  onClick={handlePresentationMode}
+                  color={isPresentationMode ? "error" : "primary"}
+                  sx={{
+                    minWidth: 160,
+                  }}
+                >
+                  {isPresentationMode ? 'Detener Demo' : 'Modo Demo'}
+                </Button>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.25 }}
+              >
+                <IconButton
+                  onClick={handleFullscreen}
+                  sx={{
+                    border: '1px solid',
+                    borderColor: 'divider',
+                  }}
+                >
+                  <Fullscreen />
+                </IconButton>
+              </motion.div>
+
+              {canAccessExecutive && (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    variant="contained"
+                    startIcon={<DashboardIcon />}
+                    onClick={() => {
+                      NotificationService.info('Navegando al Dashboard Ejecutivo...');
+                      navigate('/executive');
+                    }}
+                    sx={{
+                      background: 'linear-gradient(45deg, #FF6B35 30%, #FF8F65 90%)',
+                      boxShadow: '0 4px 16px rgba(255, 107, 53, 0.3)',
+                      '&:hover': {
+                        background: 'linear-gradient(45deg, #E85D25 30%, #FF6B35 90%)',
+                        boxShadow: '0 6px 20px rgba(255, 107, 53, 0.4)',
+                      },
+                    }}
+                  >
+                    Dashboard Ejecutivo
+                  </Button>
+                </motion.div>
+              )}
+            </Stack>
           </Stack>
         </motion.div>
 
@@ -390,6 +475,18 @@ export const Dashboard: React.FC = () => {
                         ))}
                       </Box>
                     </Paper>
+                  </motion.div>
+                </StaggerItem>
+
+                {/* WhatsApp Panel */}
+                <StaggerItem>
+                  <motion.div
+                    whileHover={{ y: -2 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Box sx={{ height: 400 }}>
+                      <WhatsAppPanel />
+                    </Box>
                   </motion.div>
                 </StaggerItem>
               </Stack>

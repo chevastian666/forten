@@ -1,0 +1,1 @@
+export { AnimatedTimeline } from './AnimatedTimeline';

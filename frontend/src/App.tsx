@@ -15,6 +15,7 @@ import { Events } from './pages/Events';
 import { AccessControl } from './pages/AccessControl';
 import { Monitoring } from './pages/Monitoring';
 import { ExecutiveDashboard } from './pages/Dashboard/ExecutiveDashboard';
+import { PresentationDashboard } from './pages/Dashboard/PresentationDashboard';
 import { Building3DMap } from './components/Map';
 import { CommandCenter } from './pages/CommandCenter';
 import { AIAlertSystem } from './components/Alerts';
@@ -23,6 +24,7 @@ import { ToastProvider } from './components/Notifications';
 import { useAppSelector } from './hooks/useAppSelector';
 import { useAppDispatch } from './hooks/useAppDispatch';
 import { fetchProfile } from './store/authSlice';
+import { IncomingCallDialog } from './components/IncomingCall';
 
 const AppContent: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -45,6 +47,16 @@ const AppContent: React.FC = () => {
           element={
             <PrivateRoute roles={['admin', 'manager']}>
               <ExecutiveDashboard />
+            </PrivateRoute>
+          } 
+        />
+
+        {/* Presentation Dashboard - Demo mode */}
+        <Route 
+          path="/presentation" 
+          element={
+            <PrivateRoute>
+              <PresentationDashboard />
             </PrivateRoute>
           } 
         />
@@ -102,6 +114,7 @@ function App() {
         <Router>
           <ToastProvider>
             <AppContent />
+            <IncomingCallDialog />
           </ToastProvider>
         </Router>
       </ThemeProvider>

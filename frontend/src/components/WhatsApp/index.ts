@@ -1,0 +1,1 @@
+export { WhatsAppPanel } from './WhatsAppPanel';
