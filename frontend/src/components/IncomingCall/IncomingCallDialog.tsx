@@ -20,6 +20,8 @@ import {
   MicOff,
   VolumeUp,
   Close,
+  LockOpen,
+  CheckCircle,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationService from '../../services/notificationService';
@@ -37,6 +39,8 @@ export const IncomingCallDialog: React.FC = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
   const [isAnswered, setIsAnswered] = useState(false);
+  const [isDoorOpening, setIsDoorOpening] = useState(false);
+  const [doorOpened, setDoorOpened] = useState(false);
 
   useEffect(() => {
     const handleIncomingCall = (event: CustomEvent<IncomingCallData>) => {
@@ -44,6 +48,8 @@ export const IncomingCallDialog: React.FC = () => {
       setIsOpen(true);
       setIsAnswered(false);
       setCallDuration(0);
+      setIsDoorOpening(false);
+      setDoorOpened(false);
       
       // Play ringtone sound (simulated)
       const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSMFL4NO89iNOAkaaLvt559NEAxQp+PwtmMcBjiR1/LMeSMFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSMFL4NO89iNOAkaaLvt559NEAxQp+PwtmMcBjiR1/LMeSMFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSMFL4NO89iNOAkaaLvt559N');
@@ -98,11 +104,18 @@ export const IncomingCallDialog: React.FC = () => {
   };
 
   const handleOpenDoor = () => {
-    NotificationService.success('🚪 Puerta abierta remotamente');
-    // Simulate door opening
+    setIsDoorOpening(true);
+    
+    // Simular proceso de apertura
     setTimeout(() => {
-      setIsOpen(false);
-    }, 2000);
+      setDoorOpened(true);
+      NotificationService.success('🚪 Puerta abierta exitosamente');
+      
+      // Cerrar el diálogo después de mostrar la confirmación
+      setTimeout(() => {
+        setIsOpen(false);
+      }, 1500);
+    }, 1000);
   };
 
   const formatDuration = (seconds: number) => {
@@ -326,25 +339,79 @@ export const IncomingCallDialog: React.FC = () => {
                     </Stack>
 
                     <Stack direction="row" spacing={2} justifyContent="center">
-                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button
-                          variant="contained"
-                          size="large"
-                          startIcon={<DoorFront />}
-                          onClick={handleOpenDoor}
-                          sx={{
-                            borderRadius: 2,
-                            px: 4,
-                            py: 1.5,
-                            backgroundColor: '#FF6B35',
-                            '&:hover': {
-                              backgroundColor: '#E85D25',
-                            },
-                          }}
-                        >
-                          Abrir Puerta
-                        </Button>
-                      </motion.div>
+                      <AnimatePresence mode="wait">
+                        {!doorOpened ? (
+                          <motion.div
+                            key="door-button"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                          >
+                            <Button
+                              variant="contained"
+                              size="large"
+                              startIcon={isDoorOpening ? (
+                                <motion.div
+                                  animate={{ rotate: 360 }}
+                                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                >
+                                  <LockOpen />
+                                </motion.div>
+                              ) : (
+                                <DoorFront />
+                              )}
+                              onClick={handleOpenDoor}
+                              disabled={isDoorOpening}
+                              sx={{
+                                borderRadius: 2,
+                                px: 4,
+                                py: 1.5,
+                                backgroundColor: isDoorOpening ? '#FFA500' : '#FF6B35',
+                                '&:hover': {
+                                  backgroundColor: isDoorOpening ? '#FFA500' : '#E85D25',
+                                },
+                                '&.Mui-disabled': {
+                                  backgroundColor: '#FFA500',
+                                  color: 'white',
+                                },
+                              }}
+                            >
+                              {isDoorOpening ? 'Abriendo...' : 'Abrir Puerta'}
+                            </Button>
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="success-message"
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: "spring", stiffness: 200 }}
+                          >
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 2,
+                                backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                                border: '2px solid #4CAF50',
+                                borderRadius: 2,
+                                px: 4,
+                                py: 2,
+                              }}
+                            >
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: [0, 1.2, 1] }}
+                                transition={{ duration: 0.5 }}
+                              >
+                                <CheckCircle sx={{ color: '#4CAF50', fontSize: 32 }} />
+                              </motion.div>
+                              <Typography variant="h6" sx={{ color: '#4CAF50', fontWeight: 'bold' }}>
+                                ¡Puerta Abierta!
+                              </Typography>
+                            </Box>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
 
                       <Button
                         variant="outlined"
@@ -363,6 +430,47 @@ export const IncomingCallDialog: React.FC = () => {
                   </Stack>
                 )}
               </Paper>
+
+              {/* Door opening animation overlay */}
+              <AnimatePresence>
+                {isDoorOpening && !doorOpened && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                      zIndex: 1000,
+                    }}
+                  >
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 0.8, repeat: Infinity }}
+                    >
+                      <Box
+                        sx={{
+                          backgroundColor: 'rgba(255, 165, 0, 0.2)',
+                          borderRadius: '50%',
+                          p: 4,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <LockOpen sx={{ fontSize: 80, color: '#FFA500' }} />
+                      </Box>
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </Box>
           </DialogContent>
         </Dialog>

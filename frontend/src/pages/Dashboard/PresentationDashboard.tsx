@@ -31,6 +31,7 @@ import { ActivityChart } from '../../components/ActivityChart';
 import { AnimatedTimeline } from '../../components/Timeline';
 import { InteractiveMap } from '../../components/Map';
 import { WhatsAppPanel } from '../../components/WhatsApp';
+import { DeliveryPanel } from '../../components/Delivery';
 import presentationModeService from '../../services/presentationModeService';
 import NotificationService from '../../services/notificationService';
 
@@ -346,6 +347,17 @@ export const PresentationDashboard: React.FC = () => {
             >
               <Box sx={{ height: 300 }}>
                 <WhatsAppPanel />
+              </Box>
+            </motion.div>
+
+            {/* Delivery System */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.9 }}
+            >
+              <Box sx={{ height: 400 }}>
+                <DeliveryPanel />
               </Box>
             </motion.div>
           </Stack>

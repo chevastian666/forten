@@ -7,6 +7,7 @@ export interface SimulatedActivity {
   calls: boolean;
   access: boolean;
   whatsapp: boolean;
+  deliveries: boolean;
   interval: number; // milliseconds
 }
 
@@ -18,6 +19,7 @@ class PresentationModeService {
     calls: true,
     access: true,
     whatsapp: true,
+    deliveries: true,
     interval: 5000,
   };
 
@@ -47,6 +49,15 @@ class PresentationModeService {
     'Mantenimiento de ascensor mañana 10:00',
   ];
 
+  private deliveryCompanies = [
+    { name: 'MercadoLibre', prefix: 'ML' },
+    { name: 'Amazon', prefix: 'AMZ' },
+    { name: 'Uber Eats', prefix: 'UBR' },
+    { name: 'Rappi', prefix: 'RAP' },
+    { name: 'PedidosYa', prefix: 'PYA' },
+    { name: 'DHL', prefix: 'DHL' },
+  ];
+
   start(config?: Partial<SimulatedActivity>) {
     if (this.isActive) return;
     
@@ -70,6 +81,10 @@ class PresentationModeService {
 
     if (this.activities.whatsapp) {
       this.startWhatsAppSimulation();
+    }
+
+    if (this.activities.deliveries) {
+      this.startDeliverySimulation();
     }
   }
 
@@ -106,7 +121,7 @@ class PresentationModeService {
       // Show AI alert for security events
       if (event.type === 'security' && Math.random() > 0.5) {
         NotificationService.aiAlert({
-          type: 'intrusion',
+          type: 'suspicious_behavior',
           title: 'Posible intrusión detectada',
           location: event.location,
           confidence: 0.85 + Math.random() * 0.14,
@@ -200,6 +215,63 @@ class PresentationModeService {
     this.intervalIds.push(timeoutId);
   }
 
+  private startDeliverySimulation() {
+    const simulateDelivery = () => {
+      if (!this.isActive) return;
+
+      const company = this.deliveryCompanies[Math.floor(Math.random() * this.deliveryCompanies.length)];
+      const visitor = this.visitorsData[Math.floor(Math.random() * this.visitorsData.length)];
+      const trackingNumber = `${company.prefix}${Math.random().toString().substr(2, 9)}`;
+      const statuses = ['en_camino', 'en_edificio', 'en_casillero'];
+      const status = statuses[Math.floor(Math.random() * statuses.length)];
+      
+      // Dispatch custom event for delivery update
+      window.dispatchEvent(new CustomEvent('deliveryUpdate', {
+        detail: {
+          id: `delivery-${Date.now()}`,
+          trackingNumber,
+          apartment: visitor.apt,
+          recipient: visitor.name,
+          company: company.name,
+          status,
+          priority: Math.random() > 0.7 ? 'express' : 'normal',
+          timestamp: new Date(),
+        }
+      }));
+
+      // Show notification based on status
+      switch (status) {
+        case 'en_camino':
+          NotificationService.info(`📦 ${company.name}: Delivery en camino para ${visitor.apt}`);
+          break;
+        case 'en_edificio':
+          NotificationService.warning(`🏢 ${company.name}: Delivery llegó - ${visitor.apt}`);
+          break;
+        case 'en_casillero':
+          NotificationService.success(`🔒 Paquete en casillero para ${visitor.apt}`);
+          // Send WhatsApp notification
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('whatsappMessage', {
+              detail: {
+                message: `📦 Su paquete de ${company.name} está disponible en casillero L-A${Math.floor(Math.random() * 3) + 1}. Código: QR${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+                apartment: visitor.apt,
+                timestamp: new Date(),
+              }
+            }));
+          }, 2000);
+          break;
+      }
+
+      // Schedule next delivery
+      const nextInterval = this.activities.interval * 6 + (Math.random() * 20000);
+      const timeoutId = setTimeout(simulateDelivery, nextInterval);
+      this.intervalIds.push(timeoutId);
+    };
+
+    const timeoutId = setTimeout(simulateDelivery, 12000);
+    this.intervalIds.push(timeoutId);
+  }
+
   isRunning() {
     return this.isActive;
   }
@@ -209,4 +281,5 @@ class PresentationModeService {
   }
 }
 
-export default new PresentationModeService();
+const presentationModeService = new PresentationModeService();
+export default presentationModeService;
